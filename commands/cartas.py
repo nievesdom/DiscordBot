@@ -107,7 +107,7 @@ class Cartas(commands.Cog):
 
 
     @commands.command(help="Muestra la colección de cartas en modo texto", extras={"categoria": "Cartas 🃏"})
-    async def coleccion(self, ctx):
+    async def coleccion(self, ctx, mencionado: discord.Member = None):
         try:
             # Si se menciona a alguien, se muestra la colección de ese usuario, si no la del autor del mensaje
             objetivo = mencionado or ctx.author
@@ -139,8 +139,12 @@ class Cartas(commands.Cog):
             await ctx.send("Ha ocurrido un error al intentar mostrar tu colección.")
 
 
-    @commands.command(help="Busca cartas de RGGO por nombre", extras={"categoria": "Cartas 🃏"})
-    async def buscar(self, ctx, *, palabra):
+    @commands.command(help="Busca cartas de RGGO. Introduce el término a buscar detrás del comando.", extras={"categoria": "Cartas 🃏"})
+    async def buscar(self, ctx, *, palabra = None):
+        # Se debe introducir una
+        if palabra == None:
+            await ctx.send(f"Introduce un término tras el comando para buscar cartas que lo contengan. Ej: y!buscar Yamai")
+            return
         servidor_id = str(ctx.guild.id)
         cartas = cargar_cartas()
         
@@ -169,10 +173,16 @@ class Cartas(commands.Cog):
                 mensaje += f"+ {c['nombre']}\n"
         mensaje += "```"
 
-        if len(mensaje) > 2000:
-            mensaje = mensaje[:1990] + "\n```..."
+        bloques = [mensaje[i:i+1900] for i in range(0, len(mensaje), 1900)]
+        for b in bloques:
+            await ctx.send(f"\n{b}\n")
 
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}':\n{mensaje}")
+
+    #@commands.command(help="Muestra la carta introducida", extras={"categoria": "Cartas 🃏"})
+    #async def carta(self, ctx):
+
+
 
 
     # Actualiza el archivo cartas.json con las imágenes nuevas. Restringido, solo para el creador

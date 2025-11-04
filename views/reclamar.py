@@ -1,6 +1,8 @@
 import discord
 import os
 from core.propiedades import propiedades, guardar_propiedades
+from core.cartas import cargar_cartas
+
 
 # Reclamar una carta
 class ReclamarCarta(discord.ui.View):

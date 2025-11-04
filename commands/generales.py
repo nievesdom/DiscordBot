@@ -24,13 +24,22 @@ class Generales(commands.Cog):
 
 
     @commands.command(help="Cuenta hasta un número introducido por el usuario", extras={"categoria": "General 👤"})
-    async def contar(self, ctx, numero: int = 10):
+    async def contar(self, ctx, numero: str = "10"):
+        try:
+            # Validación: ¿es un número entero positivo?
+            numero_int = int(numero)
+            if numero_int <= 0:
+                await ctx.send("❌ Prueba tú a contar hasta ese número y luego me com. Ej: `y!contar 5`.")
+                return
+        except ValueError:
+            await ctx.send("❌ Introduce un número o la tenemos. Ej: `y!contar 5`.")
+            return
         mensaje = await ctx.send("Contando... 0")
         async def contar_mensaje():
             for i in range(1, numero + 1):
                 await asyncio.sleep(1)
                 await mensaje.edit(content=f"Contando... {i}")
-            await mensaje.edit(content=f"✅ Ya he terminado de contar hasta {numero}", extras={"categoria": "General 👤"})
+            await mensaje.edit(content=f"✅ Ya he terminado de contar hasta {numero}")
         asyncio.create_task(contar_mensaje())
 
 
