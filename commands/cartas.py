@@ -55,14 +55,23 @@ class Cartas(commands.Cog):
         ruta_img = elegida["imagen"]
         archivo = None
 
-        # Comprobar si existe una URL en el campo imagen y usarla
+        # Comprobar si la ruta es URL (Render) o local
         if ruta_img and ruta_img.startswith("http"):
             embed.set_image(url=ruta_img)
+        elif os.path.exists(ruta_img):
+            archivo = discord.File(ruta_img, filename="carta.png")
+            embed.set_image(url="attachment://carta.png")
         else:
-            embed.description = "⚠️ Imagen no encontrada o sin URL válida."
-        
-        # Enviar el embed con la carta
-        await ctx.send(embed=embed)
+            embed.description = "⚠️ Imagen no encontrada."
+
+        # Crear vista con botón para reclamar
+        vista = ReclamarCarta(elegida["id"], embed, ruta_img)
+
+        # Enviar mensaje con embed y botón
+        if archivo:
+            await ctx.send(file=archivo, embed=embed, view=vista)
+        else:
+            await ctx.send(embed=embed, view=vista)
 
 
 
