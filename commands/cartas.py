@@ -82,29 +82,36 @@ class Cartas(commands.Cog):
             objetivo = mencionado or ctx.author
             servidor_id = str(ctx.guild.id)
             usuario_id = str(objetivo.id)
-
+    
             cartas_ids = obtener_cartas_usuario(servidor_id, usuario_id)
             if not cartas_ids:
                 await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
                 return
-
+    
             cartas_info = cartas_por_id() # Diccionario de cartas por ID
+    
+            # NUEVO: asegurarse de que las cartas cargadas tienen sus URLs desde el JSON
+            for carta_id in cartas_ids:
+                carta = cartas_info.get(str(carta_id))
+                if carta and "imagen" in carta and carta["imagen"].startswith("http"):
+                    continue  # La imagen ya está bien referenciada en el JSON
+                
             vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
             embed, archivo = vista.mostrar()
-
+    
             # Borrar el mensaje del comando si el bot tiene permisos
             if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 try:
                     await ctx.message.delete()
                 except discord.Forbidden:
                     pass
-
-            # Enviar el mensaje con el album
+                
+            # Enviar el mensaje con el álbum
             if archivo:
                 vista.msg = await ctx.send(file=archivo, embed=embed, view=vista)
             else:
                 vista.msg = await ctx.send(embed=embed, view=vista)
-
+    
         except Exception as e:
             print(f"[ERROR] en comando album: {type(e).__name__} - {e}")
             await ctx.send("Ha ocurrido un error al intentar mostrar el álbum.")
@@ -191,24 +198,24 @@ class Cartas(commands.Cog):
     @commands.command(help=None)
     async def actualizar_img(self, ctx):
         import urllib.parse
-    
+
         # Carga el JSON existente
         with open("cartas/cartas.json", "r", encoding="utf-8") as f:
             cartas = json.load(f)
-    
+
         # URL base en Render
         BASE_URL = "https://discordbot-n4ts.onrender.com/cartas/"
-    
+
         # Actualiza cada ruta de imagen a partir del nombre de la carta
         for carta in cartas:
             nombre_archivo = f"{carta['nombre']}.png"
             nombre_codificado = urllib.parse.quote(nombre_archivo)
             carta["imagen"] = BASE_URL + nombre_codificado
-    
+
         # Guarda el nuevo archivo
         with open("cartas/cartas.json", "w", encoding="utf-8") as f:
             json.dump(cartas, f, ensure_ascii=False, indent=2)
-    
+
         print("Rutas actualizadas correctamente.")
         await ctx.send("✅ Rutas de imágenes actualizadas correctamente.")
 
