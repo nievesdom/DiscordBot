@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 import json
 import random
+from urllib.parse import quote
 
 # Para tener comandos que solo pueda usar el creador del bot (yo)
 OWNER_ID = 182920174276575232
@@ -53,22 +54,12 @@ class Cartas(commands.Cog):
         embed = discord.Embed(title=elegida["nombre"], color=color)
         ruta_img = elegida["imagen"]
         archivo = None
-        
-        # Comprobar si la imagen existe la imagen y adjuntarla
-        if os.path.exists(ruta_img):
-            archivo = discord.File(ruta_img, filename="carta.png")
-            embed.set_image(url="attachment://carta.png")
-        else:
-            embed.description = "⚠️ Imagen no encontrada en la carpeta local."
 
-        # Crear vista con botón para reclamar
-        vista = ReclamarCarta(elegida["id"], embed, ruta_img)
-
-        # Enviar mensaje con embed y botón
-        if archivo:
-            await ctx.send(file=archivo, embed=embed, view=vista)
+        # Comprobar si existe una URL en el campo imagen y usarla
+        if ruta_img and ruta_img.startswith("http"):
+            embed.set_image(url=ruta_img)
         else:
-            await ctx.send(embed=embed, view=vista)
+            embed.description = "⚠️ Imagen no encontrada o sin URL válida."
 
 
     @commands.command(help="Muestra la colección de cartas de forma visual. Si no se menciona a nadie, se mostrará la colección del autor del mensaje.", extras={"categoria": "Cartas 🃏"})
@@ -182,6 +173,29 @@ class Cartas(commands.Cog):
     #@commands.command(help="Muestra la carta introducida", extras={"categoria": "Cartas 🃏"})
     #async def carta(self, ctx):
 
+
+    # Actualiza el archivo cartas.json con las imágenes nuevas. Restringido, solo para el creador
+    @commands.command(help=None)
+    async def actualizar_img(self, ctx):
+        # Carga el JSON existente
+        with open("cartas/cartas.json", "r", encoding="utf-8") as f:
+            cartas = json.load(f)
+
+        # Cambia esta URL base según tu entorno
+        # En local: usa localhost
+        # En Render: cambia por la URL pública (por ejemplo, https://discordbot.onrender.com)
+        BASE_URL = "https://discordbot-n4ts.onrender.com/cartas/"
+
+        # Actualiza cada ruta de imagen
+        for carta in cartas:
+            nombre_archivo = os.path.basename(carta["imagen"]).replace("\\", "/")
+            carta["imagen"] = BASE_URL + quote(nombre_archivo)
+
+        # Guarda el nuevo archivo
+        with open("cartas/cartas.json", "w", encoding="utf-8") as f:
+            json.dump(cartas, f, ensure_ascii=False, indent=2)
+
+        print("Rutas actualizadas correctamente.")
 
 
 

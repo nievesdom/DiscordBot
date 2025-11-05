@@ -72,6 +72,27 @@ class Generales(commands.Cog):
     
         await ctx.send(embed=embed)
 
+    @commands.command(help="Recarga todos los módulos del bot sin reiniciarlo", extras={"categoria": "Sistema ⚙️"})
+    @commands.is_owner()  # Solo el dueño del bot puede usarlo
+    async def recargar(self, ctx):
+        recargados = 0
+        errores = []
+    
+        for extension in list(self.bot.extensions.keys()):
+            try:
+                self.bot.reload_extension(extension)
+                recargados += 1
+            except Exception as e:
+                errores.append(f"❌ {extension}: {e}")
+    
+        if errores:
+            mensaje = f"Se recargaron {recargados} módulos, pero hubo errores:\n" + "\n".join(errores)
+        else:
+            mensaje = f"✅ Se recargaron correctamente {recargados} módulos."
+    
+        await ctx.send(mensaje)
+
+
 
 async def setup(bot):
     await bot.add_cog(Generales(bot))

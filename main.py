@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from config import TOKEN, INTENTS
 import logging
+from keep_alive import iniciar_servidor
 
 logging.basicConfig(
     level=logging.INFO,  # Puedes cambiar a DEBUG, WARNING, ERROR, etc.
@@ -11,6 +12,8 @@ logging.basicConfig(
 )
 
 bot = commands.Bot(command_prefix='y!', intents=INTENTS, help_command=None)
+
+iniciar_servidor()
 
 @bot.event
 async def on_ready():
