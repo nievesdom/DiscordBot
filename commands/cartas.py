@@ -60,6 +60,10 @@ class Cartas(commands.Cog):
             embed.set_image(url=ruta_img)
         else:
             embed.description = "⚠️ Imagen no encontrada o sin URL válida."
+        
+        # Enviar el embed con la carta
+        await ctx.send(embed=embed)
+
 
 
     @commands.command(help="Muestra la colección de cartas de forma visual. Si no se menciona a nadie, se mostrará la colección del autor del mensaje.", extras={"categoria": "Cartas 🃏"})
