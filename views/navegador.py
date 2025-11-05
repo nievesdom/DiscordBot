@@ -1,5 +1,4 @@
 import discord
-import os
 
 # Navegar visualmente por las cartas de un usuario
 class Navegador(discord.ui.View):
@@ -29,7 +28,7 @@ class Navegador(discord.ui.View):
             return sorted(self.cartas_ids, key=lambda cid: self.cartas_info.get(str(cid), {}).get("nombre", "").lower())
         return self.cartas_ids
 
-    # Crea el embed y adjunta la imagen si existe
+    # Crea el embed y usa la imagen desde el JSON (sin archivos locales)
     def mostrar(self):
         lista_actual = self.lista()
         carta_id = str(lista_actual[self.i])
@@ -42,10 +41,10 @@ class Navegador(discord.ui.View):
         embed = discord.Embed(title=nombre, color=color)
         embed.set_footer(text=f"Carta {self.i + 1} de {len(lista_actual)} • Propiedad de {self.dueño.display_name}")
 
-        if imagen and os.path.exists(imagen):
-            archivo = discord.File(imagen, filename="carta.png")
-            embed.set_image(url="attachment://carta.png")
-            return embed, archivo
+        # Mostrar la imagen directamente desde la URL
+        if imagen and imagen.startswith("http"):
+            embed.set_image(url=imagen)
+            return embed, None
         else:
             embed.description = "⚠️ Imagen no encontrada."
             return embed, None
