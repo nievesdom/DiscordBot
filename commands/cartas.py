@@ -190,25 +190,29 @@ class Cartas(commands.Cog):
     # Actualiza el archivo cartas.json con las imágenes nuevas. Restringido, solo para el creador
     @commands.command(help=None)
     async def actualizar_img(self, ctx):
+        import urllib.parse
+    
         # Carga el JSON existente
         with open("cartas/cartas.json", "r", encoding="utf-8") as f:
             cartas = json.load(f)
-
-        # Cambia esta URL base según tu entorno
-        # En local: usa localhost
-        # En Render: cambia por la URL pública (por ejemplo, https://discordbot.onrender.com)
+    
+        # URL base en Render
         BASE_URL = "https://discordbot-n4ts.onrender.com/cartas/"
-
-        # Actualiza cada ruta de imagen
+    
+        # Actualiza cada ruta de imagen a partir del nombre de la carta
         for carta in cartas:
-            nombre_archivo = os.path.basename(carta["imagen"]).replace("\\", "/")
-            carta["imagen"] = BASE_URL + quote(nombre_archivo)
-
+            nombre_archivo = f"{carta['nombre']}.png"
+            nombre_codificado = urllib.parse.quote(nombre_archivo)
+            carta["imagen"] = BASE_URL + nombre_codificado
+    
         # Guarda el nuevo archivo
         with open("cartas/cartas.json", "w", encoding="utf-8") as f:
             json.dump(cartas, f, ensure_ascii=False, indent=2)
-
+    
         print("Rutas actualizadas correctamente.")
+        await ctx.send("✅ Rutas de imágenes actualizadas correctamente.")
+
+
 
 
 
