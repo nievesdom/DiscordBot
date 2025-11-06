@@ -2,45 +2,50 @@ import os
 import json
 from github import Github
 
-# Carga el token y el ID del Gist desde variables de entorno
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-GIST_ID = os.getenv("GIST_ID")
+# Variables de entorno que debes tener configuradas en Render
+# GITHUB_TOKEN = tu token personal
+# GIST_ID = el id del gist donde se guarda propiedades.json
 
-if not GITHUB_TOKEN or not GIST_ID:
-    raise ValueError("Faltan variables de entorno: GITHUB_TOKEN o GIST_ID")
+def get_client():
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        raise ValueError("No se encontró la variable de entorno GITHUB_TOKEN.")
+    return Github(token)
 
-# Cliente de GitHub
-g = Github(GITHUB_TOKEN)
-gist = g.get_gist(GIST_ID)
+def get_gist():
+    gist_id = os.getenv("GIST_ID")
+    if not gist_id:
+        raise ValueError("No se encontró la variable de entorno GIST_ID.")
+    g = get_client()
+    gist = g.get_gist(gist_id)
+    return gist
 
+# -------------------------------------------------------
 
-# Cargar las propiedades desde el Gist remoto
 def cargar_propiedades():
+    """Descarga el contenido del gist y lo devuelve como dict."""
     try:
+        gist = get_gist()
         contenido = gist.files["propiedades.json"].content
         return json.loads(contenido)
     except Exception as e:
-        print(f"[ERROR] No se pudo cargar propiedades desde el Gist: {type(e).__name__} - {e}")
-        return {}
+        print(f"[ERROR] cargar_propiedades: {e}")
+        return {}  # Devuelve un dict vacío si no puede cargar
 
-
-# Guardar propiedades en el Gist remoto
-def guardar_propiedades(propiedades=None):
+def guardar_propiedades(datos):
+    """Sube los cambios al gist, actualizando propiedades.json."""
     try:
-        if propiedades is None:
-            propiedades = cargar_propiedades()
-
-        nuevo_contenido = json.dumps(propiedades, ensure_ascii=False, indent=2)
-        gist.edit(
-            files={"propiedades.json": {"content": nuevo_contenido}}
-        )
-        print("[OK] Propiedades actualizadas en el Gist remoto.")
+        gist = get_gist()
+        nuevo_contenido = json.dumps(datos, indent=2, ensure_ascii=False)
+        gist.edit(files={"propiedades.json": {"content": nuevo_contenido}})
+        print("[OK] Propiedades actualizadas correctamente en el Gist.")
     except Exception as e:
-        print(f"[ERROR] No se pudo guardar propiedades en el Gist: {type(e).__name__} - {e}")
+        print(f"[ERROR] guardar_propiedades: {e}")
 
+# -------------------------------------------------------
 
-# Obtener las cartas de un usuario específico en un servidor
 def obtener_cartas_usuario(servidor_id, usuario_id):
+    """Devuelve lista de IDs de cartas del usuario."""
     propiedades = cargar_propiedades()
     if servidor_id in propiedades and usuario_id in propiedades[servidor_id]:
         return propiedades[servidor_id][usuario_id]
