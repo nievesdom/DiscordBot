@@ -1,6 +1,6 @@
 import discord
 import os
-from core.gist_propiedades import cargar_propiedades, guardar_propiedades  # Cambiado para usar el sistema remoto
+from core.gist_propiedades import cargar_propiedades, guardar_propiedades  # Sistema remoto
 from core.cartas import cargar_cartas
 
 
@@ -30,8 +30,8 @@ class ReclamarCarta(discord.ui.View):
             await interaction.response.send_message("No se encontró información de esta carta.", ephemeral=True)
             return
 
-        # Cargar propiedades desde el Gist (en lugar de usar variable global)
-        propiedades = cargar_propiedades()  # NUEVO
+        # Cargar propiedades desde el Gist remoto
+        propiedades = cargar_propiedades()
 
         # Inicializar propiedades si no existen
         if servidor_id not in propiedades:
@@ -47,29 +47,27 @@ class ReclamarCarta(discord.ui.View):
 
         # Asignar carta al usuario
         propiedades[servidor_id][usuario_id].append(self.carta_id)
-        guardar_propiedades(propiedades)  # NUEVO (guarda en el Gist remoto)
+        guardar_propiedades(propiedades)  # Guarda en el Gist remoto
 
-        # Actualizar el embed: cambiar color a negro y mostrar quién la reclamó
-        self.embed.color = discord.Color.dark_theme()
+        # Actualizar el embed
+        self.embed.color = discord.Color.dark_gray()
         self.embed.set_footer(text=f"Carta reclamada por {interaction.user.display_name}")
         self.reclamada = True
         self.clear_items()  # Eliminar el botón
 
-        # Mostrar la imagen correctamente (URL o archivo local)
+        # Mostrar imagen (URL o archivo local)
         if self.imagen_ruta and self.imagen_ruta.startswith("http"):
-            # Imagen servida desde Render u otra URL pública
-            self.embed.set_image(url=self.imagen_ruta)  # NUEVO
+            self.embed.set_image(url=self.imagen_ruta)
             archivo = None
         elif self.imagen_ruta and os.path.exists(self.imagen_ruta):
-            # Imagen local (modo desarrollo)
             archivo = discord.File(self.imagen_ruta, filename="carta.png")
             self.embed.set_image(url="attachment://carta.png")
         else:
             archivo = None
             self.embed.description = "⚠️ Imagen no encontrada."
 
-        # Editar el mensaje original con el nuevo embed y sin botón
-        await interaction.message.edit(embed=self.embed, attachments=[archivo] if archivo else None, view=self)
+        # Editar el mensaje original (respuesta principal)
+        await interaction.response.edit_message(embed=self.embed, attachments=[archivo] if archivo else [], view=self)
 
-        # Confirmación al usuario
-        await interaction.response.send_message(f"{interaction.user.mention} ha obtenido **{carta_info['nombre']}**")
+        # Confirmación al usuario (segunda respuesta)
+        await interaction.followup.send(f"{interaction.user.mention} ha obtenido **{carta_info['nombre']}**", ephemeral=False)
