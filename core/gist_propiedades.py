@@ -35,12 +35,16 @@ def cargar_propiedades():
 def guardar_propiedades(datos):
     """Sube los cambios al gist, actualizando propiedades.json."""
     try:
+        print("[INFO] Iniciando guardado en Gist...")  # visible en logs
         gist = get_gist()
         nuevo_contenido = json.dumps(datos, indent=2, ensure_ascii=False)
         gist.edit(files={"propiedades.json": {"content": nuevo_contenido}})
         print("[OK] Propiedades actualizadas correctamente en el Gist.")
     except Exception as e:
-        print(f"[ERROR] guardar_propiedades: {e}")
+        import traceback
+        print("[ERROR] guardar_propiedades:", e)
+        traceback.print_exc()
+
 
 # -------------------------------------------------------
 
