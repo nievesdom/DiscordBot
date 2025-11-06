@@ -12,7 +12,7 @@ def es_dueno(ctx):
     return ctx.author.id == OWNER_ID
 
 # Importar funciones desde módulos core y views
-from core.gist_propiedades import cargar_propiedades, guardar_propiedades, obtener_cartas_usuario  # NUEVO
+from core.gist_propiedades import cargar_propiedades, guardar_propiedades, obtener_cartas_usuario
 from core.cartas import cargar_cartas, cartas_por_id
 from views.navegador import Navegador
 from views.reclamar import ReclamarCarta
@@ -27,7 +27,6 @@ class Cartas(commands.Cog):
     
     def __init__(self, bot):
         self.bot = bot
-
 
     @commands.command(help="Saca una carta aleatoria de RGGO", extras={"categoria": "Cartas 🃏"})
     async def carta(self, ctx):
@@ -51,8 +50,11 @@ class Cartas(commands.Cog):
         rareza = elegida.get("rareza", "N")
         color = colores.get(rareza, 0x8c8c8c)
 
-        # Crear el embed
-        embed = discord.Embed(title=elegida["nombre"], color=color)
+        # Crear el embed con subtítulo del tipo
+        embed = discord.Embed(
+            title=f"{elegida['nombre']} — {elegida.get('tipo', 'sin tipo')}",
+            color=color
+        )
         ruta_img = elegida["imagen"]
         archivo = None
 
@@ -65,7 +67,7 @@ class Cartas(commands.Cog):
         else:
             embed.description = "⚠️ Imagen no encontrada."
 
-        # Crear vista con botón para reclamar
+        # Crear vista con botón para reclamar (comprobación por instancia de mensaje)
         vista = ReclamarCarta(elegida["id"], embed, ruta_img)
 
         # Enviar mensaje con embed y botón
@@ -73,7 +75,6 @@ class Cartas(commands.Cog):
             await ctx.send(file=archivo, embed=embed, view=vista)
         else:
             await ctx.send(embed=embed, view=vista)
-
 
     @commands.command(help="Muestra la colección de cartas de forma visual. Si no se menciona a nadie, se mostrará la colección del autor del mensaje.", extras={"categoria": "Cartas 🃏"})
     async def album(self, ctx, mencionado: discord.Member = None):
@@ -109,7 +110,6 @@ class Cartas(commands.Cog):
             print(f"[ERROR] en comando album: {type(e).__name__} - {e}")
             await ctx.send("Ha ocurrido un error al intentar mostrar el álbum.")
 
-
     @commands.command(help="Muestra la colección de cartas en modo texto", extras={"categoria": "Cartas 🃏"})
     async def coleccion(self, ctx, mencionado: discord.Member = None):
         try:
@@ -139,7 +139,6 @@ class Cartas(commands.Cog):
             print(f"[ERROR] en comando coleccion: {type(e).__name__} - {e}")
             await ctx.send("Ha ocurrido un error al intentar mostrar tu colección.")
 
-
     @commands.command(help="Busca cartas de RGGO. Introduce el término a buscar detrás del comando.", extras={"categoria": "Cartas 🃏"})
     async def buscar(self, ctx, *, palabra=None):
         if palabra is None:
@@ -156,23 +155,23 @@ class Cartas(commands.Cog):
             await ctx.send(f"No se encontraron cartas que contengan '{palabra}'.")
             return
 
-        # Cargar propiedades en tiempo real desde el Gist
-        propiedades = cargar_propiedades()  # NUEVO
-
-        # Determinar qué cartas ya tienen dueño
+        # Cargar propiedades en tiempo real desde el Gist para marcar las que tienen dueño en el servidor
+        propiedades = cargar_propiedades()
         cartas_con_dueño = set()
         if servidor_id in propiedades:
             for usuario in propiedades[servidor_id]:
                 for carta_id in propiedades[servidor_id][usuario]:
                     cartas_con_dueño.add(str(carta_id))
 
-        # Mostrar resultados con formato diff
+        # Mostrar resultados con formato diff:
+        # + disponibles (verde), ! con dueño (naranja)
         mensaje = "```diff\n"
         for c in coincidencias:
+            tipo = c.get("tipo", "sin tipo")
             if str(c["id"]) in cartas_con_dueño:
-                mensaje += f"- {c['nombre']}\n"
+                mensaje += f"! {c['nombre']} ({tipo})\n"
             else:
-                mensaje += f"+ {c['nombre']}\n"
+                mensaje += f"+ {c['nombre']} ({tipo})\n"
         mensaje += "```"
 
         bloques = [mensaje[i:i+1900] for i in range(0, len(mensaje), 1900)]
@@ -180,7 +179,6 @@ class Cartas(commands.Cog):
             await ctx.send(f"\n{b}\n")
 
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
-    
 
     # Solo para el dueño del bot: actualiza rutas de imágenes con URL de Render
     @commands.command(help=None)
@@ -200,7 +198,6 @@ class Cartas(commands.Cog):
             json.dump(cartas, f, ensure_ascii=False, indent=2)
 
         await ctx.send("✅ Rutas de imágenes actualizadas correctamente.")
-
 
     @commands.command(help=None)
     @commands.check(es_dueno)

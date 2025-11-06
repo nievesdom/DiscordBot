@@ -42,7 +42,9 @@ class ReclamarCarta(discord.ui.View):
 
         # Asignar carta al usuario (ya no comprobamos si otro la tiene)
         propiedades[servidor_id][usuario_id].append(self.carta_id)
-        guardar_propiedades(propiedades)  # Guarda en el Gist remoto
+
+        # Guardar en el gist remoto con la nueva versión de guardar_propiedades
+        guardar_propiedades(propiedades)
 
         # Actualizar el embed
         self.embed.color = discord.Color.from_rgb(0, 0, 0)
