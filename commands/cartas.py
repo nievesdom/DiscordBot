@@ -11,11 +11,12 @@ OWNER_ID = 182920174276575232
 def es_dueno(ctx):
     return ctx.author.id == OWNER_ID
 
-# Importar funciones y datos compartidos desde módulos core y views
-from core.propiedades import propiedades, guardar_propiedades, obtener_cartas_usuario
+# Importar funciones desde módulos core y views
+from core.gist_propiedades import cargar_propiedades, guardar_propiedades, obtener_cartas_usuario  # NUEVO
 from core.cartas import cargar_cartas, cartas_por_id
 from views.navegador import Navegador
 from views.reclamar import ReclamarCarta
+
 
 class Cartas(commands.Cog):
     def categoría(nombre):
@@ -30,12 +31,12 @@ class Cartas(commands.Cog):
 
     @commands.command(help="Saca una carta aleatoria de RGGO", extras={"categoria": "Cartas 🃏"})
     async def carta(self, ctx):
-        cartas = cargar_cartas() # Cargar todas las cartas
+        cartas = cargar_cartas()  # Cargar todas las cartas
         if not cartas:
             await ctx.send("No hay cartas guardadas en el archivo.")
             return
 
-        elegida = random.choice(cartas) # Elegir una al azar
+        elegida = random.choice(cartas)  # Elegir una al azar
 
         # Colores por rareza
         colores = {
@@ -50,7 +51,7 @@ class Cartas(commands.Cog):
         rareza = elegida.get("rareza", "N")
         color = colores.get(rareza, 0x8c8c8c)
 
-        # Crear el embed con el nombre y color
+        # Crear el embed
         embed = discord.Embed(title=elegida["nombre"], color=color)
         ruta_img = elegida["imagen"]
         archivo = None
@@ -74,11 +75,9 @@ class Cartas(commands.Cog):
             await ctx.send(embed=embed, view=vista)
 
 
-
     @commands.command(help="Muestra la colección de cartas de forma visual. Si no se menciona a nadie, se mostrará la colección del autor del mensaje.", extras={"categoria": "Cartas 🃏"})
     async def album(self, ctx, mencionado: discord.Member = None):
         try:
-            # Si se menciona a alguien, se muestra la colección de ese usuario, si no la del autor del mensaje
             objetivo = mencionado or ctx.author
             servidor_id = str(ctx.guild.id)
             usuario_id = str(objetivo.id)
@@ -88,14 +87,8 @@ class Cartas(commands.Cog):
                 await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
                 return
     
-            cartas_info = cartas_por_id() # Diccionario de cartas por ID
+            cartas_info = cartas_por_id()  # Diccionario de cartas por ID
     
-            # NUEVO: asegurarse de que las cartas cargadas tienen sus URLs desde el JSON
-            for carta_id in cartas_ids:
-                carta = cartas_info.get(str(carta_id))
-                if carta and "imagen" in carta and carta["imagen"].startswith("http"):
-                    continue  # La imagen ya está bien referenciada en el JSON
-                
             vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
             embed, archivo = vista.mostrar()
     
@@ -120,12 +113,10 @@ class Cartas(commands.Cog):
     @commands.command(help="Muestra la colección de cartas en modo texto", extras={"categoria": "Cartas 🃏"})
     async def coleccion(self, ctx, mencionado: discord.Member = None):
         try:
-            # Si se menciona a alguien, se muestra la colección de ese usuario, si no la del autor del mensaje
             objetivo = mencionado or ctx.author
             servidor_id = str(ctx.guild.id)
             usuario_id = str(objetivo.id)
 
-            # Comprueba si el usuario tiene cartas
             cartas_ids = obtener_cartas_usuario(servidor_id, usuario_id)
             if not cartas_ids:
                 await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
@@ -137,7 +128,6 @@ class Cartas(commands.Cog):
 
             texto = f"{ctx.author.mention}, estas son tus cartas ({len(nombres)}):\n" + "\n".join(nombres)
 
-            # Si el mensaje tiene más de 2000 caracteres, lo divide en varios
             if len(texto) <= 2000:
                 await ctx.send(texto)
             else:
@@ -151,21 +141,23 @@ class Cartas(commands.Cog):
 
 
     @commands.command(help="Busca cartas de RGGO. Introduce el término a buscar detrás del comando.", extras={"categoria": "Cartas 🃏"})
-    async def buscar(self, ctx, *, palabra = None):
-        # Se debe introducir una
-        if palabra == None:
-            await ctx.send(f"Introduce un término tras el comando para buscar cartas que lo contengan. Ej: y!buscar Yamai")
+    async def buscar(self, ctx, *, palabra=None):
+        if palabra is None:
+            await ctx.send("Introduce un término tras el comando para buscar cartas. Ejemplo: y!buscar Yamai")
             return
+
         servidor_id = str(ctx.guild.id)
         cartas = cargar_cartas()
-        
-        # Filtrar cartas que contengan la palabra
+
         coincidencias = [c for c in cartas if palabra.lower() in c["nombre"].lower()]
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
 
         if not coincidencias:
             await ctx.send(f"No se encontraron cartas que contengan '{palabra}'.")
             return
+
+        # Cargar propiedades en tiempo real desde el Gist
+        propiedades = cargar_propiedades()  # NUEVO
 
         # Determinar qué cartas ya tienen dueño
         cartas_con_dueño = set()
@@ -174,8 +166,7 @@ class Cartas(commands.Cog):
                 for carta_id in propiedades[servidor_id][usuario]:
                     cartas_con_dueño.add(str(carta_id))
 
-        # Generar mensaje con formato diff.
-        # Rojo: con dueño. Verde: libre
+        # Mostrar resultados con formato diff
         mensaje = "```diff\n"
         for c in coincidencias:
             if str(c["id"]) in cartas_con_dueño:
@@ -188,42 +179,29 @@ class Cartas(commands.Cog):
         for b in bloques:
             await ctx.send(f"\n{b}\n")
 
-        await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}':\n{mensaje}")
+        await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
+    
 
-    #@commands.command(help="Muestra la carta introducida", extras={"categoria": "Cartas 🃏"})
-    #async def carta(self, ctx):
-
-
-    # Actualiza el archivo cartas.json con las imágenes nuevas. Restringido, solo para el creador
+    # Solo para el dueño del bot: actualiza rutas de imágenes con URL de Render
     @commands.command(help=None)
+    @commands.check(es_dueno)
     async def actualizar_img(self, ctx):
-        import urllib.parse
-
-        # Carga el JSON existente
         with open("cartas/cartas.json", "r", encoding="utf-8") as f:
             cartas = json.load(f)
 
-        # URL base en Render
         BASE_URL = "https://discordbot-n4ts.onrender.com/cartas/"
 
-        # Actualiza cada ruta de imagen a partir del nombre de la carta
         for carta in cartas:
             nombre_archivo = f"{carta['nombre']}.png"
-            nombre_codificado = urllib.parse.quote(nombre_archivo)
+            nombre_codificado = quote(nombre_archivo)
             carta["imagen"] = BASE_URL + nombre_codificado
 
-        # Guarda el nuevo archivo
         with open("cartas/cartas.json", "w", encoding="utf-8") as f:
             json.dump(cartas, f, ensure_ascii=False, indent=2)
 
-        print("Rutas actualizadas correctamente.")
         await ctx.send("✅ Rutas de imágenes actualizadas correctamente.")
 
 
-
-
-
-    # Actualiza el archivo cartas.json con las imágenes nuevas. Restringido, solo para el creador
     @commands.command(help=None)
     @commands.check(es_dueno)
     async def actualizar_cartas(self, ctx):
@@ -231,7 +209,6 @@ class Cartas(commands.Cog):
         archivo_json = os.path.join(carpeta, "cartas.json")
         os.makedirs(carpeta, exist_ok=True)
 
-        # Cargar cartas existentes
         if os.path.exists(archivo_json):
             with open(archivo_json, "r", encoding="utf-8") as f:
                 try:
@@ -247,7 +224,6 @@ class Cartas(commands.Cog):
         rarezas = ["UR", "KSR", "SSR", "SR", "R", "N"]
         max_id = max((c.get("id", 0) for c in cartas_existentes), default=0)
 
-        # Comprueba uno a uno si la carta ya está en el archivo
         nuevas = 0
         for imagen in imagenes:
             nombre = imagen.replace(".png", "")
@@ -257,7 +233,6 @@ class Cartas(commands.Cog):
             rareza = next((r for r in rarezas if nombre.startswith(r + " ")), "N")
             max_id += 1
 
-            # Si no lo está, la añade al final
             nueva_carta = {
                 "id": max_id,
                 "nombre": nombre,
@@ -269,7 +244,6 @@ class Cartas(commands.Cog):
             nuevas += 1
             print(f"[*] Añadida: {nombre} (ID {max_id}, Rareza {rareza})")
 
-        # Guardar el archivo actualizado
         try:
             with open(archivo_json, "w", encoding="utf-8") as f:
                 json.dump(cartas_existentes, f, ensure_ascii=False, indent=2)
@@ -279,7 +253,6 @@ class Cartas(commands.Cog):
 
         await ctx.send(f"Se han añadido {nuevas} cartas nuevas al archivo cartas.json.")
         
-    # Depura errores si alguien más intenta usar el comando actualizar_cartas
     @actualizar_cartas.error
     async def actualizar_cartas_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
@@ -288,4 +261,3 @@ class Cartas(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Cartas(bot))
-
