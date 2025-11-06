@@ -11,8 +11,8 @@ COLOR_TO_TIPO = {
     "red": "heart",
     "green": "technique",
     "blue": "body",
-    "yellow": "yang",
-    "magenta": "yin"
+    "yellow": "light",
+    "magenta": "shadow"
 }
 
 def detectar_color_predominante(imagen_path):

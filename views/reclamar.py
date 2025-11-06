@@ -11,13 +11,14 @@ class ReclamarCarta(discord.ui.View):
         self.carta_id = carta_id  # ID de la carta mostrada
         self.embed = embed  # Embed que se actualizará al reclamar
         self.imagen_ruta = imagen_ruta  # Ruta o URL de la imagen
-        self.reclamada = False  # Estado de la carta (si ya fue reclamada)
+        self.reclamada = False  # Estado de la carta (si ya fue reclamada en este mensaje)
 
     # Botón para reclamar la carta
     @discord.ui.button(label="Reclamar carta 🐉", style=discord.ButtonStyle.success)
     async def reclamar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Solo comprobamos si esta instancia ya fue reclamada
         if self.reclamada:
-            await interaction.response.send_message("Esta carta ya ha sido reclamada.", ephemeral=True)
+            await interaction.response.send_message("Esta carta ya ha sido reclamada en este mensaje.", ephemeral=True)
             return
 
         usuario_id = str(interaction.user.id)
@@ -39,13 +40,7 @@ class ReclamarCarta(discord.ui.View):
         if usuario_id not in propiedades[servidor_id]:
             propiedades[servidor_id][usuario_id] = []
 
-        # Verificar si la carta ya fue reclamada por alguien
-        for persona in propiedades[servidor_id]:
-            if self.carta_id in propiedades[servidor_id][persona]:
-                await interaction.response.send_message("Esa carta ya tiene dueño.", ephemeral=True)
-                return
-
-        # Asignar carta al usuario
+        # Asignar carta al usuario (ya no comprobamos si otro la tiene)
         propiedades[servidor_id][usuario_id].append(self.carta_id)
         guardar_propiedades(propiedades)  # Guarda en el Gist remoto
 
@@ -54,6 +49,12 @@ class ReclamarCarta(discord.ui.View):
         self.embed.set_footer(text=f"Carta reclamada por {interaction.user.display_name}")
         self.reclamada = True
         self.clear_items()  # Eliminar el botón
+
+        # Mostrar subtítulo con el tipo de carta
+        if "tipo" in carta_info:
+            self.embed.title = f"{carta_info['nombre']} — {carta_info['tipo']}"
+        else:
+            self.embed.title = carta_info["nombre"]
 
         # Mostrar imagen (URL o archivo local)
         if self.imagen_ruta and self.imagen_ruta.startswith("http"):
@@ -70,4 +71,7 @@ class ReclamarCarta(discord.ui.View):
         await interaction.response.edit_message(embed=self.embed, attachments=[archivo] if archivo else [], view=self)
 
         # Confirmación al usuario (segunda respuesta)
-        await interaction.followup.send(f"{interaction.user.mention} ha obtenido **{carta_info['nombre']}**", ephemeral=False)
+        await interaction.followup.send(
+            f"{interaction.user.mention} ha obtenido **{carta_info['nombre']}** ({carta_info.get('tipo', 'sin tipo')})",
+            ephemeral=False
+        )

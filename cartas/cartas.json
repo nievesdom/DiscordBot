@@ -4,7 +4,7 @@
     "nombre": "KSR Ai Kumakiri (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ai%20Kumakiri%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 2,
@@ -39,14 +39,14 @@
     "nombre": "KSR Akira Nishikiyama ('05 Decisive Battle Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Akira%20Nishikiyama%20%28%2705%20Decisive%20Battle%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 7,
     "nombre": "KSR Akira Nishikiyama ('95 Summon)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Akira%20Nishikiyama%20%28%2795%20Summon%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 8,
@@ -67,7 +67,7 @@
     "nombre": "KSR Akira Nishikiyama (Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Akira%20Nishikiyama%20%28Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 11,
@@ -88,7 +88,7 @@
     "nombre": "KSR Akira Nishikiyama (New Year's)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Akira%20Nishikiyama%20%28New%20Year%27s%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 14,
@@ -102,14 +102,14 @@
     "nombre": "KSR Andre Richardson (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Andre%20Richardson%20%28Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 16,
     "nombre": "KSR Asirpa",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Asirpa.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 17,
@@ -123,7 +123,7 @@
     "nombre": "KSR Asuka (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Asuka%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 19,
@@ -144,7 +144,7 @@
     "nombre": "KSR Azusa Osawa (Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Azusa%20Osawa%20%28Ascension%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 22,
@@ -158,7 +158,7 @@
     "nombre": "KSR Big Lo (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Big%20Lo%20%28Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 24,
@@ -172,7 +172,7 @@
     "nombre": "KSR Chifuyu Matsuno (2023)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Chifuyu%20Matsuno%20%282023%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 26,
@@ -200,14 +200,14 @@
     "nombre": "KSR Daigo Dojima ('06 Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Daigo%20Dojima%20%28%2706%20Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 30,
     "nombre": "KSR Daigo Dojima ('06 Assist)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Daigo%20Dojima%20%28%2706%20Assist%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 31,
@@ -221,7 +221,7 @@
     "nombre": "KSR Daigo Dojima ('12 Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Daigo%20Dojima%20%28%2712%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 33,
@@ -235,7 +235,7 @@
     "nombre": "KSR Daigo Dojima (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Daigo%20Dojima%20%28Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 35,
@@ -249,7 +249,7 @@
     "nombre": "KSR Daisaku Kuze ('88 Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Daisaku%20Kuze%20%28%2788%20Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 37,
@@ -263,7 +263,7 @@
     "nombre": "KSR Daisaku Kuze ('99 Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Daisaku%20Kuze%20%28%2799%20Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 39,
@@ -284,7 +284,7 @@
     "nombre": "KSR Eri Kamataki (YLAD)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Eri%20Kamataki%20%28YLAD%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 42,
@@ -298,7 +298,7 @@
     "nombre": "KSR First Lieutenant Tsurumi",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20First%20Lieutenant%20Tsurumi.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 44,
@@ -312,7 +312,7 @@
     "nombre": "KSR Futoshi Shimano ('05 Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Futoshi%20Shimano%20%28%2705%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 46,
@@ -326,7 +326,7 @@
     "nombre": "KSR Futoshi Shimano (Decisive Battle)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Futoshi%20Shimano%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 48,
@@ -347,14 +347,14 @@
     "nombre": "KSR Giichi Kitamura (Christmas Eve)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Giichi%20Kitamura%20%28Christmas%20Eve%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 51,
     "nombre": "KSR Giichi Kitamura (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Giichi%20Kitamura%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 52,
@@ -389,21 +389,21 @@
     "nombre": "KSR Goro Majima ('88 Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Goro%20Majima%20%28%2788%20Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 57,
     "nombre": "KSR Goro Majima ('88 Assist)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Goro%20Majima%20%28%2788%20Assist%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 58,
     "nombre": "KSR Goro Majima ('95 Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Goro%20Majima%20%28%2795%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 59,
@@ -438,35 +438,35 @@
     "nombre": "KSR Goro Majima (New Year's)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Goro%20Majima%20%28New%20Year%27s%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 64,
     "nombre": "KSR Goro Majima (YLAD Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Goro%20Majima%20%28YLAD%20Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 65,
     "nombre": "KSR Goro Majima (YLAD Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Goro%20Majima%20%28YLAD%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 66,
     "nombre": "KSR Goromi (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Goromi%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 67,
     "nombre": "KSR Hajime Kokonoi",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Hajime%20Kokonoi.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 68,
@@ -487,7 +487,7 @@
     "nombre": "KSR Hana ('10 Vacation)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Hana%20%28%2710%20Vacation%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 71,
@@ -501,7 +501,7 @@
     "nombre": "KSR Hana (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Hana%20%28Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 73,
@@ -529,14 +529,14 @@
     "nombre": "KSR Haruka Sawamura ('12 Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Haruka%20Sawamura%20%28%2712%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 77,
     "nombre": "KSR Haruka Sawamura ('12 Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Haruka%20Sawamura%20%28%2712%20Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 78,
@@ -599,14 +599,14 @@
     "nombre": "KSR Hikaru (Lucky)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Hikaru%20%28Lucky%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 87,
     "nombre": "KSR Hikaru (Vacation)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Hikaru%20%28Vacation%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 88,
@@ -662,7 +662,7 @@
     "nombre": "KSR Hiroshi Kugihara (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Hiroshi%20Kugihara%20%28Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 96,
@@ -683,7 +683,7 @@
     "nombre": "KSR Homare Nishitani (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Homare%20Nishitani%20%28Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 99,
@@ -704,21 +704,21 @@
     "nombre": "KSR Ichiban Kasuga (3-14)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ichiban%20Kasuga%20%283-14%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 102,
     "nombre": "KSR Ichiban Kasuga (Christmas Eve)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ichiban%20Kasuga%20%28Christmas%20Eve%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 103,
     "nombre": "KSR Ichiban Kasuga (Decisive Battle)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ichiban%20Kasuga%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 104,
@@ -767,7 +767,7 @@
     "nombre": "KSR Inkarmat",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Inkarmat.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 111,
@@ -781,7 +781,7 @@
     "nombre": "KSR Isao Katsuragi",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Isao%20Katsuragi.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 113,
@@ -809,14 +809,14 @@
     "nombre": "KSR Jo Amon (Summon)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Jo%20Amon%20%28Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 117,
     "nombre": "KSR Jo Sawashiro (Decisive Battle)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Jo%20Sawashiro%20%28Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 118,
@@ -851,28 +851,28 @@
     "nombre": "KSR Joongi Han ('16 Summon)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Joongi%20Han%20%28%2716%20Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 123,
     "nombre": "KSR Joongi Han ('99 Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Joongi%20Han%20%28%2799%20Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 124,
     "nombre": "KSR Joongi Han (YLAD Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Joongi%20Han%20%28YLAD%20Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 125,
     "nombre": "KSR Joongi Han (YLAD Assault II)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Joongi%20Han%20%28YLAD%20Assault%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 126,
@@ -886,35 +886,35 @@
     "nombre": "KSR Joryu (LAD Gaiden)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Joryu%20%28LAD%20Gaiden%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 128,
     "nombre": "KSR Jun Oda (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Jun%20Oda%20%28Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 129,
     "nombre": "KSR Jun Oda (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Jun%20Oda%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 130,
     "nombre": "KSR Junji Sugiuchi (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Junji%20Sugiuchi%20%28Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 131,
     "nombre": "KSR Kamon Kanai (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kamon%20Kanai%20%28Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 132,
@@ -928,7 +928,7 @@
     "nombre": "KSR Kamulop (Lively II)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kamulop%20%28Lively%20II%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 134,
@@ -942,7 +942,7 @@
     "nombre": "KSR Kanji Koshimizu (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kanji%20Koshimizu%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 136,
@@ -963,7 +963,7 @@
     "nombre": "KSR Kaoru Sayama (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kaoru%20Sayama%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 139,
@@ -998,14 +998,14 @@
     "nombre": "KSR Kazuhiko Serizawa (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kazuhiko%20Serizawa%20%28Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 144,
     "nombre": "KSR Kazuki ('09 Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kazuki%20%28%2709%20Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 145,
@@ -1026,7 +1026,7 @@
     "nombre": "KSR Kazuma Kiryu ('09 Kiwami II)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kazuma%20Kiryu%20%28%2709%20Kiwami%20II%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 148,
@@ -1040,7 +1040,7 @@
     "nombre": "KSR Kazuma Kiryu ('09 Summon)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kazuma%20Kiryu%20%28%2709%20Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 150,
@@ -1054,7 +1054,7 @@
     "nombre": "KSR Kazuma Kiryu ('88 Holographic)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kazuma%20Kiryu%20%28%2788%20Holographic%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 152,
@@ -1110,7 +1110,7 @@
     "nombre": "KSR Kazuma Kiryu (New Year's)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kazuma%20Kiryu%20%28New%20Year%27s%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 160,
@@ -1138,7 +1138,7 @@
     "nombre": "KSR Kei Ibuchi (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kei%20Ibuchi%20%28Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 164,
@@ -1152,14 +1152,14 @@
     "nombre": "KSR Keiji Shibusawa (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Keiji%20Shibusawa%20%28Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 166,
     "nombre": "KSR Ken Ryuguji",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ken%20Ryuguji.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 167,
@@ -1229,14 +1229,14 @@
     "nombre": "KSR Kosei Shishido (LAD Gaiden)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kosei%20Shishido%20%28LAD%20Gaiden%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 177,
     "nombre": "KSR Kosuke Koshimizu (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kosuke%20Koshimizu%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 178,
@@ -1250,7 +1250,7 @@
     "nombre": "KSR Koyuki (Christmas Eve)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Koyuki%20%28Christmas%20Eve%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 180,
@@ -1264,14 +1264,14 @@
     "nombre": "KSR Kyohei Jingu (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Kyohei%20Jingu%20%28Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 182,
     "nombre": "KSR Lau Ka Long ('05)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Lau%20Ka%20Long%20%28%2705%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 183,
@@ -1299,14 +1299,14 @@
     "nombre": "KSR Makoto Date ('09 Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Makoto%20Date%20%28%2709%20Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 187,
     "nombre": "KSR Makoto Date ('12 Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Makoto%20Date%20%28%2712%20Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 188,
@@ -1327,7 +1327,7 @@
     "nombre": "KSR Makoto Makimura (2-14)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Makoto%20Makimura%20%282-14%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 191,
@@ -1348,7 +1348,7 @@
     "nombre": "KSR Mamoru Takabe (YLAD Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Mamoru%20Takabe%20%28YLAD%20Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 194,
@@ -1362,7 +1362,7 @@
     "nombre": "KSR Manjiro Sano",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Manjiro%20Sano.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 196,
@@ -1376,7 +1376,7 @@
     "nombre": "KSR Masaru Sera ('05 Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Masaru%20Sera%20%28%2705%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 198,
@@ -1390,7 +1390,7 @@
     "nombre": "KSR Masaru Sera (1988 II)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Masaru%20Sera%20%281988%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 200,
@@ -1425,14 +1425,14 @@
     "nombre": "KSR Masato Arakawa (YLAD Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Masato%20Arakawa%20%28YLAD%20Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 205,
     "nombre": "KSR Masato Arakawa (YLAD Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Masato%20Arakawa%20%28YLAD%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 206,
@@ -1460,7 +1460,7 @@
     "nombre": "KSR Masayoshi Tanimura (Summon)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Masayoshi%20Tanimura%20%28Summon%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 210,
@@ -1474,7 +1474,7 @@
     "nombre": "KSR Masumi Arakawa (YLAD Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Masumi%20Arakawa%20%28YLAD%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 212,
@@ -1502,7 +1502,7 @@
     "nombre": "KSR Maya (Vacation)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Maya%20%28Vacation%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 216,
@@ -1523,14 +1523,14 @@
     "nombre": "KSR Mayumi Seto (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Mayumi%20Seto%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 219,
     "nombre": "KSR Mayumi Seto (True)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Mayumi%20Seto%20%28True%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 220,
@@ -1551,14 +1551,14 @@
     "nombre": "KSR Mirei Park (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Mirei%20Park%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 223,
     "nombre": "KSR Miss Tatsu (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Miss%20Tatsu%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 224,
@@ -1593,7 +1593,7 @@
     "nombre": "KSR Yu Nanba (Costume)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yu%20Nanba%20%28Costume%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 229,
@@ -1649,7 +1649,7 @@
     "nombre": "KSR Nishida (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Nishida%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 237,
@@ -1663,7 +1663,7 @@
     "nombre": "KSR Noa Amon (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Noa%20Amon%20%28Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 239,
@@ -1677,7 +1677,7 @@
     "nombre": "KSR Okada Izo (Ishin Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Okada%20Izo%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 241,
@@ -1705,7 +1705,7 @@
     "nombre": "KSR Ono Michio (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ono%20Michio%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 245,
@@ -1740,21 +1740,21 @@
     "nombre": "KSR Osamu Kashiwagi (True)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Osamu%20Kashiwagi%20%28True%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 250,
     "nombre": "KSR Reiji Ishioda (YLAD Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Reiji%20Ishioda%20%28YLAD%20Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 251,
     "nombre": "KSR Reiji Ishioda (YLAD Assault II)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Reiji%20Ishioda%20%28YLAD%20Assault%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 252,
@@ -1775,7 +1775,7 @@
     "nombre": "KSR Rikiya Shimabukuro (Decisive Battle)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Rikiya%20Shimabukuro%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 255,
@@ -1789,21 +1789,21 @@
     "nombre": "KSR Ryo Aoki (YLAD Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ryo%20Aoki%20%28YLAD%20Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 257,
     "nombre": "KSR Ryo Takashima (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ryo%20Takashima%20%28Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 258,
     "nombre": "KSR Ryuhei Hoshino (YLAD Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ryuhei%20Hoshino%20%28YLAD%20Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 259,
@@ -1817,7 +1817,7 @@
     "nombre": "KSR Ryuji Goda ('06 Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ryuji%20Goda%20%28%2706%20Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 261,
@@ -1831,7 +1831,7 @@
     "nombre": "KSR Ryuji Goda ('06 Decisive Battle)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ryuji%20Goda%20%28%2706%20Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 263,
@@ -1852,7 +1852,7 @@
     "nombre": "KSR Ryuji Goda (1999 Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Ryuji%20Goda%20%281999%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 266,
@@ -1915,7 +1915,7 @@
     "nombre": "KSR Saito Hajime (Ishin Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Saito%20Hajime%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 275,
@@ -1936,14 +1936,14 @@
     "nombre": "KSR Satomi Asakura (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Satomi%20Asakura%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 278,
     "nombre": "KSR Seishiro Munakata (Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Seishiro%20Munakata%20%28Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 279,
@@ -1957,7 +1957,7 @@
     "nombre": "KSR Seishu Inui",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Seishu%20Inui.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 281,
@@ -1985,14 +1985,14 @@
     "nombre": "KSR Shigeki Baba",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shigeki%20Baba.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 285,
     "nombre": "KSR Shinji Tanaka (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shinji%20Tanaka%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 286,
@@ -2013,14 +2013,14 @@
     "nombre": "KSR Shintaro Kazama (2005)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shintaro%20Kazama%20%282005%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 289,
     "nombre": "KSR Shintaro Kazama (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shintaro%20Kazama%20%28Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 290,
@@ -2034,7 +2034,7 @@
     "nombre": "KSR Shogo Makishima",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shogo%20Makishima.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 292,
@@ -2048,7 +2048,7 @@
     "nombre": "KSR Shun Akiyama ('10 Lively II)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shun%20Akiyama%20%28%2710%20Lively%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 294,
@@ -2062,14 +2062,14 @@
     "nombre": "KSR Shun Akiyama ('12 Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shun%20Akiyama%20%28%2712%20Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 296,
     "nombre": "KSR Shun Akiyama (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shun%20Akiyama%20%28Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 297,
@@ -2083,28 +2083,28 @@
     "nombre": "KSR Shusei Kagari",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Shusei%20Kagari.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 299,
     "nombre": "KSR Sofia (Christmas Eve)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Sofia%20%28Christmas%20Eve%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 300,
     "nombre": "KSR Sofia (Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Sofia%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 301,
     "nombre": "KSR Sofia (Lucky)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Sofia%20%28Lucky%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 302,
@@ -2146,14 +2146,14 @@
     "nombre": "KSR Sota Kume (YLAD Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Sota%20Kume%20%28YLAD%20Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 308,
     "nombre": "KSR Sotaro Komaki (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Sotaro%20Komaki%20%28Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 309,
@@ -2167,28 +2167,28 @@
     "nombre": "KSR Taiga Saejima ('10 Summon)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Taiga%20Saejima%20%28%2710%20Summon%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 311,
     "nombre": "KSR Taiga Saejima ('12 Decisive Battle Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Taiga%20Saejima%20%28%2712%20Decisive%20Battle%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 312,
     "nombre": "KSR Taiga Saejima ('12 Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Taiga%20Saejima%20%28%2712%20Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 313,
     "nombre": "KSR Taiga Saejima ('12 Holographic)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Taiga%20Saejima%20%28%2712%20Holographic%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 314,
@@ -2209,7 +2209,7 @@
     "nombre": "KSR Taiga Saejima (True)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Taiga%20Saejima%20%28True%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 317,
@@ -2223,7 +2223,7 @@
     "nombre": "KSR Taiju Shiba",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Taiju%20Shiba.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 319,
@@ -2244,7 +2244,7 @@
     "nombre": "KSR Takechi Hanpeita (Ishin Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Takechi%20Hanpeita%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 322,
@@ -2258,14 +2258,14 @@
     "nombre": "KSR Takemichi Hanagaki (2023)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Takemichi%20Hanagaki%20%282023%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 324,
     "nombre": "KSR Takeshi Kido (Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Takeshi%20Kido%20%28Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 325,
@@ -2335,7 +2335,7 @@
     "nombre": "KSR Tetsu Tachibana (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Tetsu%20Tachibana%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 335,
@@ -2349,21 +2349,21 @@
     "nombre": "KSR The Florist of Sai ('10 Summon)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20The%20Florist%20of%20Sai%20%28%2710%20Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 337,
     "nombre": "KSR The Florist of Sai (Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20The%20Florist%20of%20Sai%20%28Ascension%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 338,
     "nombre": "KSR Tianyou Zhao (Costume)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Tianyou%20Zhao%20%28Costume%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 339,
@@ -2377,28 +2377,28 @@
     "nombre": "KSR Tianyou Zhao (YLAD Holographic)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Tianyou%20Zhao%20%28YLAD%20Holographic%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 341,
     "nombre": "KSR Tianyou Zhao (YLAD Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Tianyou%20Zhao%20%28YLAD%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 342,
     "nombre": "KSR Todo Heisuke (Ishin Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Todo%20Heisuke%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 343,
     "nombre": "KSR Toko Higashide (Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Toko%20Higashide%20%28Ascension%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 344,
@@ -2412,7 +2412,7 @@
     "nombre": "KSR Toranosuke Sengoku (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Toranosuke%20Sengoku%20%28Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 346,
@@ -2426,14 +2426,14 @@
     "nombre": "KSR Tsukasa Sagawa (Assault)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Tsukasa%20Sagawa%20%28Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 348,
     "nombre": "KSR Tsukasa Sagawa (Fighting Spirit)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Tsukasa%20Sagawa%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 349,
@@ -2468,7 +2468,7 @@
     "nombre": "KSR Utabori II (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Utabori%20II%20%28Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 354,
@@ -2545,7 +2545,7 @@
     "nombre": "KSR Yoshitaka Mine (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yoshitaka%20Mine%20%28Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 365,
@@ -2573,7 +2573,7 @@
     "nombre": "KSR Yosuke Kagami (Kiwami)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yosuke%20Kagami%20%28Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 369,
@@ -2629,7 +2629,7 @@
     "nombre": "KSR Yuki ('06 Lively)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yuki%20%28%2706%20Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 377,
@@ -2664,14 +2664,14 @@
     "nombre": "KSR Yuta Usami (Ascension)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yuta%20Usami%20%28Ascension%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 382,
     "nombre": "KSR Yuya ('06)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yuya%20%28%2706%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 383,
@@ -2720,7 +2720,7 @@
     "nombre": "N Lau Ka Long",
     "rareza": "N",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/N%20Lau%20Ka%20Long.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 390,
@@ -2734,21 +2734,21 @@
     "nombre": "N Nishida",
     "rareza": "N",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/N%20Nishida.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 392,
     "nombre": "N Prison Guard Saito",
     "rareza": "N",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/N%20Prison%20Guard%20Saito.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 393,
     "nombre": "N Satomi Asakura",
     "rareza": "N",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/N%20Satomi%20Asakura.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 394,
@@ -2797,21 +2797,21 @@
     "nombre": "R Hana",
     "rareza": "R",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/R%20Hana.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 401,
     "nombre": "R Haruka Sawamura",
     "rareza": "R",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/R%20Haruka%20Sawamura.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 402,
     "nombre": "R Hayato Tsuji",
     "rareza": "R",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/R%20Hayato%20Tsuji.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 403,
@@ -2846,7 +2846,7 @@
     "nombre": "R Masaya Abe",
     "rareza": "R",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/R%20Masaya%20Abe.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 408,
@@ -2902,28 +2902,28 @@
     "nombre": "R Toko Higashide",
     "rareza": "R",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/R%20Toko%20Higashide.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 416,
     "nombre": "R Yuri",
     "rareza": "R",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/R%20Yuri.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 417,
     "nombre": "R Yuya",
     "rareza": "R",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/R%20Yuya.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 418,
     "nombre": "SR .Notes",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20.Notes.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 419,
@@ -2951,7 +2951,7 @@
     "nombre": "SR Carlos Genet",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Carlos%20Genet.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 423,
@@ -2965,14 +2965,14 @@
     "nombre": "SR Daijiro Saigo",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Daijiro%20Saigo.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 425,
     "nombre": "SR Daisaku Minami",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Daisaku%20Minami.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 426,
@@ -3000,7 +3000,7 @@
     "nombre": "SR Kazuki",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Kazuki.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 430,
@@ -3063,7 +3063,7 @@
     "nombre": "SR Noa Amon",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Noa%20Amon.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 439,
@@ -3126,14 +3126,14 @@
     "nombre": "SR Takumi Sakuraba",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Takumi%20Sakuraba.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 448,
     "nombre": "SR Tatsuo Shinada (1997)",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Tatsuo%20Shinada%20%281997%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 449,
@@ -3154,7 +3154,7 @@
     "nombre": "SR Yuri",
     "rareza": "SR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SR%20Yuri.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 452,
@@ -3182,21 +3182,21 @@
     "nombre": "SSR Akira Nishikiyama (Asura)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Akira%20Nishikiyama%20%28Asura%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 456,
     "nombre": "SSR Akira Nishikiyama (Black)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Akira%20Nishikiyama%20%28Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 457,
     "nombre": "SSR Akira Nishikiyama (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Akira%20Nishikiyama%20%28Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 458,
@@ -3210,7 +3210,7 @@
     "nombre": "SSR Akira Nishikiyama (High Schooler)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Akira%20Nishikiyama%20%28High%20Schooler%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 460,
@@ -3252,7 +3252,7 @@
     "nombre": "SSR Baki Hanma",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Baki%20Hanma.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 466,
@@ -3266,7 +3266,7 @@
     "nombre": "SSR Chiyori Mori",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Chiyori%20Mori.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 468,
@@ -3301,7 +3301,7 @@
     "nombre": "SSR Daigo Dojima (2006 III)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Daigo%20Dojima%20%282006%20III%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 473,
@@ -3350,7 +3350,7 @@
     "nombre": "SSR Daisaku Kuze ('99)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Daisaku%20Kuze%20%28%2799%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 480,
@@ -3378,28 +3378,28 @@
     "nombre": "SSR Ed",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ed.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 484,
     "nombre": "SSR Emoto",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Emoto.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 485,
     "nombre": "SSR Fierce Tiger",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Fierce%20Tiger.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 486,
     "nombre": "SSR Fukuro",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Fukuro.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 487,
@@ -3413,7 +3413,7 @@
     "nombre": "SSR Futoshi Shimano (2005)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Futoshi%20Shimano%20%282005%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 489,
@@ -3469,7 +3469,7 @@
     "nombre": "SSR Goh Hamazaki (2010)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Goh%20Hamazaki%20%282010%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 497,
@@ -3490,14 +3490,14 @@
     "nombre": "SSR Goro Majima (1988)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Goro%20Majima%20%281988%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 500,
     "nombre": "SSR Goro Majima (1988 Holographic)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Goro%20Majima%20%281988%20Holographic%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 501,
@@ -3532,14 +3532,14 @@
     "nombre": "SSR Goro Majima (Fighting Spirit)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Goro%20Majima%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 506,
     "nombre": "SSR Goro Majima (Legend)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Goro%20Majima%20%28Legend%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 507,
@@ -3560,7 +3560,7 @@
     "nombre": "SSR Goromi",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Goromi.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 510,
@@ -3574,7 +3574,7 @@
     "nombre": "SSR Hana",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Hana.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 512,
@@ -3616,21 +3616,21 @@
     "nombre": "SSR Haruka Sawamura",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Haruka%20Sawamura.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 518,
     "nombre": "SSR Haruka Sawamura & Haruto",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Haruka%20Sawamura%20%26%20Haruto.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 519,
     "nombre": "SSR Haruka Sawamura (2005)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Haruka%20Sawamura%20%282005%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 520,
@@ -3651,14 +3651,14 @@
     "nombre": "SSR Haruka Sawamura (2009 II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Haruka%20Sawamura%20%282009%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 523,
     "nombre": "SSR Haruka Sawamura (2010)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Haruka%20Sawamura%20%282010%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 524,
@@ -3693,7 +3693,7 @@
     "nombre": "SSR Hayato Tsuji",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Hayato%20Tsuji.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 529,
@@ -3707,7 +3707,7 @@
     "nombre": "SSR Hijikata Toshizo",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Hijikata%20Toshizo.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 531,
@@ -3735,7 +3735,7 @@
     "nombre": "SSR Himiko",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Himiko.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 535,
@@ -3777,28 +3777,28 @@
     "nombre": "SSR Hiroshi Kugihara",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Hiroshi%20Kugihara.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 541,
     "nombre": "SSR Hoichi Mochizuki",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Hoichi%20Mochizuki.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 542,
     "nombre": "SSR Homare Nishitani",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Homare%20Nishitani.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 543,
     "nombre": "SSR Homare Nishitani (1988 II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Homare%20Nishitani%20%281988%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 544,
@@ -3812,7 +3812,7 @@
     "nombre": "SSR Ichiban Kasuga (Breaker)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ichiban%20Kasuga%20%28Breaker%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 546,
@@ -3826,7 +3826,7 @@
     "nombre": "SSR Ichiban Kasuga (Festival)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ichiban%20Kasuga%20%28Festival%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 548,
@@ -3847,56 +3847,56 @@
     "nombre": "SSR Ichiban Kasuga (Shinsengumi)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ichiban%20Kasuga%20%28Shinsengumi%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 551,
     "nombre": "SSR Ichiban Kasuga (Two-Year Anniversary)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ichiban%20Kasuga%20%28Two-Year%20Anniversary%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 552,
     "nombre": "SSR Ichiban Kasuga (YLAD Holographic)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ichiban%20Kasuga%20%28YLAD%20Holographic%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 553,
     "nombre": "SSR Inoue Genzaburo",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Inoue%20Genzaburo.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 554,
     "nombre": "SSR Isao Katsuragi",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Isao%20Katsuragi.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 555,
     "nombre": "SSR Ito Kashitaro",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ito%20Kashitaro.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 556,
     "nombre": "SSR Jin Goda",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Jin%20Goda.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 557,
     "nombre": "SSR Jin Goda (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Jin%20Goda%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 558,
@@ -3917,14 +3917,14 @@
     "nombre": "SSR Jo Amon (Black)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Jo%20Amon%20%28Black%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 561,
     "nombre": "SSR Jo Amon (Snipe)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Jo%20Amon%20%28Snipe%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 562,
@@ -3959,28 +3959,28 @@
     "nombre": "SSR Joji Kazama",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Joji%20Kazama.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 567,
     "nombre": "SSR Joji Kazama (2009)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Joji%20Kazama%20%282009%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 568,
     "nombre": "SSR Joongi Han",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Joongi%20Han.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 569,
     "nombre": "SSR Joongi Han ('16)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Joongi%20Han%20%28%2716%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 570,
@@ -4001,7 +4001,7 @@
     "nombre": "SSR Joongi Han (Vacation)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Joongi%20Han%20%28Vacation%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 573,
@@ -4036,7 +4036,7 @@
     "nombre": "SSR Kamon Kanai",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kamon%20Kanai.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 578,
@@ -4050,7 +4050,7 @@
     "nombre": "SSR Kamurobo",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kamurobo.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 580,
@@ -4071,14 +4071,14 @@
     "nombre": "SSR Kaoru Hanayama",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kaoru%20Hanayama.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 583,
     "nombre": "SSR Kaoru Hanayama (Patriarch)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kaoru%20Hanayama%20%28Patriarch%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 584,
@@ -4099,7 +4099,7 @@
     "nombre": "SSR Kaoru Sayama (Furisode)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kaoru%20Sayama%20%28Furisode%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 587,
@@ -4120,7 +4120,7 @@
     "nombre": "SSR Katsura Kogoro (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Katsura%20Kogoro%20%28Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 590,
@@ -4134,7 +4134,7 @@
     "nombre": "SSR Kazuki (2009)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuki%20%282009%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 592,
@@ -4148,7 +4148,7 @@
     "nombre": "SSR Kazuma Kiryu",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuma%20Kiryu.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 594,
@@ -4162,7 +4162,7 @@
     "nombre": "SSR Kazuma Kiryu (1988 II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuma%20Kiryu%20%281988%20II%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 596,
@@ -4176,14 +4176,14 @@
     "nombre": "SSR Kazuma Kiryu (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuma%20Kiryu%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 598,
     "nombre": "SSR Kazuma Kiryu (Decisive Battle II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuma%20Kiryu%20%28Decisive%20Battle%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 599,
@@ -4204,7 +4204,7 @@
     "nombre": "SSR Kazuma Kiryu (Holographic)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuma%20Kiryu%20%28Holographic%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 602,
@@ -4225,21 +4225,21 @@
     "nombre": "SSR Kazuma Kiryu (Two-Year Anniversary)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuma%20Kiryu%20%28Two-Year%20Anniversary%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 605,
     "nombre": "SSR Kazuto Arase",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kazuto%20Arase.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 606,
     "nombre": "SSR Kei Ibuchi",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Kei%20Ibuchi.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 607,
@@ -4253,7 +4253,7 @@
     "nombre": "SSR Keiji Shibusawa (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Keiji%20Shibusawa%20%28Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 609,
@@ -4330,7 +4330,7 @@
     "nombre": "SSR Koyuki",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Koyuki.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 620,
@@ -4351,7 +4351,7 @@
     "nombre": "SSR Lao Gui",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Lao%20Gui.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 623,
@@ -4365,7 +4365,7 @@
     "nombre": "SSR Lau Ka Long (II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Lau%20Ka%20Long%20%28II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 625,
@@ -4379,7 +4379,7 @@
     "nombre": "SSR Lily (Christmas Eve)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Lily%20%28Christmas%20Eve%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 627,
@@ -4414,21 +4414,21 @@
     "nombre": "SSR Makoto Date (Legend)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Makoto%20Date%20%28Legend%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 632,
     "nombre": "SSR Makoto Makimura",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Makoto%20Makimura.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 633,
     "nombre": "SSR Makoto Makimura ('88)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Makoto%20Makimura%20%28%2788%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 634,
@@ -4442,7 +4442,7 @@
     "nombre": "SSR Masaru Sera",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masaru%20Sera.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 636,
@@ -4463,7 +4463,7 @@
     "nombre": "SSR Masaru Watase",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masaru%20Watase.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 639,
@@ -4484,21 +4484,21 @@
     "nombre": "SSR Masato Aizawa (Black)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masato%20Aizawa%20%28Black%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 642,
     "nombre": "SSR Masato Aizawa (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masato%20Aizawa%20%28Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 643,
     "nombre": "SSR Masaya Abe",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masaya%20Abe.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 644,
@@ -4512,7 +4512,7 @@
     "nombre": "SSR Masayoshi Tanimura",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masayoshi%20Tanimura.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 646,
@@ -4526,28 +4526,28 @@
     "nombre": "SSR Masayoshi Tanimura (2010 III)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masayoshi%20Tanimura%20%282010%20III%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 648,
     "nombre": "SSR Masked Man (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masked%20Man%20%28Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 649,
     "nombre": "SSR Masumi Arakawa (Black)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masumi%20Arakawa%20%28Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 650,
     "nombre": "SSR Masumi Arakawa (YLAD Black)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Masumi%20Arakawa%20%28YLAD%20Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 651,
@@ -4561,7 +4561,7 @@
     "nombre": "SSR Maya (Santa)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Maya%20%28Santa%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 653,
@@ -4589,7 +4589,7 @@
     "nombre": "SSR Mayumi Seto (Santa)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Mayumi%20Seto%20%28Santa%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 657,
@@ -4603,7 +4603,7 @@
     "nombre": "SSR Midori Hanagata",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Midori%20Hanagata.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 659,
@@ -4631,7 +4631,7 @@
     "nombre": "SSR Mitsuo Yasumura",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Mitsuo%20Yasumura.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 663,
@@ -4652,7 +4652,7 @@
     "nombre": "SSR Munan Suzuki",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Munan%20Suzuki.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 666,
@@ -4666,7 +4666,7 @@
     "nombre": "SSR Nagakura Shinpachi (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Nagakura%20Shinpachi%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 668,
@@ -4722,42 +4722,42 @@
     "nombre": "SSR Naoto Tagashira",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Naoto%20Tagashira.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 676,
     "nombre": "SSR Niibori Matsusuke",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Niibori%20Matsusuke.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 677,
     "nombre": "SSR Nishida (Promoted)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Nishida%20%28Promoted%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 678,
     "nombre": "SSR Noa Amon (Idol)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Noa%20Amon%20%28Idol%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 679,
     "nombre": "SSR Noa Amon (Snipe)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Noa%20Amon%20%28Snipe%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 680,
     "nombre": "SSR Okada Izo",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Okada%20Izo.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 681,
@@ -4785,7 +4785,7 @@
     "nombre": "SSR Ono Michio",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ono%20Michio.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 685,
@@ -4799,7 +4799,7 @@
     "nombre": "SSR Osamu Kashiwagi (1988)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Osamu%20Kashiwagi%20%281988%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 687,
@@ -4820,14 +4820,14 @@
     "nombre": "SSR Osamu Kashiwagi (Holographic)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Osamu%20Kashiwagi%20%28Holographic%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 690,
     "nombre": "SSR Osamu Kashiwagi (Legend)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Osamu%20Kashiwagi%20%28Legend%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 691,
@@ -4841,35 +4841,35 @@
     "nombre": "SSR Reina",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Reina.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 693,
     "nombre": "SSR Rie Shibuki",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Rie%20Shibuki.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 694,
     "nombre": "SSR Rikiya Shimabukuro",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Rikiya%20Shimabukuro.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 695,
     "nombre": "SSR Rikiya Shimabukuro (2009)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Rikiya%20Shimabukuro%20%282009%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 696,
     "nombre": "SSR Rikiya Shimabukuro (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Rikiya%20Shimabukuro%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 697,
@@ -4883,14 +4883,14 @@
     "nombre": "SSR Ryo Takashima (2006 II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ryo%20Takashima%20%282006%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 699,
     "nombre": "SSR Ryuhei Hoshino (New Year's)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ryuhei%20Hoshino%20%28New%20Year%27s%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 700,
@@ -4904,7 +4904,7 @@
     "nombre": "SSR Ryuji Goda",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ryuji%20Goda.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 702,
@@ -4918,7 +4918,7 @@
     "nombre": "SSR Ryuji Goda (Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ryuji%20Goda%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 704,
@@ -4932,7 +4932,7 @@
     "nombre": "SSR Ryuji Goda (Festival)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Ryuji%20Goda%20%28Festival%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 706,
@@ -4981,7 +4981,7 @@
     "nombre": "SSR Saeko Mukoda (YLAD)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Saeko%20Mukoda%20%28YLAD%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 713,
@@ -5023,14 +5023,14 @@
     "nombre": "SSR Sasaki Tadasaburo",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Sasaki%20Tadasaburo.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 719,
     "nombre": "SSR Satomi Asakura",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Satomi%20Asakura.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 720,
@@ -5065,7 +5065,7 @@
     "nombre": "SSR Sengoku Toranojo",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Sengoku%20Toranojo.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 725,
@@ -5079,14 +5079,14 @@
     "nombre": "SSR Seonhee (New Year's)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Seonhee%20%28New%20Year%27s%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 727,
     "nombre": "SSR Seonhee (YLAD Snipe)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Seonhee%20%28YLAD%20Snipe%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 728,
@@ -5100,7 +5100,7 @@
     "nombre": "SSR Shigeki Baba (Fighting Spirit)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Shigeki%20Baba%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 730,
@@ -5135,21 +5135,21 @@
     "nombre": "SSR Shintaro Kazama (1993)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Shintaro%20Kazama%20%281993%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 735,
     "nombre": "SSR Shintaro Kazama (Holographic)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Shintaro%20Kazama%20%28Holographic%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 736,
     "nombre": "SSR Shiro Kiyota",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Shiro%20Kiyota.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 737,
@@ -5198,7 +5198,7 @@
     "nombre": "SSR Shun Akiyama (Fighting Spirit)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Shun%20Akiyama%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 744,
@@ -5226,7 +5226,7 @@
     "nombre": "SSR Sofia (Christmas Eve)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Sofia%20%28Christmas%20Eve%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 748,
@@ -5317,14 +5317,14 @@
     "nombre": "SSR Taiga Saejima (Legend)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Taiga%20Saejima%20%28Legend%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 761,
     "nombre": "SSR Taiga Saejima (Montsuki and Hakama)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Taiga%20Saejima%20%28Montsuki%20and%20Hakama%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 762,
@@ -5380,7 +5380,7 @@
     "nombre": "SSR Takumi Someya",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Takumi%20Someya.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 770,
@@ -5394,7 +5394,7 @@
     "nombre": "SSR Tani Sanjuro",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Tani%20Sanjuro.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 772,
@@ -5408,7 +5408,7 @@
     "nombre": "SSR Tatsuo Shinada (2012 II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Tatsuo%20Shinada%20%282012%20II%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 774,
@@ -5422,14 +5422,14 @@
     "nombre": "SSR Teru Yamada",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Teru%20Yamada.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 776,
     "nombre": "SSR Teru Yamada (Furisode)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Teru%20Yamada%20%28Furisode%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 777,
@@ -5450,14 +5450,14 @@
     "nombre": "SSR Tetsuo Tamashiro",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Tetsuo%20Tamashiro.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 780,
     "nombre": "SSR The Bathkeeper of Sai",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20The%20Bathkeeper%20of%20Sai.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 781,
@@ -5471,7 +5471,7 @@
     "nombre": "SSR The Florist of Sai (2005)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20The%20Florist%20of%20Sai%20%282005%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 783,
@@ -5506,35 +5506,35 @@
     "nombre": "SSR Toko Higashide",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Toko%20Higashide.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 788,
     "nombre": "SSR Toko Higashide (Recovery)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Toko%20Higashide%20%28Recovery%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 789,
     "nombre": "SSR Tokugawa Yoshinobu",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Tokugawa%20Yoshinobu.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 790,
     "nombre": "SSR Toranosuke Sengoku",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Toranosuke%20Sengoku.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 791,
     "nombre": "SSR Toranosuke Sengoku ('06 II)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Toranosuke%20Sengoku%20%28%2706%20II%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 792,
@@ -5548,7 +5548,7 @@
     "nombre": "SSR Toya Shiba",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Toya%20Shiba.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 794,
@@ -5562,7 +5562,7 @@
     "nombre": "SSR Tsukasa Sagawa",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Tsukasa%20Sagawa.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 796,
@@ -5604,7 +5604,7 @@
     "nombre": "SSR Utabori II",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Utabori%20II.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 802,
@@ -5632,7 +5632,7 @@
     "nombre": "SSR Yamazaki Susumu",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yamazaki%20Susumu.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 806,
@@ -5667,7 +5667,7 @@
     "nombre": "SSR Yoshitaka Mine (Black)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yoshitaka%20Mine%20%28Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 811,
@@ -5688,14 +5688,14 @@
     "nombre": "SSR Yoshitaka Mine (Three-Year Anniversary)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yoshitaka%20Mine%20%28Three-Year%20Anniversary%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 814,
     "nombre": "SSR Yoshitaka Mine (Vacation)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yoshitaka%20Mine%20%28Vacation%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 815,
@@ -5716,7 +5716,7 @@
     "nombre": "SSR Yosuke Tendo (YLAD Decisive Battle)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yosuke%20Tendo%20%28YLAD%20Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 818,
@@ -5779,7 +5779,7 @@
     "nombre": "SSR Yuri",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yuri.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 827,
@@ -5800,7 +5800,7 @@
     "nombre": "SSR Yuta Usami ('16)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yuta%20Usami%20%28%2716%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 830,
@@ -5814,14 +5814,14 @@
     "nombre": "SSR Yuya (Promoted)",
     "rareza": "SSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yuya%20%28Promoted%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 832,
     "nombre": "UR .Notes",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20.Notes.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 833,
@@ -5849,14 +5849,14 @@
     "nombre": "UR Akira Nishikiyama ('05 Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Akira%20Nishikiyama%20%28%2705%20Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 837,
     "nombre": "UR Akira Nishikiyama ('95 Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Akira%20Nishikiyama%20%28%2795%20Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 838,
@@ -5870,7 +5870,7 @@
     "nombre": "UR Asuka (Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Asuka%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 840,
@@ -5884,7 +5884,7 @@
     "nombre": "UR Azusa Osawa (Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Azusa%20Osawa%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 842,
@@ -5898,7 +5898,7 @@
     "nombre": "UR Daigo Dojima ('06 Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Daigo%20Dojima%20%28%2706%20Summon%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 844,
@@ -5940,14 +5940,14 @@
     "nombre": "UR Futoshi Shimano ('05 Decisive Battle)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Futoshi%20Shimano%20%28%2705%20Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 850,
     "nombre": "UR Goro Majima ('06 Assault)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Goro%20Majima%20%28%2706%20Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 851,
@@ -5996,7 +5996,7 @@
     "nombre": "UR Goro Majima (3-14)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Goro%20Majima%20%283-14%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 858,
@@ -6024,7 +6024,7 @@
     "nombre": "UR Haruka Sawamura ('05 Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Haruka%20Sawamura%20%28%2705%20Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 862,
@@ -6045,14 +6045,14 @@
     "nombre": "UR Haruka Sawamura (2-14)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Haruka%20Sawamura%20%282-14%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 865,
     "nombre": "UR Haruka Sawamura (Cherry Blossom Viewing)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Haruka%20Sawamura%20%28Cherry%20Blossom%20Viewing%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 866,
@@ -6073,7 +6073,7 @@
     "nombre": "UR Hijikata Toshizo (Ishin Kiwami)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Hijikata%20Toshizo%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 869,
@@ -6087,14 +6087,14 @@
     "nombre": "UR Hikaru (New Year's)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Hikaru%20%28New%20Year%27s%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 871,
     "nombre": "UR Hiroaki Arai (Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Hiroaki%20Arai%20%28Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 872,
@@ -6115,7 +6115,7 @@
     "nombre": "UR Homare Nishitani (Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Homare%20Nishitani%20%28Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 875,
@@ -6143,7 +6143,7 @@
     "nombre": "UR Ichiban Kasuga (Decisive Battle)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ichiban%20Kasuga%20%28Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 879,
@@ -6157,7 +6157,7 @@
     "nombre": "UR Ichiban Kasuga (LADIW)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ichiban%20Kasuga%20%28LADIW%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 881,
@@ -6171,14 +6171,14 @@
     "nombre": "UR Inoue Genzaburo (Ishin Kiwami)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Inoue%20Genzaburo%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 883,
     "nombre": "UR Jo Amon (Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Jo%20Amon%20%28Summon%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 884,
@@ -6192,14 +6192,14 @@
     "nombre": "UR Jo Sawashiro (LADIW)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Jo%20Sawashiro%20%28LADIW%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 886,
     "nombre": "UR Joongi Han ('16 Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Joongi%20Han%20%28%2716%20Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 887,
@@ -6213,7 +6213,7 @@
     "nombre": "UR Joongi Han (Vacation)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Joongi%20Han%20%28Vacation%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 889,
@@ -6234,7 +6234,7 @@
     "nombre": "UR Kaoru Sayama (Fighting Spirit)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kaoru%20Sayama%20%28Fighting%20Spirit%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 892,
@@ -6248,14 +6248,14 @@
     "nombre": "UR Kaoru Sayama (Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kaoru%20Sayama%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 894,
     "nombre": "UR Kaoru Sayama (True)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kaoru%20Sayama%20%28True%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 895,
@@ -6276,7 +6276,7 @@
     "nombre": "UR Kazuma Kiryu ('05 Holographic)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kazuma%20Kiryu%20%28%2705%20Holographic%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 898,
@@ -6290,7 +6290,7 @@
     "nombre": "UR Kazuma Kiryu ('09 Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kazuma%20Kiryu%20%28%2709%20Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 900,
@@ -6304,7 +6304,7 @@
     "nombre": "UR Kazuma Kiryu ('88 Decisive Battle)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kazuma%20Kiryu%20%28%2788%20Decisive%20Battle%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 902,
@@ -6353,7 +6353,7 @@
     "nombre": "UR Kyohei Jingu",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kyohei%20Jingu.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 909,
@@ -6367,7 +6367,7 @@
     "nombre": "UR Mai Sanada (Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Mai%20Sanada%20%28Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 911,
@@ -6381,7 +6381,7 @@
     "nombre": "UR Makoto Date (2007)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Makoto%20Date%20%282007%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 913,
@@ -6416,7 +6416,7 @@
     "nombre": "UR Masaru Sera ('88 Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Masaru%20Sera%20%28%2788%20Black%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 918,
@@ -6430,7 +6430,7 @@
     "nombre": "UR Masaru Watase (Decisive Battle)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Masaru%20Watase%20%28Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 920,
@@ -6458,7 +6458,7 @@
     "nombre": "UR Masumi Arakawa (YLAD Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Masumi%20Arakawa%20%28YLAD%20Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 924,
@@ -6472,7 +6472,7 @@
     "nombre": "UR Maya (Christmas Eve)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Maya%20%28Christmas%20Eve%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 926,
@@ -6507,7 +6507,7 @@
     "nombre": "UR Munan Suzuki",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Munan%20Suzuki.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 931,
@@ -6577,7 +6577,7 @@
     "nombre": "UR Osamu Kashiwagi ('05 Assist)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Osamu%20Kashiwagi%20%28%2705%20Assist%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 941,
@@ -6598,7 +6598,7 @@
     "nombre": "UR Ryo Aoki (YLAD Assault)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ryo%20Aoki%20%28YLAD%20Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 944,
@@ -6612,14 +6612,14 @@
     "nombre": "UR Ryuji Goda ('06 Assist)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ryuji%20Goda%20%28%2706%20Assist%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 946,
     "nombre": "UR Ryuji Goda ('06 Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ryuji%20Goda%20%28%2706%20Black%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 947,
@@ -6647,7 +6647,7 @@
     "nombre": "UR Sakamoto Ryoma (Ishin Kiwami)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Sakamoto%20Ryoma%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 951,
@@ -6668,7 +6668,7 @@
     "nombre": "UR Shintaro Kazama ('05 Assist)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Shintaro%20Kazama%20%28%2705%20Assist%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 954,
@@ -6682,14 +6682,14 @@
     "nombre": "UR Shun Akiyama ('10 Assist II)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Shun%20Akiyama%20%28%2710%20Assist%20II%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 956,
     "nombre": "UR Shun Akiyama (Festival)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Shun%20Akiyama%20%28Festival%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 957,
@@ -6710,7 +6710,7 @@
     "nombre": "UR Sofia (Costume)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Sofia%20%28Costume%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 960,
@@ -6724,7 +6724,7 @@
     "nombre": "UR Sofia (New Year's)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Sofia%20%28New%20Year%27s%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 962,
@@ -6745,28 +6745,28 @@
     "nombre": "UR Taiga Saejima ('10 Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Taiga%20Saejima%20%28%2710%20Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 965,
     "nombre": "UR Taiga Saejima ('12 Decisive Battle)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Taiga%20Saejima%20%28%2712%20Decisive%20Battle%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 966,
     "nombre": "UR Taiga Saejima (True)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Taiga%20Saejima%20%28True%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 967,
     "nombre": "UR Takumi Someya (Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Takumi%20Someya%20%28Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 968,
@@ -6787,7 +6787,7 @@
     "nombre": "UR Tatsuo Shinada ('12 Fighting Spirit)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Tatsuo%20Shinada%20%28%2712%20Fighting%20Spirit%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 971,
@@ -6808,21 +6808,21 @@
     "nombre": "UR Tianyou Zhao (True)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Tianyou%20Zhao%20%28True%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 974,
     "nombre": "UR Tsukasa Sagawa (Assault)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Tsukasa%20Sagawa%20%28Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 975,
     "nombre": "UR Tsuneo Iwami ('16 Assault)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Tsuneo%20Iwami%20%28%2716%20Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 976,
@@ -6850,14 +6850,14 @@
     "nombre": "UR Yoshitaka Mine ('09 Assist)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yoshitaka%20Mine%20%28%2709%20Assist%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 980,
     "nombre": "UR Yoshitaka Mine ('09 Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yoshitaka%20Mine%20%28%2709%20Black%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 981,
@@ -6871,7 +6871,7 @@
     "nombre": "UR Yoshitaka Mine (Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yoshitaka%20Mine%20%28Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 983,
@@ -6892,7 +6892,7 @@
     "nombre": "UR Yu Narumi",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yu%20Narumi.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 986,
@@ -6913,7 +6913,7 @@
     "nombre": "UR Yuki (2-14)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yuki%20%282-14%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 989,
@@ -6934,21 +6934,21 @@
     "nombre": "UR Yumi Sawamura (Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yumi%20Sawamura%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 992,
     "nombre": "UR Yutaka Yamai (LADIW)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yutaka%20Yamai%20%28LADIW%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 993,
     "nombre": "KSR Yu Nanba (Costume)",
     "rareza": "KSR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yu%20Nanba%20%28Costume%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 994,
@@ -6976,7 +6976,7 @@
     "nombre": "UR Akira Nishikiyama ('05 Black II)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Akira%20Nishikiyama%20%28%2705%20Black%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 998,
@@ -6990,21 +6990,21 @@
     "nombre": "UR Asuka (Costume)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Asuka%20%28Costume%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1000,
     "nombre": "UR Big Lo (Assault)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Big%20Lo%20%28Assault%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1001,
     "nombre": "UR Chitose Fujinomiya (LADIW II)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Chitose%20Fujinomiya%20%28LADIW%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1002,
@@ -7053,14 +7053,14 @@
     "nombre": "UR Gary Buster Holmes (Assist)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Gary%20Buster%20Holmes%20%28Assist%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1009,
     "nombre": "UR Goh Hamazaki ('10 Assault)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Goh%20Hamazaki%20%28%2710%20Assault%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1010,
@@ -7074,14 +7074,14 @@
     "nombre": "UR Goro Majima (Vacation)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Goro%20Majima%20%28Vacation%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1012,
     "nombre": "UR Goromi (Assist)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Goromi%20%28Assist%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1013,
@@ -7095,14 +7095,14 @@
     "nombre": "UR Haruka Sawamura ('05 Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Haruka%20Sawamura%20%28%2705%20Lively%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1015,
     "nombre": "UR Haruka Sawamura ('10 Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Haruka%20Sawamura%20%28%2710%20Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1016,
@@ -7130,7 +7130,7 @@
     "nombre": "UR Himiko",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Himiko.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1020,
@@ -7144,7 +7144,7 @@
     "nombre": "UR Ichiban Kasuga (LADIW II)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ichiban%20Kasuga%20%28LADIW%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1022,
@@ -7179,14 +7179,14 @@
     "nombre": "UR Joongi Han (YLAD Kiwami)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Joongi%20Han%20%28YLAD%20Kiwami%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1027,
     "nombre": "UR Kamulop (Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kamulop%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1028,
@@ -7200,7 +7200,7 @@
     "nombre": "UR Katsura Kogoro (Ishin Kiwami)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Katsura%20Kogoro%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1030,
@@ -7228,28 +7228,28 @@
     "nombre": "UR Kazuma Kiryu (Festival)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kazuma%20Kiryu%20%28Festival%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1034,
     "nombre": "UR Kazuma Kiryu (LADIW II)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kazuma%20Kiryu%20%28LADIW%20II%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1035,
     "nombre": "UR Keiji Shibusawa (Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Keiji%20Shibusawa%20%28Summon%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1036,
     "nombre": "UR Koichi Adachi (YLAD Kiwami)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Koichi%20Adachi%20%28YLAD%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1037,
@@ -7284,7 +7284,7 @@
     "nombre": "UR Maya (Costume)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Maya%20%28Costume%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1042,
@@ -7312,7 +7312,7 @@
     "nombre": "UR Nanoha Mukoda",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Nanoha%20Mukoda.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1046,
@@ -7333,14 +7333,14 @@
     "nombre": "UR Osamu Kashiwagi (True)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Osamu%20Kashiwagi%20%28True%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1049,
     "nombre": "UR Reiji Ishioda (YLAD Black)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Reiji%20Ishioda%20%28YLAD%20Black%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1050,
@@ -7375,14 +7375,14 @@
     "nombre": "UR Ryuji Goda ('06)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ryuji%20Goda%20%28%2706%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1055,
     "nombre": "UR Ryuji Goda (Seven-Year Anniversary)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ryuji%20Goda%20%28Seven-Year%20Anniversary%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1056,
@@ -7396,7 +7396,7 @@
     "nombre": "UR Saigo Kichinosuke (Ishin Kiwami)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Saigo%20Kichinosuke%20%28Ishin%20Kiwami%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1058,
@@ -7417,7 +7417,7 @@
     "nombre": "UR Seonhee (Costume II)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Seonhee%20%28Costume%20II%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1061,
@@ -7452,21 +7452,21 @@
     "nombre": "UR Shun Akiyama (Holographic)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Shun%20Akiyama%20%28Holographic%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1066,
     "nombre": "UR Sofia (Festival)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Sofia%20%28Festival%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1067,
     "nombre": "UR Sofia (Vacation)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Sofia%20%28Vacation%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1068,
@@ -7480,7 +7480,7 @@
     "nombre": "UR Taiga Saejima ('10)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Taiga%20Saejima%20%28%2710%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1070,
@@ -7515,7 +7515,7 @@
     "nombre": "UR Tatsuo Shinada ('12 Summon)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Tatsuo%20Shinada%20%28%2712%20Summon%29.png",
-    "tipo": "yin"
+    "tipo": "shadow"
   },
   {
     "id": 1075,
@@ -7529,7 +7529,7 @@
     "nombre": "UR Tianyou Zhao (LADIW)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Tianyou%20Zhao%20%28LADIW%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1077,
@@ -7564,7 +7564,7 @@
     "nombre": "UR Yu Nanba (True)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yu%20Nanba%20%28True%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1082,
@@ -7578,7 +7578,7 @@
     "nombre": "UR Yui (Lively)",
     "rareza": "UR",
     "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yui%20%28Lively%29.png",
-    "tipo": "yang"
+    "tipo": "light"
   },
   {
     "id": 1084,
