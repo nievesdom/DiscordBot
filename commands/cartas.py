@@ -12,7 +12,7 @@ def es_dueno(ctx):
     return ctx.author.id == OWNER_ID
 
 # Importar funciones desde módulos core y views
-from core.gist_propiedades import cargar_propiedades, guardar_propiedades, obtener_cartas_usuario
+from core.gist_propiedades import cargar_propiedades, guardar_propiedades
 from core.cartas import cargar_cartas, cartas_por_id
 from views.navegador import Navegador
 from views.reclamar import ReclamarCarta
@@ -50,11 +50,11 @@ class Cartas(commands.Cog):
         rareza = elegida.get("rareza", "N")
         color = colores.get(rareza, 0x8c8c8c)
 
-        # Crear el embed con subtítulo del tipo
         embed = discord.Embed(
             title=f"{elegida['nombre']} — {elegida.get('tipo', 'sin tipo')}",
             color=color
         )
+
         ruta_img = elegida["imagen"]
         archivo = None
 
@@ -67,45 +67,41 @@ class Cartas(commands.Cog):
         else:
             embed.description = "⚠️ Imagen no encontrada."
 
-        # Crear vista con botón para reclamar (comprobación por instancia de mensaje)
         vista = ReclamarCarta(elegida["id"], embed, ruta_img)
 
-        # Enviar mensaje con embed y botón
         if archivo:
             await ctx.send(file=archivo, embed=embed, view=vista)
         else:
             await ctx.send(embed=embed, view=vista)
 
-    @commands.command(help="Muestra la colección de cartas de forma visual. Si no se menciona a nadie, se mostrará la colección del autor del mensaje.", extras={"categoria": "Cartas 🃏"})
+    @commands.command(help="Muestra la colección de cartas de forma visual.", extras={"categoria": "Cartas 🃏"})
     async def album(self, ctx, mencionado: discord.Member = None):
         try:
             objetivo = mencionado or ctx.author
             servidor_id = str(ctx.guild.id)
             usuario_id = str(objetivo.id)
-    
-            cartas_ids = obtener_cartas_usuario(servidor_id, usuario_id)
+
+            propiedades = cargar_propiedades()
+            cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
             if not cartas_ids:
                 await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
                 return
-    
-            cartas_info = cartas_por_id()  # Diccionario de cartas por ID
-    
+
+            cartas_info = cartas_por_id()
             vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
             embed, archivo = vista.mostrar()
-    
-            # Borrar el mensaje del comando si el bot tiene permisos
+
             if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 try:
                     await ctx.message.delete()
                 except discord.Forbidden:
                     pass
-                
-            # Enviar el mensaje con el álbum
+
             if archivo:
                 vista.msg = await ctx.send(file=archivo, embed=embed, view=vista)
             else:
                 vista.msg = await ctx.send(embed=embed, view=vista)
-    
+
         except Exception as e:
             print(f"[ERROR] en comando album: {type(e).__name__} - {e}")
             await ctx.send("Ha ocurrido un error al intentar mostrar el álbum.")
@@ -117,7 +113,8 @@ class Cartas(commands.Cog):
             servidor_id = str(ctx.guild.id)
             usuario_id = str(objetivo.id)
 
-            cartas_ids = obtener_cartas_usuario(servidor_id, usuario_id)
+            propiedades = cargar_propiedades()
+            cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
             if not cartas_ids:
                 await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
                 return
@@ -139,7 +136,7 @@ class Cartas(commands.Cog):
             print(f"[ERROR] en comando coleccion: {type(e).__name__} - {e}")
             await ctx.send("Ha ocurrido un error al intentar mostrar tu colección.")
 
-    @commands.command(help="Busca cartas de RGGO. Introduce el término a buscar detrás del comando.", extras={"categoria": "Cartas 🃏"})
+    @commands.command(help="Busca cartas de RGGO.", extras={"categoria": "Cartas 🃏"})
     async def buscar(self, ctx, *, palabra=None):
         if palabra is None:
             await ctx.send("Introduce un término tras el comando para buscar cartas. Ejemplo: y!buscar Yamai")
@@ -147,7 +144,6 @@ class Cartas(commands.Cog):
 
         servidor_id = str(ctx.guild.id)
         cartas = cargar_cartas()
-
         coincidencias = [c for c in cartas if palabra.lower() in c["nombre"].lower()]
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
 
@@ -155,7 +151,6 @@ class Cartas(commands.Cog):
             await ctx.send(f"No se encontraron cartas que contengan '{palabra}'.")
             return
 
-        # Cargar propiedades en tiempo real desde el Gist para marcar las que tienen dueño en el servidor
         propiedades = cargar_propiedades()
         cartas_con_dueño = set()
         if servidor_id in propiedades:
@@ -163,8 +158,6 @@ class Cartas(commands.Cog):
                 for carta_id in propiedades[servidor_id][usuario]:
                     cartas_con_dueño.add(str(carta_id))
 
-        # Mostrar resultados con formato diff:
-        # + disponibles (verde), ! con dueño (naranja)
         mensaje = "```diff\n"
         for c in coincidencias:
             tipo = c.get("tipo", "sin tipo")
@@ -180,7 +173,7 @@ class Cartas(commands.Cog):
 
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
 
-    # Solo para el dueño del bot: actualiza rutas de imágenes con URL de Render
+    # Solo para el dueño del bot
     @commands.command(help=None)
     @commands.check(es_dueno)
     async def actualizar_img(self, ctx):
@@ -217,7 +210,6 @@ class Cartas(commands.Cog):
 
         nombres_existentes = {c["nombre"] for c in cartas_existentes}
         imagenes = [f for f in os.listdir(carpeta) if f.lower().endswith(".png")]
-
         rarezas = ["UR", "KSR", "SSR", "SR", "R", "N"]
         max_id = max((c.get("id", 0) for c in cartas_existentes), default=0)
 
@@ -229,7 +221,6 @@ class Cartas(commands.Cog):
 
             rareza = next((r for r in rarezas if nombre.startswith(r + " ")), "N")
             max_id += 1
-
             nueva_carta = {
                 "id": max_id,
                 "nombre": nombre,
