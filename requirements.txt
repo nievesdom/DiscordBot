@@ -2,3 +2,4 @@ discord.py
 asyncio
 flask
 python-dotenv
+PyGithub
