@@ -50,7 +50,7 @@ class ReclamarCarta(discord.ui.View):
         guardar_propiedades(propiedades)  # Guarda en el Gist remoto
 
         # Actualizar el embed
-        self.embed.color = discord.Color.dark_gray()
+        self.embed.color = discord.Color.black()
         self.embed.set_footer(text=f"Carta reclamada por {interaction.user.display_name}")
         self.reclamada = True
         self.clear_items()  # Eliminar el botón
