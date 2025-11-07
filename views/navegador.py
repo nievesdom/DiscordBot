@@ -28,7 +28,7 @@ class Navegador(discord.ui.View):
             return sorted(self.cartas_ids, key=lambda cid: self.cartas_info.get(str(cid), {}).get("nombre", "").lower())
         return self.cartas_ids
 
-    # Crea el embed y usa la imagen desde el JSON (sin archivos locales)
+    # Crea el embed y usa la imagen desde el JSON
     def mostrar(self):
         lista_actual = self.lista()
         carta_id = str(lista_actual[self.i])
@@ -37,7 +37,7 @@ class Navegador(discord.ui.View):
         rareza = carta.get("rareza", "N")
         color = self.colores.get(rareza, 0x8c8c8c)
         imagen = carta.get("imagen")
-        descripcion=f"Type: {carta.get('tipo', 'sin tipo')}",
+        descripcion=f"Type: {carta.get("tipo")}",
 
         embed = discord.Embed(title=nombre, color=color, description=descripcion)
         embed.set_footer(text=f"Carta {self.i + 1} de {len(lista_actual)} • Propiedad de {self.dueño.display_name}")

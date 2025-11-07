@@ -80,7 +80,7 @@ class ReclamarCarta(discord.ui.View):
 
             # Mensaje de confirmación público
             await interaction.followup.send(
-                f"{interaction.user.mention} ha reclamado **{nombre_carta}** ({tipo_carta or 'sin tipo'})",
+                f"{interaction.user.mention} ha reclamado **{nombre_carta}**",
                 ephemeral=False
             )
 

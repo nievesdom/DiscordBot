@@ -75,19 +75,23 @@ class Cartas(commands.Cog):
         else:
             await ctx.send(embed=embed, view=vista)
 
-    @commands.command(help="Muestra la colección de cartas de forma visual.", extras={"categoria": "Cartas 🃏"})
+    @commands.command(help="Muestra la colección de cartas de forma visual. Menciona a otro usuario para ver su colección.", extras={"categoria": "Cartas 🃏"})
     async def album(self, ctx, mencionado: discord.Member = None):
         try:
+            # Si se menciona a una persona, ese será el objetivo, si no lo será el autor del mensaje
             objetivo = mencionado or ctx.author
             servidor_id = str(ctx.guild.id)
             usuario_id = str(objetivo.id)
 
+            # Carga el archivo de propiedades y guarda las del objetivo
             propiedades = cargar_propiedades()
             cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
+            # Si no tiene cartas aún, se dice
             if not cartas_ids:
                 await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
                 return
 
+            # Busca la información de las cartas para mostrarla
             cartas_info = cartas_por_id()
             vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
             embed, archivo = vista.mostrar()
