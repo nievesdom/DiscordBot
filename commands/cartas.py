@@ -51,7 +51,8 @@ class Cartas(commands.Cog):
         color = colores.get(rareza, 0x8c8c8c)
 
         embed = discord.Embed(
-            title=f"{elegida['nombre']} — {elegida.get('tipo', 'sin tipo')}",
+            title=f"{elegida['nombre']}",
+            description=f"Type: {elegida.get('tipo', 'sin tipo')}",
             color=color
         )
 
