@@ -55,7 +55,7 @@ class ReclamarCarta(discord.ui.View):
 
             # Mostrar tipo de carta (si existe)
             nombre_carta = carta_info["nombre"]
-            tipo_carta = carta_info.get("tipo")
+            tipo_carta = carta_info.get("atributo")
             if tipo_carta:
                 self.embed.title = f"{nombre_carta} — {tipo_carta}"
             else:

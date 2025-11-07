@@ -61,13 +61,13 @@ def actualizar_json():
         if os.path.exists(ruta_img):
             color = detectar_color_predominante(ruta_img)
             tipo = COLOR_TO_TIPO.get(color, "unknown")
-            carta["tipo"] = tipo
+            carta["atributo"] = tipo
             if tipo != "unknown" and tipo is not None:
                 tipos_detectados.append(tipo)
             else:
                 cartas_unknown.append(carta["nombre"])
         else:
-            carta["tipo"] = None
+            carta["atributo"] = None
             cartas_unknown.append(carta["nombre"])
 
     # Guardar cambios en cartas.json

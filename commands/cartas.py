@@ -165,7 +165,7 @@ class Cartas(commands.Cog):
 
         mensaje = "```diff\n"
         for c in coincidencias:
-            tipo = c.get("tipo", "sin tipo")
+            tipo = c.get("atributo", "sin tipo")
             if str(c["id"]) in cartas_con_dueño:
                 mensaje += f"! {c['nombre']} ({tipo})\n"
             else:

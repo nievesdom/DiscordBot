@@ -37,7 +37,7 @@ class Navegador(discord.ui.View):
         rareza = carta.get("rareza", "N")
         color = self.colores.get(rareza, 0x8c8c8c)
         imagen = carta.get("imagen")
-        descripcion=f"Type: {carta.get("tipo")}",
+        descripcion=f"Type: {carta.get("atributo")}",
 
         embed = discord.Embed(title=nombre, color=color, description=descripcion)
         embed.set_footer(text=f"Carta {self.i + 1} de {len(lista_actual)} • Propiedad de {self.dueño.display_name}")
