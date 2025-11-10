@@ -143,6 +143,31 @@ class Moderation(commands.Cog):
         await ctx.send("🏷️ Etiquetas ya configuradas en el foro:\n" + (", ".join(sorted(etiquetas_foro)) or "—"))
         await ctx.send("⚠️ Etiquetas faltantes que deberías crear en el foro:\n" +
                        (", ".join(sorted(faltantes)) if faltantes else "✅ Todas las etiquetas ya existen en el foro."))
+        
+    
+    @commands.command(help="Muestra la estructura del embed del último mensaje con link AO3")
+    async def debug_ao3(self, ctx, limite: int = 10):
+        canal = self.bot.get_channel(CANAL_ORIGEN_ID)
+        async for msg in canal.history(limit=limite):
+            if not msg.embeds:
+                continue
+            embed = msg.embeds[0]
+            if "archiveofourown.org" not in (msg.content or "") and "archiveofourown.org" not in (embed.url or ""):
+                continue
+
+            info = f"**Título:** {embed.title}\n"
+            info += f"**Descripción:**\n{embed.description}\n\n"
+            info += f"**Campos:**\n"
+            for f in embed.fields:
+                info += f"- {f.name}: {f.value}\n"
+            info += f"**Autor embed.author.name:** {getattr(embed.author, 'name', None)}\n"
+            info += f"**Footer:** {getattr(embed.footer, 'text', None)}\n"
+            info += f"**URL:** {embed.url}\n"
+
+            await ctx.send(f"```{info}```")
+            return
+
+        await ctx.send("No se encontraron mensajes con embeds de AO3 en el rango dado.")
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
