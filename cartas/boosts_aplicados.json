@@ -1,0 +1,930 @@
+[
+  {
+    "id": 7,
+    "nombre": "KSR Akira Nishikiyama ('95 Summon)",
+    "boost": {
+      "type": "global",
+      "factor": 1.034
+    },
+    "stats_antes": {
+      "health": 839,
+      "attack": 264,
+      "defense": 178,
+      "speed": 198
+    }
+  },
+  {
+    "id": 21,
+    "nombre": "KSR Azusa Osawa (Ascension)",
+    "boost": {
+      "type": "global",
+      "factor": 1.041
+    },
+    "stats_antes": {
+      "health": 965,
+      "attack": 255,
+      "defense": 274,
+      "speed": 150
+    }
+  },
+  {
+    "id": 46,
+    "nombre": "KSR Futoshi Shimano ('85 Assist)",
+    "boost": {
+      "type": "single",
+      "stat": "speed",
+      "factor": 1.13
+    },
+    "stats_antes": {
+      "health": 803,
+      "attack": 326,
+      "defense": 189,
+      "speed": 223
+    }
+  },
+  {
+    "id": 69,
+    "nombre": "KSR Hana ('10 Lively)",
+    "boost": {
+      "type": "global",
+      "factor": 1.031
+    },
+    "stats_antes": {
+      "health": 903,
+      "attack": 290,
+      "defense": 154,
+      "speed": 212
+    }
+  },
+  {
+    "id": 71,
+    "nombre": "KSR Hana ('12 True)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.105
+    },
+    "stats_antes": {
+      "health": 983,
+      "attack": 235,
+      "defense": 282,
+      "speed": 172
+    }
+  },
+  {
+    "id": 72,
+    "nombre": "KSR Hana (Kiwami)",
+    "boost": {
+      "type": "single",
+      "stat": "health",
+      "factor": 1.134
+    },
+    "stats_antes": {
+      "health": 1228,
+      "attack": 172,
+      "defense": 186,
+      "speed": 124
+    }
+  },
+  {
+    "id": 113,
+    "nombre": "KSR Isao Katsuragi (Assault)",
+    "boost": {
+      "type": "single",
+      "stat": "health",
+      "factor": 1.12
+    },
+    "stats_antes": {
+      "health": 1089,
+      "attack": 292,
+      "defense": 206,
+      "speed": 130
+    }
+  },
+  {
+    "id": 124,
+    "nombre": "KSR Joongi Han (YLAD Assault)",
+    "boost": {
+      "type": "single",
+      "stat": "defense",
+      "factor": 1.121
+    },
+    "stats_antes": {
+      "health": 880,
+      "attack": 249,
+      "defense": 266,
+      "speed": 122
+    }
+  },
+  {
+    "id": 131,
+    "nombre": "KSR Kamon Kanai (Fighting Spirit)",
+    "boost": {
+      "type": "global",
+      "factor": 1.041
+    },
+    "stats_antes": {
+      "health": 798,
+      "attack": 372,
+      "defense": 168,
+      "speed": 152
+    }
+  },
+  {
+    "id": 145,
+    "nombre": "KSR Kazuma Kiryu ('05 Decisive Battle Kiwami)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.116
+    },
+    "stats_antes": {
+      "health": 915,
+      "attack": 234,
+      "defense": 170,
+      "speed": 151
+    }
+  },
+  {
+    "id": 166,
+    "nombre": "KSR Ken Ryuguji",
+    "boost": {
+      "type": "global",
+      "factor": 1.049
+    },
+    "stats_antes": {
+      "health": 1000,
+      "attack": 264,
+      "defense": 195,
+      "speed": 136
+    }
+  },
+  {
+    "id": 173,
+    "nombre": "KSR Koji Masuzoe (Assault)",
+    "boost": {
+      "type": "single",
+      "stat": "defense",
+      "factor": 1.122
+    },
+    "stats_antes": {
+      "health": 1134,
+      "attack": 174,
+      "defense": 217,
+      "speed": 161
+    }
+  },
+  {
+    "id": 201,
+    "nombre": "KSR Masaru Watase (YLAD Kiwami)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.107
+    },
+    "stats_antes": {
+      "health": 962,
+      "attack": 244,
+      "defense": 260,
+      "speed": 117
+    }
+  },
+  {
+    "id": 218,
+    "nombre": "KSR Mayumi Seto (Lively)",
+    "boost": {
+      "type": "global",
+      "factor": 1.033
+    },
+    "stats_antes": {
+      "health": 1326,
+      "attack": 245,
+      "defense": 224,
+      "speed": 132
+    }
+  },
+  {
+    "id": 233,
+    "nombre": "KSR New Serena Mama (Lively)",
+    "boost": {
+      "type": "global",
+      "factor": 1.035
+    },
+    "stats_antes": {
+      "health": 1068,
+      "attack": 319,
+      "defense": 249,
+      "speed": 141
+    }
+  },
+  {
+    "id": 236,
+    "nombre": "KSR Nishida (Lively)",
+    "boost": {
+      "type": "single",
+      "stat": "speed",
+      "factor": 1.116
+    },
+    "stats_antes": {
+      "health": 933,
+      "attack": 211,
+      "defense": 200,
+      "speed": 145
+    }
+  },
+  {
+    "id": 246,
+    "nombre": "KSR Osamu Kashiwagi ('06 Assist)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.148
+    },
+    "stats_antes": {
+      "health": 1169,
+      "attack": 263,
+      "defense": 182,
+      "speed": 145
+    }
+  },
+  {
+    "id": 270,
+    "nombre": "KSR Saeko Mukoda (YLAD Kiwami)",
+    "boost": {
+      "type": "global",
+      "factor": 1.045
+    },
+    "stats_antes": {
+      "health": 1043,
+      "attack": 296,
+      "defense": 161,
+      "speed": 201
+    }
+  },
+  {
+    "id": 280,
+    "nombre": "KSR Seishu Inui",
+    "boost": {
+      "type": "global",
+      "factor": 1.042
+    },
+    "stats_antes": {
+      "health": 785,
+      "attack": 379,
+      "defense": 214,
+      "speed": 178
+    }
+  },
+  {
+    "id": 284,
+    "nombre": "KSR Shigeki Baba",
+    "boost": {
+      "type": "global",
+      "factor": 1.043
+    },
+    "stats_antes": {
+      "health": 1244,
+      "attack": 300,
+      "defense": 334,
+      "speed": 128
+    }
+  },
+  {
+    "id": 286,
+    "nombre": "KSR Shintaro Kazama ('05 Assault)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.13
+    },
+    "stats_antes": {
+      "health": 1015,
+      "attack": 284,
+      "defense": 282,
+      "speed": 118
+    }
+  },
+  {
+    "id": 319,
+    "nombre": "KSR Takashi Mitsuya",
+    "boost": {
+      "type": "single",
+      "stat": "health",
+      "factor": 1.103
+    },
+    "stats_antes": {
+      "health": 1065,
+      "attack": 193,
+      "defense": 230,
+      "speed": 164
+    }
+  },
+  {
+    "id": 390,
+    "nombre": "N Miyuki Moriya",
+    "boost": {
+      "type": "single",
+      "stat": "health",
+      "factor": 1.123
+    },
+    "stats_antes": {
+      "health": 327,
+      "attack": 90,
+      "defense": 52,
+      "speed": 44
+    }
+  },
+  {
+    "id": 432,
+    "nombre": "SR Kyohei Matsuzawa",
+    "boost": {
+      "type": "global",
+      "factor": 1.04
+    },
+    "stats_antes": {
+      "health": 664,
+      "attack": 158,
+      "defense": 113,
+      "speed": 138
+    }
+  },
+  {
+    "id": 435,
+    "nombre": "SR Maria Yamamoto",
+    "boost": {
+      "type": "global",
+      "factor": 1.036
+    },
+    "stats_antes": {
+      "health": 676,
+      "attack": 232,
+      "defense": 177,
+      "speed": 120
+    }
+  },
+  {
+    "id": 436,
+    "nombre": "SR Miyuki Moriya",
+    "boost": {
+      "type": "global",
+      "factor": 1.039
+    },
+    "stats_antes": {
+      "health": 519,
+      "attack": 113,
+      "defense": 139,
+      "speed": 124
+    }
+  },
+  {
+    "id": 447,
+    "nombre": "SR Takumi Sakuraba",
+    "boost": {
+      "type": "global",
+      "factor": 1.039
+    },
+    "stats_antes": {
+      "health": 535,
+      "attack": 152,
+      "defense": 153,
+      "speed": 111
+    }
+  },
+  {
+    "id": 461,
+    "nombre": "SSR Andre Richardson (II)",
+    "boost": {
+      "type": "global",
+      "factor": 1.033
+    },
+    "stats_antes": {
+      "health": 578,
+      "attack": 305,
+      "defense": 192,
+      "speed": 161
+    }
+  },
+  {
+    "id": 464,
+    "nombre": "SSR Asuka (Summer Vacation)",
+    "boost": {
+      "type": "global",
+      "factor": 1.047
+    },
+    "stats_antes": {
+      "health": 788,
+      "attack": 164,
+      "defense": 192,
+      "speed": 140
+    }
+  },
+  {
+    "id": 520,
+    "nombre": "SSR Haruka Sawamura (2005 II)",
+    "boost": {
+      "type": "global",
+      "factor": 1.044
+    },
+    "stats_antes": {
+      "health": 1017,
+      "attack": 219,
+      "defense": 285,
+      "speed": 115
+    }
+  },
+  {
+    "id": 533,
+    "nombre": "SSR Hikaru",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.126
+    },
+    "stats_antes": {
+      "health": 777,
+      "attack": 253,
+      "defense": 258,
+      "speed": 105
+    }
+  },
+  {
+    "id": 534,
+    "nombre": "SSR Himiko",
+    "boost": {
+      "type": "global",
+      "factor": 1.031
+    },
+    "stats_antes": {
+      "health": 871,
+      "attack": 228,
+      "defense": 257,
+      "speed": 164
+    }
+  },
+  {
+    "id": 567,
+    "nombre": "SSR Joji Kazama (2009)",
+    "boost": {
+      "type": "global",
+      "factor": 1.04
+    },
+    "stats_antes": {
+      "health": 625,
+      "attack": 199,
+      "defense": 142,
+      "speed": 144
+    }
+  },
+  {
+    "id": 580,
+    "nombre": "SSR Kanji Koshimizu",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.125
+    },
+    "stats_antes": {
+      "health": 663,
+      "attack": 188,
+      "defense": 202,
+      "speed": 114
+    }
+  },
+  {
+    "id": 591,
+    "nombre": "SSR Kazuki (2009)",
+    "boost": {
+      "type": "global",
+      "factor": 1.034
+    },
+    "stats_antes": {
+      "health": 1012,
+      "attack": 159,
+      "defense": 193,
+      "speed": 165
+    }
+  },
+  {
+    "id": 594,
+    "nombre": "SSR Kazuma Kiryu (1988)",
+    "boost": {
+      "type": "global",
+      "factor": 1.039
+    },
+    "stats_antes": {
+      "health": 723,
+      "attack": 260,
+      "defense": 167,
+      "speed": 142
+    }
+  },
+  {
+    "id": 629,
+    "nombre": "SSR Makoto Date (2007)",
+    "boost": {
+      "type": "single",
+      "stat": "health",
+      "factor": 1.118
+    },
+    "stats_antes": {
+      "health": 791,
+      "attack": 255,
+      "defense": 116,
+      "speed": 179
+    }
+  },
+  {
+    "id": 679,
+    "nombre": "SSR Noa Amon (Snipe)",
+    "boost": {
+      "type": "single",
+      "stat": "health",
+      "factor": 1.14
+    },
+    "stats_antes": {
+      "health": 817,
+      "attack": 314,
+      "defense": 128,
+      "speed": 175
+    }
+  },
+  {
+    "id": 680,
+    "nombre": "SSR Okada Izo",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.134
+    },
+    "stats_antes": {
+      "health": 698,
+      "attack": 251,
+      "defense": 144,
+      "speed": 159
+    }
+  },
+  {
+    "id": 683,
+    "nombre": "SSR Okita Soji (Decisive Battle)",
+    "boost": {
+      "type": "global",
+      "factor": 1.033
+    },
+    "stats_antes": {
+      "health": 603,
+      "attack": 281,
+      "defense": 212,
+      "speed": 141
+    }
+  },
+  {
+    "id": 688,
+    "nombre": "SSR Osamu Kashiwagi (2006)",
+    "boost": {
+      "type": "global",
+      "factor": 1.035
+    },
+    "stats_antes": {
+      "health": 894,
+      "attack": 223,
+      "defense": 134,
+      "speed": 161
+    }
+  },
+  {
+    "id": 690,
+    "nombre": "SSR Osamu Kashiwagi (Legend)",
+    "boost": {
+      "type": "global",
+      "factor": 1.049
+    },
+    "stats_antes": {
+      "health": 832,
+      "attack": 209,
+      "defense": 171,
+      "speed": 198
+    }
+  },
+  {
+    "id": 729,
+    "nombre": "SSR Shigeki Baba (Fighting Spirit)",
+    "boost": {
+      "type": "global",
+      "factor": 1.036
+    },
+    "stats_antes": {
+      "health": 628,
+      "attack": 270,
+      "defense": 214,
+      "speed": 175
+    }
+  },
+  {
+    "id": 749,
+    "nombre": "SSR Sohei Dojima",
+    "boost": {
+      "type": "single",
+      "stat": "defense",
+      "factor": 1.135
+    },
+    "stats_antes": {
+      "health": 738,
+      "attack": 209,
+      "defense": 220,
+      "speed": 161
+    }
+  },
+  {
+    "id": 774,
+    "nombre": "SSR Tatsuo Shinada (Holographic)",
+    "boost": {
+      "type": "single",
+      "stat": "speed",
+      "factor": 1.135
+    },
+    "stats_antes": {
+      "health": 632,
+      "attack": 208,
+      "defense": 205,
+      "speed": 191
+    }
+  },
+  {
+    "id": 784,
+    "nombre": "SSR Tianyou Zhao (New Year's)",
+    "boost": {
+      "type": "single",
+      "stat": "defense",
+      "factor": 1.147
+    },
+    "stats_antes": {
+      "health": 605,
+      "attack": 157,
+      "defense": 234,
+      "speed": 128
+    }
+  },
+  {
+    "id": 803,
+    "nombre": "SSR Wen Hai Lee",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.109
+    },
+    "stats_antes": {
+      "health": 557,
+      "attack": 333,
+      "defense": 212,
+      "speed": 143
+    }
+  },
+  {
+    "id": 817,
+    "nombre": "SSR Yosuke Tendo (YLAD Decisive Battle)",
+    "boost": {
+      "type": "single",
+      "stat": "defense",
+      "factor": 1.127
+    },
+    "stats_antes": {
+      "health": 893,
+      "attack": 172,
+      "defense": 199,
+      "speed": 125
+    }
+  },
+  {
+    "id": 847,
+    "nombre": "UR Daisaku Kuze ('88 Assist)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.114
+    },
+    "stats_antes": {
+      "health": 737,
+      "attack": 491,
+      "defense": 199,
+      "speed": 162
+    }
+  },
+  {
+    "id": 854,
+    "nombre": "UR Goro Majima ('88 Fighting Spirit)",
+    "boost": {
+      "type": "single",
+      "stat": "speed",
+      "factor": 1.136
+    },
+    "stats_antes": {
+      "health": 985,
+      "attack": 354,
+      "defense": 190,
+      "speed": 223
+    }
+  },
+  {
+    "id": 888,
+    "nombre": "UR Joongi Han (Vacation)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.115
+    },
+    "stats_antes": {
+      "health": 1252,
+      "attack": 247,
+      "defense": 216,
+      "speed": 171
+    }
+  },
+  {
+    "id": 920,
+    "nombre": "UR Masato Aizawa ('12 Black)",
+    "boost": {
+      "type": "global",
+      "factor": 1.046
+    },
+    "stats_antes": {
+      "health": 1477,
+      "attack": 289,
+      "defense": 322,
+      "speed": 215
+    }
+  },
+  {
+    "id": 925,
+    "nombre": "UR Maya (Christmas Eve)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.118
+    },
+    "stats_antes": {
+      "health": 899,
+      "attack": 445,
+      "defense": 297,
+      "speed": 159
+    }
+  },
+  {
+    "id": 932,
+    "nombre": "UR Yu Nanba (YLAD Holographic)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.101
+    },
+    "stats_antes": {
+      "health": 904,
+      "attack": 369,
+      "defense": 254,
+      "speed": 190
+    }
+  },
+  {
+    "id": 938,
+    "nombre": "UR Ono Michio ('16 Assist)",
+    "boost": {
+      "type": "global",
+      "factor": 1.032
+    },
+    "stats_antes": {
+      "health": 975,
+      "attack": 394,
+      "defense": 240,
+      "speed": 205
+    }
+  },
+  {
+    "id": 954,
+    "nombre": "UR Shun Akiyama ('10 Assist)",
+    "boost": {
+      "type": "global",
+      "factor": 1.049
+    },
+    "stats_antes": {
+      "health": 1065,
+      "attack": 304,
+      "defense": 244,
+      "speed": 160
+    }
+  },
+  {
+    "id": 956,
+    "nombre": "UR Shun Akiyama (Festival)",
+    "boost": {
+      "type": "single",
+      "stat": "speed",
+      "factor": 1.135
+    },
+    "stats_antes": {
+      "health": 1102,
+      "attack": 303,
+      "defense": 207,
+      "speed": 178
+    }
+  },
+  {
+    "id": 975,
+    "nombre": "UR Tsuneo Iwami ('16 Assault)",
+    "boost": {
+      "type": "global",
+      "factor": 1.035
+    },
+    "stats_antes": {
+      "health": 1101,
+      "attack": 278,
+      "defense": 279,
+      "speed": 168
+    }
+  },
+  {
+    "id": 982,
+    "nombre": "UR Yoshitaka Mine (Black)",
+    "boost": {
+      "type": "global",
+      "factor": 1.038
+    },
+    "stats_antes": {
+      "health": 959,
+      "attack": 439,
+      "defense": 326,
+      "speed": 208
+    }
+  },
+  {
+    "id": 1000,
+    "nombre": "UR Big Lo (Assault)",
+    "boost": {
+      "type": "single",
+      "stat": "attack",
+      "factor": 1.148
+    },
+    "stats_antes": {
+      "health": 1170,
+      "attack": 352,
+      "defense": 270,
+      "speed": 194
+    }
+  },
+  {
+    "id": 1002,
+    "nombre": "UR Chiyori Mori",
+    "boost": {
+      "type": "single",
+      "stat": "defense",
+      "factor": 1.133
+    },
+    "stats_antes": {
+      "health": 1245,
+      "attack": 232,
+      "defense": 184,
+      "speed": 226
+    }
+  },
+  {
+    "id": 1013,
+    "nombre": "UR Hana (Kiwami II)",
+    "boost": {
+      "type": "single",
+      "stat": "defense",
+      "factor": 1.131
+    },
+    "stats_antes": {
+      "health": 1119,
+      "attack": 357,
+      "defense": 250,
+      "speed": 225
+    }
+  },
+  {
+    "id": 1057,
+    "nombre": "UR Saigo Kichinosuke (Ishin Kiwami)",
+    "boost": {
+      "type": "global",
+      "factor": 1.038
+    },
+    "stats_antes": {
+      "health": 1100,
+      "attack": 351,
+      "defense": 203,
+      "speed": 216
+    }
+  },
+  {
+    "id": 1061,
+    "nombre": "UR Seonhee (LADIW)",
+    "boost": {
+      "type": "global",
+      "factor": 1.049
+    },
+    "stats_antes": {
+      "health": 1160,
+      "attack": 370,
+      "defense": 235,
+      "speed": 168
+    }
+  }
+]
