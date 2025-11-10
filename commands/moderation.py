@@ -1,89 +1,148 @@
 import discord
 from discord.ext import commands
 import re
-import aiohttp
-from bs4 import BeautifulSoup
-import asyncio
 
 TOKEN = "TU_TOKEN_DEL_BOT"
 CANAL_ORIGEN_ID = 1437348279107977266  # canal de texto con mensajes antiguos
-FORO_DESTINO_ID = 1437348404559876226  # canal de foro destino
-AO3_LINKER_ID = 347104324255481858     # <-- ID del bot "AO3 Linker"
+CANAL_FORO_ID = 1437348404559876226    # canal de foro destino
+
+AO3_REGEX = re.compile(r"(https?://archiveofourown\.org/\S+)", re.IGNORECASE)
+
+# Regex para extraer campos desde embed.description (cuando no hay fields)
+RE_AUTHOR = re.compile(r"author:\s*(.+)", re.IGNORECASE)
+RE_RATING = re.compile(r"rating:\s*(.+)", re.IGNORECASE)
+RE_CATEGORIES = re.compile(r"categories:\s*(.+)", re.IGNORECASE)
+RE_RELATIONSHIPS = re.compile(r"relationships:\s*(.+)", re.IGNORECASE)
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(help="Migra mensajes con links de AO3 al foro", extras={"categoria": "Moderation 👤"})
-    async def mover(self, ctx):
-        canal_origen = self.bot.get_channel(CANAL_ORIGEN_ID)
-        foro_destino = self.bot.get_channel(FORO_DESTINO_ID)
+    # Utilidad: extraer datos del embed, tolerando distintas estructuras
+    def _parse_embed(self, embed: discord.Embed):
+        # Título (limpiar " - Chapter ...")
+        raw_title = embed.title or "Título desconocido"
+        titulo = raw_title.split(" - Chapter")[0].strip() if " - Chapter" in raw_title else raw_title.strip()
 
-        if canal_origen is None:
-            await ctx.send(f"No se encontró el canal con ID {CANAL_ORIGEN_ID}.")
+        autor = "Autor desconocido"
+        rating = None
+        categories = []
+        relationships = []
+
+        # 1️⃣ Intentar primero desde los fields
+        for field in embed.fields:
+            name = field.name.lower().strip()
+            value = field.value.strip()
+            if name.startswith("author"):
+                autor = value
+            elif name.startswith("rating"):
+                rating = value
+            elif name.startswith("categories"):
+                categories = [c.strip() for c in value.split(",") if c.strip()]
+            elif name.startswith("relationships"):
+                relationships = [r.strip() for r in value.split(",") if r.strip()]
+
+        # 2️⃣ Si no hay fields, usar description como respaldo
+        desc = embed.description or ""
+        if autor == "Autor desconocido":
+            m = RE_AUTHOR.search(desc)
+            if m:
+                autor = m.group(1).strip()
+        if not rating:
+            m = RE_RATING.search(desc)
+            if m:
+                rating = m.group(1).strip()
+        if not categories:
+            m = RE_CATEGORIES.search(desc)
+            if m:
+                categories = [c.strip() for c in m.group(1).split(",") if c.strip()]
+        if not relationships:
+            m = RE_RELATIONSHIPS.search(desc)
+            if m:
+                relationships = [r.strip() for r in m.group(1).split(",") if r.strip()]
+
+        # Conjunto de etiquetas detectadas (rating + categories + relationships)
+        etiquetas_detectadas = set()
+        if rating:
+            etiquetas_detectadas.add(rating)
+        etiquetas_detectadas.update(categories)
+        etiquetas_detectadas.update(relationships)
+
+        return titulo, autor, etiquetas_detectadas
+
+    @commands.command(help="Migra mensajes del bot de AO3", extras={"categoria": "Moderation 👤"})
+    async def migrar(self, ctx, limite: int = 100):
+        origen = self.bot.get_channel(CANAL_ORIGEN_ID)
+        foro: discord.ForumChannel = self.bot.get_channel(CANAL_FORO_ID)
+
+        if origen is None or foro is None:
+            await ctx.send("❌ No se encontraron los canales indicados.")
             return
-        if foro_destino is None or not isinstance(foro_destino, discord.ForumChannel):
-            await ctx.send(f"El canal con ID {FORO_DESTINO_ID} no es un foro válido.")
-            return
 
-        patron = re.compile(r"https?://archiveofourown\.org/(?:works|series)/\d+")
-        contador = 0
+        count = 0
+        titulos_usados = set()
 
-        await ctx.send("🔍 Buscando mensajes con links de AO3...")
+        async for msg in origen.history(limit=limite):
+            # Solo mensajes con link AO3 y con embed
+            if not msg.embeds:
+                continue
+            link_match = AO3_REGEX.search(msg.content) or (msg.embeds and AO3_REGEX.search(msg.embeds[0].url or ""))
+            if not link_match:
+                continue
 
-        async with aiohttp.ClientSession() as session:
-            async for mensaje in canal_origen.history(limit=None):
-                coincidencias = re.findall(patron, mensaje.content)
-                if not coincidencias:
-                    continue
+            link = link_match.group(1)
+            embed = msg.embeds[0]
 
-                for url in coincidencias:
-                    titulo = None
-                    autor = None
+            titulo, autor, etiquetas_detectadas = self._parse_embed(embed)
+            nombre_post = f"{titulo} — {autor}"
 
-                    # Si hay un embed (por ejemplo, de AO3 Linker)
-                    if mensaje.embeds:
-                        for embed in mensaje.embeds:
-                            # Solo usa embeds del bot AO3 Linker si existe su ID
-                            if mensaje.author.id == AO3_LINKER_ID:
-                                titulo = embed.title or "Sin título"
-                                if embed.author:
-                                    autor = embed.author.name or "Autor desconocido"
-                                else:
-                                    autor = "Autor desconocido"
-                                break
+            # Evitar duplicados
+            if nombre_post in titulos_usados:
+                print(f"⚠️ Duplicado detectado, se omite: {nombre_post}")
+                continue
 
-                    # Si no hay embed o datos incompletos, intentar obtenerlos desde AO3
-                    if not titulo or not autor:
-                        try:
-                            async with session.get(url) as resp:
-                                if resp.status != 200:
-                                    continue
-                                html = await resp.text()
+            # Mapear etiquetas detectadas a etiquetas del foro
+            etiquetas_foro = {tag.name: tag for tag in foro.available_tags}
+            applied_tags = [etiquetas_foro[n] for n in etiquetas_detectadas if n in etiquetas_foro]
 
-                            soup = BeautifulSoup(html, "html.parser")
-                            titulo_elem = soup.find("h2", class_="title")
-                            autor_elem = soup.find("a", rel="author")
+            # Crear post en foro con etiquetas
+            await foro.create_thread(
+                name=nombre_post,
+                content=link,
+                applied_tags=applied_tags
+            )
+            titulos_usados.add(nombre_post)
+            count += 1
+            print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
 
-                            titulo = titulo_elem.text.strip() if titulo_elem else "Sin título"
-                            autor = autor_elem.text.strip() if autor_elem else "Autor desconocido"
-                        except Exception as e:
-                            print(f"Error obteniendo datos desde AO3: {e}")
-                            continue
+        await ctx.send(f"✅ Migrados {count} mensajes únicos con links de AO3 al foro.")
 
-                    # Crear el post en el foro
-                    try:
-                        await foro_destino.create_thread(
-                            name=f"{titulo} - {autor}",
-                            content=f"{url}"
-                        )
-                        contador += 1
-                        await asyncio.sleep(0.8)
-                    except Exception as e:
-                        print(f"Error creando el post en el foro: {e}")
-                        continue
+    @commands.command(help="Lista todas las etiquetas de AO3 detectadas en mensajes", extras={"categoria": "Moderation 👤"})
+    async def listar_etiquetas(self, ctx, limite: int = 100):
+        origen = self.bot.get_channel(CANAL_ORIGEN_ID)
+        foro: discord.ForumChannel = self.bot.get_channel(CANAL_FORO_ID)
 
-        await ctx.send(f"✅ Se movieron {contador} mensajes con links de AO3 al foro.")
+        etiquetas_detectadas = set()
+
+        async for msg in origen.history(limit=limite):
+            if not msg.embeds:
+                continue
+            embed = msg.embeds[0]
+
+            link_present = AO3_REGEX.search(msg.content) or (embed and AO3_REGEX.search(embed.url or ""))
+            if not link_present:
+                continue
+
+            _, _, etiq = self._parse_embed(embed)
+            etiquetas_detectadas.update(etiq)
+
+        etiquetas_foro = {tag.name for tag in foro.available_tags}
+        faltantes = etiquetas_detectadas - etiquetas_foro
+
+        await ctx.send("📊 Etiquetas detectadas en AO3:\n" + (", ".join(sorted(etiquetas_detectadas)) or "—"))
+        await ctx.send("🏷️ Etiquetas ya configuradas en el foro:\n" + (", ".join(sorted(etiquetas_foro)) or "—"))
+        await ctx.send("⚠️ Etiquetas faltantes que deberías crear en el foro:\n" +
+                       (", ".join(sorted(faltantes)) if faltantes else "✅ Todas las etiquetas ya existen en el foro."))
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
