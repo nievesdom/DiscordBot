@@ -3,3 +3,4 @@ asyncio
 flask
 python-dotenv
 PyGithub
+beautifulsoup4
