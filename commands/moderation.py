@@ -2,11 +2,12 @@ import discord
 from discord.ext import commands
 import re
 
+# IDs fijos
 CANAL_ORIGEN_ID = 1437348279107977266
 CANAL_FORO_ID = 1437348404559876226
 
+# Regex para links de AO3 a la obra completa
 AO3_REGEX = re.compile(r"https?://archiveofourown\.org/works/\d+", re.IGNORECASE)
-
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -14,9 +15,12 @@ class Moderation(commands.Cog):
 
     # Extraer datos del embed
     def _parse_embed(self, embed: discord.Embed):
+        # Título
         titulo = (embed.title or "Título desconocido").strip()
+        # Limpiar "- Chapter X" si está
+        titulo = titulo.split(" - Chapter")[0].strip() if " - Chapter" in titulo else titulo
 
-        # Autor(es) en la descripción
+        # Autor(es)
         desc = embed.description or ""
         autores = re.findall(r"\[([^\]]+)\]\(https://archiveofourown\.org/users/.+?\)", desc)
         autor = ", ".join(autores) if autores else "Autor desconocido"
@@ -53,37 +57,44 @@ class Moderation(commands.Cog):
         origen = self.bot.get_channel(CANAL_ORIGEN_ID)
         foro: discord.ForumChannel = self.bot.get_channel(CANAL_FORO_ID)
 
+        if origen is None:
+            await ctx.send(f"No se encontró el canal con ID {CANAL_ORIGEN_ID}.")
+            return
+        if foro is None or not isinstance(foro, discord.ForumChannel):
+            await ctx.send(f"No se encontró un foro válido con ID {CANAL_FORO_ID}.")
+            return
+
         count = 0
-        titulos_usados = set()
+        obras_usadas = set()
 
         async for msg in origen.history(limit=limite):
             if not msg.embeds:
                 continue
 
-            # Tomar solo el embed principal de la obra completa
             embed = msg.embeds[0]
             link_match = AO3_REGEX.search(msg.content) or AO3_REGEX.search(embed.url or "")
             if not link_match:
                 continue
 
-            link = link_match.group(0)  # link original a la obra completa
+            link = link_match.group(0)  # siempre link a la obra completa
             titulo, autor, etiquetas_detectadas = self._parse_embed(embed)
             nombre_post = f"{titulo} — {autor}"
 
-            if nombre_post in titulos_usados:
+            if nombre_post in obras_usadas:
                 continue
 
-            # Mapear etiquetas detectadas a etiquetas del foro
+            # Mapear etiquetas a las del foro
             etiquetas_foro = {tag.name: tag for tag in foro.available_tags}
             applied_tags = [etiquetas_foro[n] for n in etiquetas_detectadas if n in etiquetas_foro]
 
-            # Crear thread en foro
+            # Crear thread
             await foro.create_thread(
                 name=nombre_post,
                 content=link,
                 applied_tags=applied_tags
             )
-            titulos_usados.add(nombre_post)
+
+            obras_usadas.add(nombre_post)
             count += 1
             print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
 
@@ -99,7 +110,6 @@ class Moderation(commands.Cog):
                 continue
             embed = msg.embeds[0]
 
-            # Solo embeds de obras completas
             if not AO3_REGEX.search(msg.content) and not AO3_REGEX.search(embed.url or ""):
                 continue
 
@@ -108,3 +118,7 @@ class Moderation(commands.Cog):
 
         etiquetas_list = sorted(etiquetas_detectadas)
         await ctx.send(f"📊 Etiquetas detectadas ({len(etiquetas_list)}):\n" + (", ".join(etiquetas_list) or "—"))
+
+# Función setup para discord.py 2.x
+async def setup(bot):
+    await bot.add_cog(Moderation(bot))
