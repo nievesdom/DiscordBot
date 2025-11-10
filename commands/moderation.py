@@ -1,63 +1,51 @@
 import discord
 from discord.ext import commands
 import re
-import asyncio
 import aiohttp
+from bs4 import BeautifulSoup
 
 TOKEN = "TU_TOKEN_DEL_BOT"
-CANAL_ORIGEN_ID = 1437348279107977266  # canal de texto con mensajes antiguos
-CANAL_FORO_ID = 1437348404559876226    # canal de foro destino
+CANAL_ORIGEN_ID = 1437348279107977266
+CANAL_FORO_ID = 1437348404559876226
 
 AO3_REGEX = re.compile(r"(https?://archiveofourown\.org/\S+)", re.IGNORECASE)
 
-# Regex y utilidades para parsear AO3 HTML
-RE_TITLE = re.compile(r'<h2[^>]*class="title heading"[^>]*>\s*(.*?)\s*</h2>', re.IGNORECASE | re.DOTALL)
-RE_AUTHOR = re.compile(r'<a[^>]*rel="author"[^>]*>(.*?)</a>', re.IGNORECASE | re.DOTALL)
-RE_RATING = re.compile(r'<dt[^>]*>Rating:</dt>\s*<dd[^>]*>\s*<a[^>]*>(.*?)</a>', re.IGNORECASE | re.DOTALL)
-RE_CATEGORIES = re.compile(r'<dt[^>]*>Category:</dt>\s*<dd[^>]*>(.*?)</dd>', re.IGNORECASE | re.DOTALL)
-RE_RELATIONSHIPS = re.compile(r'<dt[^>]*>Relationship[s]?:</dt>\s*<dd[^>]*>(.*?)</dd>', re.IGNORECASE | re.DOTALL)
-RE_ANCHORS = re.compile(r'<a[^>]*>(.*?)</a>', re.IGNORECASE | re.DOTALL)
-
-async def fetch_ao3_fields(session: aiohttp.ClientSession, url: str):
-    # Normalizar URL a la página principal del work (evitar /chapters)
+async def fetch_ao3_fields(session, url: str):
+    # Normalizar URL al work principal
     base_url = url.split("?")[0]
     if "/chapters/" in base_url:
         base_url = base_url.split("/chapters/")[0]
-    # Aceptar cookies adult (- sideload simple sin cookie de sesión)
+
     headers = {"User-Agent": "Mozilla/5.0"}
     async with session.get(base_url, headers=headers) as resp:
         html = await resp.text()
 
+    soup = BeautifulSoup(html, "html.parser")
+
     # Título
-    m_title = RE_TITLE.search(html)
-    titulo = (m_title.group(1).strip() if m_title else "Título desconocido")
-    # Autor (primer rel="author")
-    m_author = RE_AUTHOR.search(html)
-    autor = (m_author.group(1).strip() if m_author else "Autor desconocido")
-    # Rating
-    m_rating = RE_RATING.search(html)
-    rating = m_rating.group(1).strip() if m_rating else None
-    # Categorías (puede haber varias dentro del dd)
-    cats_block = RE_CATEGORIES.search(html)
-    categories = []
-    if cats_block:
-        categories = [c.strip() for c in RE_ANCHORS.findall(cats_block.group(1)) if c.strip()]
-    # Relationships (varios anchors dentro del dd)
-    rels_block = RE_RELATIONSHIPS.search(html)
-    relationships = []
-    if rels_block:
-        relationships = [r.strip() for r in RE_ANCHORS.findall(rels_block.group(1)) if r.strip()]
+    titulo_tag = soup.find("h2", class_="title")
+    titulo = titulo_tag.get_text(strip=True) if titulo_tag else "Título desconocido"
+
+    # Autor
+    autor_tag = soup.find("a", rel="author")
+    autor = autor_tag.get_text(strip=True) if autor_tag else "Autor desconocido"
 
     etiquetas_detectadas = set()
-    if rating:
-        etiquetas_detectadas.add(rating)
-    etiquetas_detectadas.update(categories)
-    etiquetas_detectadas.update(relationships)
 
-    # AO3 a veces incluye “- Chapter …” en el título del embed; aquí usamos el título del HTML directamente.
-    # Aseguramos limpieza mínima:
-    titulo = re.sub(r"\s+", " ", titulo).strip()
-    autor = re.sub(r"\s+", " ", autor).strip()
+    # Rating
+    rating_dd = soup.find("dd", class_="rating")
+    if rating_dd:
+        etiquetas_detectadas.add(rating_dd.get_text(strip=True))
+
+    # Categorías
+    cat_dd = soup.find("dd", class_="category")
+    if cat_dd:
+        etiquetas_detectadas.update([c.get_text(strip=True) for c in cat_dd.find_all("a")])
+
+    # Relationships
+    rel_dd = soup.find("dd", class_="relationship")
+    if rel_dd:
+        etiquetas_detectadas.update([r.get_text(strip=True) for r in rel_dd.find_all("a")])
 
     return titulo, autor, etiquetas_detectadas, base_url
 
@@ -75,14 +63,11 @@ class Moderation(commands.Cog):
 
         async with aiohttp.ClientSession() as session:
             async for msg in origen.history(limit=limite):
-                # Debe contener link AO3
-                link_match = AO3_REGEX.search(msg.content)
-                if not link_match:
+                match = AO3_REGEX.search(msg.content)
+                if not match:
                     continue
 
-                link = link_match.group(1)
-
-                # Parsear desde la página de AO3
+                link = match.group(1)
                 try:
                     titulo, autor, etiquetas_detectadas, work_url = await fetch_ao3_fields(session, link)
                 except Exception as e:
@@ -90,17 +75,12 @@ class Moderation(commands.Cog):
                     continue
 
                 nombre_post = f"{titulo} — {autor}"
-
-                # Evitar duplicados por título-autor
                 if nombre_post in titulos_usados:
-                    print(f"⚠️ Duplicado detectado, se omite: {nombre_post}")
                     continue
 
-                # Mapear etiquetas detectadas a etiquetas del foro
                 etiquetas_foro = {tag.name: tag for tag in foro.available_tags}
                 applied_tags = [etiquetas_foro[n] for n in etiquetas_detectadas if n in etiquetas_foro]
 
-                # Crear post en foro (usamos la URL normalizada del work)
                 await foro.create_thread(
                     name=nombre_post,
                     content=work_url,
@@ -108,7 +88,6 @@ class Moderation(commands.Cog):
                 )
                 titulos_usados.add(nombre_post)
                 count += 1
-                print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
 
         await ctx.send(f"✅ Migrados {count} mensajes únicos con links de AO3 al foro.")
 
@@ -121,10 +100,10 @@ class Moderation(commands.Cog):
 
         async with aiohttp.ClientSession() as session:
             async for msg in origen.history(limit=limite):
-                link_match = AO3_REGEX.search(msg.content)
-                if not link_match:
+                match = AO3_REGEX.search(msg.content)
+                if not match:
                     continue
-                link = link_match.group(1)
+                link = match.group(1)
                 try:
                     _, _, etiq, _ = await fetch_ao3_fields(session, link)
                     etiquetas_detectadas.update(etiq)
