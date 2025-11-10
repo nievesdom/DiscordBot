@@ -146,7 +146,7 @@ class Moderation(commands.Cog):
         
     
     @commands.command(help="Muestra la estructura del embed del último mensaje con link AO3")
-    async def debug_ao3(self, ctx, limite: int = 10):
+    async def debug_ao3(self, ctx, limite: int = 200):
         canal = self.bot.get_channel(CANAL_ORIGEN_ID)
         async for msg in canal.history(limit=limite):
             if not msg.embeds:
