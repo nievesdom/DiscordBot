@@ -4,10 +4,11 @@ from config import TOKEN, INTENTS
 import logging
 from keep_alive import iniciar_servidor
 
+# Configuración de los logs
 logging.basicConfig(
-    level=logging.INFO,  # Puedes cambiar a DEBUG, WARNING, ERROR, etc.
-    filename='bot.log',  # Nombre del archivo donde se guardarán los logs
-    filemode='a',        # 'a' para añadir, 'w' para sobrescribir cada vez
+    level=logging.INFO,
+    filename='bot.log',
+    filemode='a', # "a" para añadir, "w" para sobrescribir cada vez
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
@@ -21,7 +22,6 @@ async def on_ready():
     print(f'Bot conectado como {bot.user}')
 
     # Cargar extensiones
-
     await bot.load_extension("commands.generales")
     await bot.load_extension("commands.cartas")
     await bot.load_extension("commands.wiki")

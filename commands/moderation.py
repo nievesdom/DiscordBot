@@ -5,8 +5,8 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 TOKEN = "TU_TOKEN_DEL_BOT"
-CANAL_ORIGEN_ID = 1437348279107977266
-CANAL_FORO_ID = 1437348404559876226
+CANAL_ORIGEN_ID = 1437348279107977266  # canal de texto con mensajes antiguos
+CANAL_FORO_ID = 1437348404559876226    # canal de foro destino
 
 AO3_REGEX = re.compile(r"(https?://archiveofourown\.org/\S+)", re.IGNORECASE)
 
@@ -33,21 +33,32 @@ async def fetch_ao3_fields(session, url: str):
     etiquetas_detectadas = set()
 
     # Rating
-    rating_dd = soup.find("dd", class_="rating")
+    rating_dd = soup.find("dd", class_="rating tags")
     if rating_dd:
-        etiquetas_detectadas.add(rating_dd.get_text(strip=True))
+        etiquetas_detectadas.update([a.get_text(strip=True) for a in rating_dd.find_all("a", class_="tag")])
 
-    # Categorías
-    cat_dd = soup.find("dd", class_="category")
+    # Categories
+    cat_dd = soup.find("dd", class_="category tags")
     if cat_dd:
-        etiquetas_detectadas.update([c.get_text(strip=True) for c in cat_dd.find_all("a")])
+        etiquetas_detectadas.update([a.get_text(strip=True) for a in cat_dd.find_all("a", class_="tag")])
 
     # Relationships
-    rel_dd = soup.find("dd", class_="relationship")
+    rel_dd = soup.find("dd", class_="relationship tags")
     if rel_dd:
-        etiquetas_detectadas.update([r.get_text(strip=True) for r in rel_dd.find_all("a")])
+        etiquetas_detectadas.update([a.get_text(strip=True) for a in rel_dd.find_all("a", class_="tag")])
+
+    # Characters
+    char_dd = soup.find("dd", class_="character tags")
+    if char_dd:
+        etiquetas_detectadas.update([a.get_text(strip=True) for a in char_dd.find_all("a", class_="tag")])
+
+    # Additional Tags
+    free_dd = soup.find("dd", class_="freeform tags")
+    if free_dd:
+        etiquetas_detectadas.update([a.get_text(strip=True) for a in free_dd.find_all("a", class_="tag")])
 
     return titulo, autor, etiquetas_detectadas, base_url
+
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -76,6 +87,7 @@ class Moderation(commands.Cog):
 
                 nombre_post = f"{titulo} — {autor}"
                 if nombre_post in titulos_usados:
+                    print(f"⚠️ Duplicado detectado, se omite: {nombre_post}")
                     continue
 
                 etiquetas_foro = {tag.name: tag for tag in foro.available_tags}
@@ -88,10 +100,11 @@ class Moderation(commands.Cog):
                 )
                 titulos_usados.add(nombre_post)
                 count += 1
+                print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
 
         await ctx.send(f"✅ Migrados {count} mensajes únicos con links de AO3 al foro.")
 
-    @commands.command(help="Lista etiquetas AO3 encontradas y compara con las del foro", extras={"categoria": "Moderation 👤"})
+    @commands.command(help="Lista todas las etiquetas de AO3 detectadas en mensajes", extras={"categoria": "Moderation 👤"})
     async def listar_etiquetas(self, ctx, limite: int = 100):
         origen = self.bot.get_channel(CANAL_ORIGEN_ID)
         foro: discord.ForumChannel = self.bot.get_channel(CANAL_FORO_ID)
@@ -114,10 +127,11 @@ class Moderation(commands.Cog):
         etiquetas_foro = {tag.name for tag in foro.available_tags}
         faltantes = etiquetas_detectadas - etiquetas_foro
 
-        await ctx.send("📊 Etiquetas detectadas en AO3:\n" + (", ".join(sorted(etiquetas_detectadas)) or "—"))
-        await ctx.send("🏷️ Etiquetas ya configuradas en el foro:\n" + (", ".join(sorted(etiquetas_foro)) or "—"))
-        await ctx.send("⚠️ Etiquetas faltantes que deberías crear en el foro:\n" +
+        await ctx.send("📊 **Etiquetas detectadas en AO3:**\n" + (", ".join(sorted(etiquetas_detectadas)) or "—"))
+        await ctx.send("🏷️ **Etiquetas ya configuradas en el foro:**\n" + (", ".join(sorted(etiquetas_foro)) or "—"))
+        await ctx.send("⚠️ **Etiquetas faltantes que deberías crear en el foro:**\n" +
                        (", ".join(sorted(faltantes)) if faltantes else "✅ Todas las etiquetas ya existen en el foro."))
+
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
