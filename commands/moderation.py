@@ -60,7 +60,8 @@ class Moderation(commands.Cog):
                 # Pequeña pausa para no saturar AO3
                 await asyncio.sleep(0.8)
     
-                # (Opcional) borrar el mensaje original
-                # await mensaje.delete()
     
         await ctx.send(f"✅ Se movieron {contador} mensajes con links de AO3 al foro.")
+        
+async def setup(bot):
+    await bot.add_cog(Moderation(bot))
