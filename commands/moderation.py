@@ -28,12 +28,15 @@ class Moderation(commands.Cog):
         characters = []
         additional_tags = []
 
+        # Recorre cada campo del embed
         for field in embed.fields:
             nombre = field.name.lower().strip(": ")
             valor = field.value.strip()
 
             if "rating" in nombre:
                 rating = re.sub(r"^[:\w\s]*:", "", valor).strip(" :")
+                if rating == "Teen And Up Audiences":
+                    rating = "Teen And Up"
             elif "categories" in nombre:
                 categories = [v.strip() for v in valor.split(",") if v.strip()]
             elif "relationships" in nombre:
@@ -43,6 +46,7 @@ class Moderation(commands.Cog):
             elif "additional tags" in nombre:
                 additional_tags = [v.strip() for v in valor.split(",") if v.strip()]
 
+        # Organiza las etiquetas
         etiquetas_principales = set()
         if rating:
             etiquetas_principales.add(rating)
@@ -78,46 +82,53 @@ class Moderation(commands.Cog):
                 continue
 
             link = link_match.group(0)
-            titulo, autor, etiquetas_principales, _, relaciones, personajes = self._parse_embed(embed)
+            titulo, autor, etiquetas_principales, _, relationships, characters = self._parse_embed(embed)
 
+            # Ignorar si no hay autor
             if not autor:
                 continue
+
+            # Evitar duplicados por obra
             if link in obras_usadas:
                 continue
 
-            # Añadir relaciones o personajes al título
-            extra_info = ""
-            if relaciones:
-                extra_info = f" [{' | '.join(relaciones[:3])}]"
-            elif personajes:
-                extra_info = f" [{' | '.join(personajes[:5])}]"
+            # Construir título con relaciones o personajes
+            extra_info = []
+            if relationships:
+                extra_info = relationships[:3]
+            elif characters:
+                extra_info = characters[:5]
 
-            nombre_post = f"{titulo} — {autor}{extra_info}"
-            if len(nombre_post) > 100:
-                nombre_post = nombre_post[:97] + "..."
+            if extra_info:
+                extra_str = f" [{' / '.join(extra_info)}]"
+                max_len = 100 - len(extra_str)  # Discord Forum title limit = 100 chars
+                titulo_final = (titulo[:max_len].rstrip() + extra_str) if len(titulo) > max_len else titulo + extra_str
+            else:
+                titulo_final = titulo
 
-            # Mapear etiquetas
+            nombre_post = f"{titulo_final} — {autor}"
+
+            # Mapear etiquetas principales a etiquetas del foro
             etiquetas_foro = {tag.name: tag for tag in foro.available_tags}
             applied_tags = [etiquetas_foro[n] for n in etiquetas_principales if n in etiquetas_foro]
 
-            # Espera breve para no saturar el foro ni AO3 Linker
-            await asyncio.sleep(1.2)
-
-            await foro.create_thread(
+            # Crear el thread y esperar un poco para asegurar que AO3 Linker embedea bien
+            thread = await foro.create_thread(
                 name=nombre_post,
                 content=link,
                 applied_tags=applied_tags
             )
 
+            # Pausa para permitir que AO3 Linker procese correctamente
+            await asyncio.sleep(2.5)
+
             obras_usadas.add(link)
             count += 1
-            print(f"📌 Migrado: {nombre_post}")
-
-            # Pausa para dejar respirar a AO3 Linker
-            await asyncio.sleep(2.5)
+            print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
 
         await ctx.send(f"✅ Migrados {count} mensajes únicos con links de AO3 al foro.")
 
+    # Lista etiquetas principales
     @commands.command(help="Lista las etiquetas principales detectadas en los mensajes de AO3")
     async def etiquetas_principales(self, ctx, limite: int = None):
         origen = self.bot.get_channel(CANAL_ORIGEN_ID)
@@ -135,6 +146,7 @@ class Moderation(commands.Cog):
         etiquetas_list = sorted(etiquetas_detectadas)
         await ctx.send(f"📊 Etiquetas principales ({len(etiquetas_list)}):\n" + (", ".join(etiquetas_list) or "—"))
 
+    # Lista etiquetas adicionales
     @commands.command(help="Lista las etiquetas adicionales detectadas en los mensajes de AO3")
     async def etiquetas_adicionales(self, ctx, limite: int = 100):
         origen = self.bot.get_channel(CANAL_ORIGEN_ID)
