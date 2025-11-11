@@ -55,7 +55,7 @@ class Moderation(commands.Cog):
         extra_info = relationships[:3] if relationships else characters[:5]
         extra_str = f" [{' / '.join(extra_info)}]" if extra_info else ""
 
-        max_len = 100 - len(extra_str) - len(autor) - 3  # 3 = espacios y guiones
+        max_len = 100 - len(extra_str) - len(autor) - 3
         if max_len < 1:
             max_len = 1
 
@@ -107,31 +107,19 @@ class Moderation(commands.Cog):
             applied_tags = [etiquetas_foro[n] for n in etiquetas_principales if n in etiquetas_foro]
 
             try:
-                # Crear hilo vacío y luego editarlo para que AO3 Linker lo detecte
-                thread = await foro.create_thread(
+                # Crear el hilo directamente con el link como contenido
+                await foro.create_thread(
                     name=nombre_post,
-                    content="Creando post…",
+                    content=link,
                     applied_tags=applied_tags
                 )
-
-                # Editar el primer mensaje con el link
-                async for post_msg in thread.history(limit=1, oldest_first=True):
-                    await post_msg.edit(content=link)
-                    break
-
-                # Esperar hasta que AO3 Linker agregue su embed (máximo 5 segundos)
-                for _ in range(10):
-                    await asyncio.sleep(0.5)
-                    async for post_msg in thread.history(limit=1, oldest_first=True):
-                        if post_msg.embeds:
-                            break
-                    else:
-                        continue
-                    break
 
                 obras_usadas.add(link)
                 count += 1
                 print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
+
+                # Espera breve entre publicaciones para que AO3 Linker funcione bien
+                await asyncio.sleep(0.8)
 
             except discord.HTTPException as e:
                 print(f"❌ Error al crear post ({nombre_post}): {e}")
