@@ -81,8 +81,7 @@ class Moderation(commands.Cog):
             if len(nuevo) <= 100:
                 items.append(cand)
             else:
-                # si este candidato no cabe entero, no intentamos candidatos más largos
-                # (ya que la lista viene en orden de aparición y siguientes suelen ser igual o más largos)
+                # si este candidato no cabe entero, paramos
                 break
 
         if items:
@@ -147,8 +146,8 @@ class Moderation(commands.Cog):
                 count += 1
                 print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
 
-                # Pequeña pausa para que AO3 Linker procese (puedes ajustar si hace falta)
-                await asyncio.sleep(0.8)
+                # Pequeña pausa para que AO3 Linker procese
+                await asyncio.sleep(2)
 
             except discord.HTTPException as e:
                 print(f"❌ Error al crear post ({nombre_post}): {e}")
