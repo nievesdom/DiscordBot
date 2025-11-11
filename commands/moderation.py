@@ -52,21 +52,49 @@ class Moderation(commands.Cog):
         return titulo, autor, etiquetas_principales, etiquetas_adicionales, relationships, characters
 
     def _formatear_titulo(self, titulo, autor, relationships, characters):
-        extra_info = relationships[:3] if relationships else characters[:5]
-        extra_str = f" [{' / '.join(extra_info)}]" if extra_info else ""
+        """
+        Construye: "Título - autor [Rel1 / Rel2]" 
+        Solo añade relaciones (máx 3) o personajes (máx 5) si **cada** nuevo nombre cabe completo
+        sin superar 100 caracteres en total. No recorta nombres.
+        """
+        base = f"{titulo} - {autor}"  # formato base solicitado
 
-        max_len = 100 - len(extra_str) - len(autor) - 3
-        if max_len < 1:
-            max_len = 1
+        # preparar lista de candidatos a añadir entre corchetes (relaciones preferidas)
+        candidatos = relationships[:3] if relationships else characters[:5]
+        if not candidatos:
+            # asegurar longitud permitida
+            if len(base) == 0:
+                return "Sin título"
+            return base[:100]  # truncar base si excede (raro)
 
-        titulo_final = titulo[:max_len].rstrip()
-        nombre_post = f"{titulo_final}{extra_str} — {autor}"
+        # vamos añadiendo items uno a uno verificando si caben completos
+        items = []
+        for cand in candidatos:
+            # si no hay items aún, el incremento añade: " [cand]"
+            if not items:
+                nuevo = f"{base} [{cand}]"
+            else:
+                # si ya hay items, añadimos " / cand" dentro de los corchetes
+                nuevo_items = " / ".join(items + [cand])
+                nuevo = f"{base} [{nuevo_items}]"
 
-        if len(nombre_post) == 0:
-            nombre_post = "Sin título — " + autor
-        elif len(nombre_post) > 100:
-            nombre_post = nombre_post[:100]
+            if len(nuevo) <= 100:
+                items.append(cand)
+            else:
+                # si este candidato no cabe entero, no intentamos candidatos más largos
+                # (ya que la lista viene en orden de aparición y siguientes suelen ser igual o más largos)
+                break
 
+        if items:
+            nombre_post = f"{base} [{ ' / '.join(items) }]"
+        else:
+            nombre_post = base
+
+        # fallback por seguridad
+        if not nombre_post:
+            return "Sin título"
+        if len(nombre_post) > 100:
+            return nombre_post[:100]
         return nombre_post
 
     @commands.command(help="Migra mensajes del bot de AO3")
@@ -101,13 +129,14 @@ class Moderation(commands.Cog):
             if link in obras_usadas:
                 continue
 
+            # formatear título en el orden exacto solicitado
             nombre_post = self._formatear_titulo(titulo, autor, relationships, characters)
 
             etiquetas_foro = {tag.name: tag for tag in foro.available_tags}
             applied_tags = [etiquetas_foro[n] for n in etiquetas_principales if n in etiquetas_foro]
 
             try:
-                # Crear el hilo directamente con el link como contenido
+                # Crear hilo con el link como contenido (no editamos el mensaje)
                 await foro.create_thread(
                     name=nombre_post,
                     content=link,
@@ -118,7 +147,7 @@ class Moderation(commands.Cog):
                 count += 1
                 print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
 
-                # Espera breve entre publicaciones para que AO3 Linker funcione bien
+                # Pequeña pausa para que AO3 Linker procese (puedes ajustar si hace falta)
                 await asyncio.sleep(0.8)
 
             except discord.HTTPException as e:
