@@ -52,11 +52,9 @@ class Moderation(commands.Cog):
         return titulo, autor, etiquetas_principales, etiquetas_adicionales, relationships, characters
 
     def _formatear_titulo(self, titulo, autor, relationships, characters):
-        # Prioriza relaciones, si no hay, usa personajes
         extra_info = relationships[:3] if relationships else characters[:5]
         extra_str = f" [{' / '.join(extra_info)}]" if extra_info else ""
 
-        # Calcula longitud máxima segura (Discord limita a 100)
         max_len = 100 - len(extra_str) - len(autor) - 3  # 3 = espacios y guiones
         if max_len < 1:
             max_len = 1
@@ -64,7 +62,6 @@ class Moderation(commands.Cog):
         titulo_final = titulo[:max_len].rstrip()
         nombre_post = f"{titulo_final}{extra_str} — {autor}"
 
-        # Garantiza que siempre tenga 1–100 caracteres
         if len(nombre_post) == 0:
             nombre_post = "Sin título — " + autor
         elif len(nombre_post) > 100:
@@ -110,22 +107,22 @@ class Moderation(commands.Cog):
             applied_tags = [etiquetas_foro[n] for n in etiquetas_principales if n in etiquetas_foro]
 
             try:
-                # Crear el hilo sin contenido, luego editar con el link (para activar AO3 Linker)
+                # Crear hilo vacío y luego editarlo para que AO3 Linker lo detecte
                 thread = await foro.create_thread(
                     name=nombre_post,
                     content="Creando post…",
                     applied_tags=applied_tags
                 )
 
-                # Editar el mensaje para insertar el link y activar AO3 Linker
-                async for post_msg in thread.channel.history(limit=1, oldest_first=True):
+                # Editar el primer mensaje con el link
+                async for post_msg in thread.history(limit=1, oldest_first=True):
                     await post_msg.edit(content=link)
                     break
 
-                # Esperar dinámicamente a que aparezca el embed del AO3 Linker
-                for _ in range(10):  # Hasta 5 segundos máximo
+                # Esperar hasta que AO3 Linker agregue su embed (máximo 5 segundos)
+                for _ in range(10):
                     await asyncio.sleep(0.5)
-                    async for post_msg in thread.channel.history(limit=1, oldest_first=True):
+                    async for post_msg in thread.history(limit=1, oldest_first=True):
                         if post_msg.embeds:
                             break
                     else:
