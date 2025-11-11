@@ -52,18 +52,25 @@ class Cartas(commands.Cog):
 
         embed = discord.Embed(
             title=f"{elegida['nombre']}",
-            description=f"Type: {elegida.get('tipo', 'sin tipo')}",
             color=color
         )
 
         ruta_img = elegida["imagen"]
         archivo = None
 
-        # Comprobar si la ruta es URL (Render) o local
-        if ruta_img and ruta_img.startswith("http"):
-            embed.set_image(url=ruta_img)
-        elif os.path.exists(ruta_img):
+        # Comprobar si la ruta existe
+        if os.path.exists(ruta_img):
             archivo = discord.File(ruta_img, filename="carta.png")
+            # Añadir atributos como campos (dos por línea)
+            embed.add_field(name="Atributo", value=elegida.get("atributo", "—"), inline=True)
+            embed.add_field(name="Tipo", value=elegida.get("tipo", "—"), inline=True)
+
+            embed.add_field(name="Health", value=elegida.get("health", "—"), inline=True)
+            embed.add_field(name="Attack", value=elegida.get("attack", "—"), inline=True)
+
+            embed.add_field(name="Defense", value=elegida.get("defense", "—"), inline=True)
+            embed.add_field(name="Speed", value=elegida.get("speed", "—"), inline=True)
+            
             embed.set_image(url="attachment://carta.png")
         else:
             embed.description = "⚠️ Imagen no encontrada."
