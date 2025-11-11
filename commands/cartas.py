@@ -58,12 +58,13 @@ class Cartas(commands.Cog):
         ruta_img = elegida["imagen"]
         archivo = None
 
-        # Comprobar si la ruta es URL (Render) o local
+        # Comprobar si la ruta es válida
         if ruta_img and ruta_img.startswith("http"):
             # Añadir atributos como campos (dos por línea)
-            embed.add_field(name="Atributo", value=elegida.get("atributo", "—"), inline=True)
-            embed.add_field(name="Tipo", value=elegida.get("tipo", "—"), inline=True)
-
+            embed.add_field(name="Attribute", value=elegida.get("atributo", "—"), inline=True)
+            embed.add_field(name="Type", value=elegida.get("tipo", "—"), inline=True)
+            embed.add_field(name="\u200b", value="\u200b", inline=False)
+            
             embed.add_field(name="Health", value=elegida.get("health", "—"), inline=True)
             embed.add_field(name="Attack", value=elegida.get("attack", "—"), inline=True)
 
