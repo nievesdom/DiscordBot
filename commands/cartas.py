@@ -4,6 +4,8 @@ import os
 import json
 import random
 from urllib.parse import quote
+from core.gist_settings import cargar_settings, guardar_settings
+import datetime
 
 # Para tener comandos que solo pueda usar el creador del bot (yo)
 OWNER_ID = 182920174276575232
@@ -184,6 +186,93 @@ class Cartas(commands.Cog):
             await ctx.send(f"\n{b}\n")
 
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
+    
+    
+    @commands.command(help="Abre un paquete diario de 5 cartas", extras={"categoria": "Cartas 🃏"})
+    async def paquete(self, ctx):
+        servidor_id = str(ctx.guild.id)
+        usuario_id = str(ctx.author.id)
+
+        # --- SETTINGS: controlar límite diario ---
+        settings = cargar_settings()
+        servidor_settings = settings.setdefault(servidor_id, {})
+        usuario_settings = servidor_settings.setdefault(usuario_id, {})
+
+        hoy = datetime.date.today().isoformat()
+        if usuario_settings.get("ultimo_paquete") == hoy:
+            await ctx.send(f"🚫 {ctx.author.mention}, ya has abierto tu paquete de hoy. Vuelve mañana.")
+            return
+
+        # --- CARTAS: cargar todas ---
+        cartas = cargar_cartas()
+        if not cartas:
+            await ctx.send("❌ No hay cartas disponibles en el archivo.")
+            return
+
+        # Elegir 5 cartas aleatorias
+        nuevas_cartas = random.sample(cartas, 5)
+
+        # Guardar fecha en settings.json
+        usuario_settings["ultimo_paquete"] = hoy
+        guardar_settings(settings)
+
+        # Guardar cartas en propiedades.json
+        propiedades = cargar_propiedades()
+        servidor_props = propiedades.setdefault(servidor_id, {})
+        usuario_cartas = servidor_props.setdefault(usuario_id, [])
+        usuario_cartas.extend([c["id"] for c in nuevas_cartas])
+        guardar_propiedades(propiedades)
+
+        # --- Mostrar cartas ---
+        colores = {
+            "UR": 0x8841f2,
+            "KSR": 0xabfbff,
+            "SSR": 0x57ffae,
+            "SR": 0xfcb63d,
+            "R": 0xfc3d3d,
+            "N": 0x8c8c8c
+        }
+
+        await ctx.send(f"🎁 {ctx.author.mention} ha abierto su paquete diario de 5 cartas:")
+
+        for carta in nuevas_cartas:
+            rareza = carta.get("rareza", "N")
+            color = colores.get(rareza, 0x8c8c8c)
+
+            embed = discord.Embed(
+                title=f"{carta['nombre']} [{rareza}]",
+                color=color
+            )
+
+            # Primera fila: atributo y tipo
+            embed.add_field(name="Atributo", value=carta.get("atributo", "—"), inline=True)
+            embed.add_field(name="Tipo", value=carta.get("tipo", "—"), inline=True)
+            embed.add_field(name="\u200b", value="\u200b", inline=False)
+
+            # Segunda fila: health y attack
+            embed.add_field(name="Health", value=carta.get("health", "—"), inline=True)
+            embed.add_field(name="Attack", value=carta.get("attack", "—"), inline=True)
+            embed.add_field(name="\u200b", value="\u200b", inline=False)
+
+            # Tercera fila: defense y speed
+            embed.add_field(name="Defense", value=carta.get("defense", "—"), inline=True)
+            embed.add_field(name="Speed", value=carta.get("speed", "—"), inline=True)
+
+            ruta_img = carta.get("imagen")
+            archivo = None
+            if ruta_img and ruta_img.startswith("http"):
+                embed.set_image(url=ruta_img)
+            elif ruta_img and os.path.exists(ruta_img):
+                archivo = discord.File(ruta_img, filename="carta.png")
+                embed.set_image(url="attachment://carta.png")
+
+            if archivo:
+                await ctx.send(file=archivo, embed=embed)
+            else:
+                await ctx.send(embed=embed)
+
+
+
 
     # Solo para el dueño del bot
     @commands.command(help=None)
