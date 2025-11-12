@@ -199,8 +199,19 @@ class Cartas(commands.Cog):
         usuario_settings = servidor_settings.setdefault(usuario_id, {})
 
         hoy = datetime.date.today().isoformat()
+        ahora = datetime.datetime.now()
+
         if usuario_settings.get("ultimo_paquete") == hoy:
-            await ctx.send(f"🚫 {ctx.author.mention}, ya has abierto tu paquete de hoy. Vuelve mañana.")
+            # Calcular tiempo restante hasta medianoche
+            mañana = ahora + datetime.timedelta(days=1)
+            medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
+            restante = medianoche - ahora
+            horas, resto = divmod(restante.seconds, 3600)
+            minutos = resto // 60
+            await ctx.send(
+                f"🚫 {ctx.author.mention}, ya has abierto tu paquete de hoy.\n"
+                f"⏳ Podrás abrir otro en {horas}h {minutos}m."
+            )
             return
 
         # --- CARTAS: cargar todas ---
@@ -223,7 +234,7 @@ class Cartas(commands.Cog):
         usuario_cartas.extend([c["id"] for c in nuevas_cartas])
         guardar_propiedades(propiedades)
 
-        # --- Mostrar cartas ---
+        # --- Mostrar todas las cartas en un único embed ---
         colores = {
             "UR": 0x8841f2,
             "KSR": 0xabfbff,
@@ -233,43 +244,29 @@ class Cartas(commands.Cog):
             "N": 0x8c8c8c
         }
 
-        await ctx.send(f"🎁 {ctx.author.mention} ha abierto su paquete diario de 5 cartas:")
+        embed = discord.Embed(
+            title=f"🎁 Paquete diario de {ctx.author.display_name}",
+            description="Has recibido 5 cartas nuevas:",
+            color=0x57ffae
+        )
 
         for carta in nuevas_cartas:
             rareza = carta.get("rareza", "N")
             color = colores.get(rareza, 0x8c8c8c)
 
-            embed = discord.Embed(
-                title=f"{carta['nombre']} [{rareza}]",
-                color=color
+            # Añadir cada carta como un campo
+            embed.add_field(
+                name=f"{carta['nombre']} [{rareza}]",
+                value=(
+                    f"**Atributo:** {carta.get('atributo', '—')} | "
+                    f"**Tipo:** {carta.get('tipo', '—')}\n"
+                    f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
+                    f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
+                ),
+                inline=False
             )
 
-            # Primera fila: atributo y tipo
-            embed.add_field(name="Atributo", value=carta.get("atributo", "—"), inline=True)
-            embed.add_field(name="Tipo", value=carta.get("tipo", "—"), inline=True)
-            embed.add_field(name="\u200b", value="\u200b", inline=False)
-
-            # Segunda fila: health y attack
-            embed.add_field(name="Health", value=carta.get("health", "—"), inline=True)
-            embed.add_field(name="Attack", value=carta.get("attack", "—"), inline=True)
-            embed.add_field(name="\u200b", value="\u200b", inline=False)
-
-            # Tercera fila: defense y speed
-            embed.add_field(name="Defense", value=carta.get("defense", "—"), inline=True)
-            embed.add_field(name="Speed", value=carta.get("speed", "—"), inline=True)
-
-            ruta_img = carta.get("imagen")
-            archivo = None
-            if ruta_img and ruta_img.startswith("http"):
-                embed.set_image(url=ruta_img)
-            elif ruta_img and os.path.exists(ruta_img):
-                archivo = discord.File(ruta_img, filename="carta.png")
-                embed.set_image(url="attachment://carta.png")
-
-            if archivo:
-                await ctx.send(file=archivo, embed=embed)
-            else:
-                await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
 
 
