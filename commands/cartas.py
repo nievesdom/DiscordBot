@@ -36,9 +36,9 @@ class Cartas(commands.Cog):
         if not cartas:
             await ctx.send("No hay cartas guardadas en el archivo.")
             return
-
+    
         elegida = random.choice(cartas)  # Elegir una al azar
-
+    
         # Colores por rareza
         colores = {
             "UR": 0x8841f2,
@@ -48,41 +48,42 @@ class Cartas(commands.Cog):
             "R": 0xfc3d3d,
             "N": 0x8c8c8c
         }
-
+    
         rareza = elegida.get("rareza", "N")
         color = colores.get(rareza, 0x8c8c8c)
-
+    
+        # Embed con formato unificado (igual que NavegadorPaquete)
         embed = discord.Embed(
-            title=f"{elegida['nombre']}",
-            color=color
+            title=f"{elegida.get('nombre', 'Carta')} [{rareza}]",
+            color=color,
+            description=(
+                f"**Atributo:** {elegida.get('atributo', '—')}\n"
+                f"**Tipo:** {elegida.get('tipo', '—')}\n"
+                f"❤️ {elegida.get('health', '—')} | ⚔️ {elegida.get('attack', '—')} | "
+                f"🛡️ {elegida.get('defense', '—')} | 💨 {elegida.get('speed', '—')}"
+            )
         )
-
-        ruta_img = elegida["imagen"]
+    
+        ruta_img = elegida.get("imagen")
         archivo = None
-
-        # Comprobar si la ruta es válida
+    
+        # Mostrar imagen (URL remota o archivo local)
         if ruta_img and ruta_img.startswith("http"):
-            # Añadir atributos como campos (dos por línea)
-            embed.add_field(name="Attribute", value=elegida.get("atributo", "—"), inline=False)
-            embed.add_field(name="Type", value=elegida.get("tipo", "—"), inline=False)
-            
-            embed.add_field(name="Health", value=elegida.get("health", "—"), inline=True)
-            embed.add_field(name="Attack", value=elegida.get("attack", "—"), inline=True)
-            embed.add_field(name=" ", value=" ", inline=False)
-
-            embed.add_field(name="Defense", value=elegida.get("defense", "—"), inline=True)
-            embed.add_field(name="Speed", value=elegida.get("speed", "—"), inline=True)
-            
             embed.set_image(url=ruta_img)
+        elif ruta_img and os.path.exists(ruta_img):
+            archivo = discord.File(ruta_img, filename="carta.png")
+            embed.set_image(url="attachment://carta.png")
         else:
-            embed.description = "⚠️ Imagen no encontrada."
-
+            embed.description += "\n⚠️ Imagen no encontrada."
+    
+        # Vista para reclamar la carta (se mantiene)
         vista = ReclamarCarta(elegida["id"], embed, ruta_img)
-
+    
         if archivo:
             await ctx.send(file=archivo, embed=embed, view=vista)
         else:
             await ctx.send(embed=embed, view=vista)
+
 
     @commands.command(help="Muestra la colección de cartas de forma visual. Menciona a otro usuario para ver su colección.", extras={"categoria": "Cartas 🃏"})
     async def album(self, ctx, mencionado: discord.Member = None):
@@ -187,77 +188,65 @@ class Cartas(commands.Cog):
 
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
     
-    
-    import datetime
-import random
-import discord
-from discord.ext import commands
 
-from core.gist_propiedades import cargar_propiedades, guardar_propiedades
-from core.gist_settings import cargar_settings, guardar_settings
-from core.cartas import cargar_cartas, cartas_por_id
-from views.navegador_paquete import NavegadorPaquete  # nueva clase basada en Navegador
+        @commands.command(help="Abre un paquete diario de 5 cartas", extras={"categoria": "Cartas 🃏"})
+        async def paquete(self, ctx):
+            servidor_id = str(ctx.guild.id)
+            usuario_id = str(ctx.author.id)
 
-class Cartas(commands.Cog):
-    # ...
+            # --- SETTINGS: controlar límite diario ---
+            settings = cargar_settings()
+            servidor_settings = settings.setdefault(servidor_id, {})
+            usuario_settings = servidor_settings.setdefault(usuario_id, {})
 
-    @commands.command(help="Abre un paquete diario de 5 cartas", extras={"categoria": "Cartas 🃏"})
-    async def paquete(self, ctx):
-        servidor_id = str(ctx.guild.id)
-        usuario_id = str(ctx.author.id)
+            hoy = datetime.date.today().isoformat()
+            ahora = datetime.datetime.now()
 
-        # --- SETTINGS: controlar límite diario ---
-        settings = cargar_settings()
-        servidor_settings = settings.setdefault(servidor_id, {})
-        usuario_settings = servidor_settings.setdefault(usuario_id, {})
+            if usuario_settings.get("ultimo_paquete") == hoy:
+                # Calcular tiempo restante hasta medianoche
+                mañana = ahora + datetime.timedelta(days=1)
+                medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
+                restante = medianoche - ahora
+                horas, resto = divmod(restante.seconds, 3600)
+                minutos = resto // 60
+                await ctx.send(
+                    f"🚫 {ctx.author.mention}, ya has abierto tu paquete de hoy.\n"
+                    f"⏳ Podrás abrir otro en {horas}h {minutos}m."
+                )
+                return
 
-        hoy = datetime.date.today().isoformat()
-        ahora = datetime.datetime.now()
+            # --- CARTAS: cargar todas ---
+            cartas = cargar_cartas()
+            if not cartas:
+                await ctx.send("❌ No hay cartas disponibles en el archivo.")
+                return
 
-        if usuario_settings.get("ultimo_paquete") == hoy:
-            # Calcular tiempo restante hasta medianoche
-            mañana = ahora + datetime.timedelta(days=1)
-            medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
-            restante = medianoche - ahora
-            horas, resto = divmod(restante.seconds, 3600)
-            minutos = resto // 60
-            await ctx.send(
-                f"🚫 {ctx.author.mention}, ya has abierto tu paquete de hoy.\n"
-                f"⏳ Podrás abrir otro en {horas}h {minutos}m."
+            # Elegir 5 cartas aleatorias
+            nuevas_cartas = random.sample(cartas, 5)
+
+            # Guardar fecha en settings.json
+            usuario_settings["ultimo_paquete"] = hoy
+            guardar_settings(settings)
+
+            # Guardar cartas en propiedades.json
+            propiedades = cargar_propiedades()
+            servidor_props = propiedades.setdefault(servidor_id, {})
+            usuario_cartas = servidor_props.setdefault(usuario_id, [])
+            usuario_cartas.extend([c["id"] for c in nuevas_cartas])
+            guardar_propiedades(propiedades)
+
+            # --- Mostrar con NavegadorPaquete ---
+            cartas_info = cartas_por_id()
+            cartas_ids = [c["id"] for c in nuevas_cartas]
+            vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
+            embed, archivo = vista.mostrar()
+
+            # Guardar el mensaje en la vista para que los botones funcionen
+            vista.msg = await ctx.send(
+                f"🎁 {ctx.author.mention} ha abierto su paquete diario de 5 cartas:",
+                embed=embed,
+                view=vista
             )
-            return
-
-        # --- CARTAS: cargar todas ---
-        cartas = cargar_cartas()
-        if not cartas:
-            await ctx.send("❌ No hay cartas disponibles en el archivo.")
-            return
-
-        # Elegir 5 cartas aleatorias
-        nuevas_cartas = random.sample(cartas, 5)
-
-        # Guardar fecha en settings.json
-        usuario_settings["ultimo_paquete"] = hoy
-        guardar_settings(settings)
-
-        # Guardar cartas en propiedades.json
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        usuario_cartas = servidor_props.setdefault(usuario_id, [])
-        usuario_cartas.extend([c["id"] for c in nuevas_cartas])
-        guardar_propiedades(propiedades)
-
-        # --- Mostrar con NavegadorPaquete ---
-        cartas_info = cartas_por_id()
-        cartas_ids = [c["id"] for c in nuevas_cartas]
-        vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
-        embed, archivo = vista.mostrar()
-
-        await ctx.send(
-            f"🎁 {ctx.author.mention} ha abierto su paquete diario de 5 cartas:",
-            embed=embed,
-            view=vista
-        )
 
 
 

@@ -1,14 +1,15 @@
 import discord
 
+# Navegar visualmente por las cartas de un paquete diario
 class NavegadorPaquete(discord.ui.View):
     def __init__(self, ctx, cartas_ids, cartas_info, dueño):
-        super().__init__(timeout=120)
+        super().__init__(timeout=120)  # La vista expira tras 2 minutos
         self.ctx = ctx
-        self.cartas_ids = cartas_ids
-        self.cartas_info = cartas_info
-        self.dueño = dueño
-        self.i = 0
-        self.msg = None
+        self.cartas_ids = cartas_ids  # Lista de IDs de cartas del paquete
+        self.cartas_info = cartas_info  # Diccionario con info de cada carta
+        self.dueño = dueño  # Usuario dueño del paquete
+        self.i = 0  # Índice de la carta actual
+        self.msg = None  # Mensaje que contiene el embed
 
         # Colores por rareza
         self.colores = {
@@ -32,8 +33,8 @@ class NavegadorPaquete(discord.ui.View):
             title=f"{nombre} [{rareza}]",
             color=color,
             description=(
-                f"**Atributo:** {carta.get('atributo', '—')} | "
-                f"**Tipo:** {carta.get('tipo', '—')}\n"
+                f"**Attribute:** {carta.get('atributo', '—')}\n"
+                f"**Type:** {carta.get('tipo', '—')}\n"
                 f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
                 f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
             )

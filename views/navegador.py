@@ -37,9 +37,17 @@ class Navegador(discord.ui.View):
         rareza = carta.get("rareza", "N")
         color = self.colores.get(rareza, 0x8c8c8c)
         imagen = carta.get("imagen")
-        descripcion=f"Type: {carta.get("atributo")}",
 
-        embed = discord.Embed(title=nombre, color=color, description=descripcion)
+        embed = discord.Embed(
+            title=f"{nombre} [{rareza}]",
+            color=color,
+            description=(
+                f"**Attribute:** {carta.get('atributo', '—')}\n"
+                f"**Type:** {carta.get('tipo', '—')}\n"
+                f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
+                f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
+            )
+        )
         embed.set_footer(text=f"Carta {self.i + 1} de {len(lista_actual)} • Propiedad de {self.dueño.display_name}")
 
         # Mostrar la imagen directamente desde la URL

@@ -3,7 +3,6 @@ import os
 from core.gist_propiedades import cargar_propiedades, guardar_propiedades
 from core.cartas import cargar_cartas
 
-
 # Reclamar una carta
 class ReclamarCarta(discord.ui.View):
     def __init__(self, carta_id, embed, imagen_ruta):
@@ -11,13 +10,21 @@ class ReclamarCarta(discord.ui.View):
         self.carta_id = carta_id
         self.embed = embed
         self.imagen_ruta = imagen_ruta
-        self.reclamada = False  # Estado local del botón
+        self.reclamada = False
 
-    # Botón para reclamar la carta
+        # Colores por rareza
+        self.colores = {
+            "UR": 0x8841f2,
+            "KSR": 0xabfbff,
+            "SSR": 0x57ffae,
+            "SR": 0xfcb63d,
+            "R": 0xfc3d3d,
+            "N": 0x8c8c8c
+        }
+
     @discord.ui.button(label="Reclamar carta 🐉", style=discord.ButtonStyle.success)
     async def reclamar(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
-            # Evitar reclamos múltiples del mismo mensaje
             if self.reclamada:
                 await interaction.response.send_message("Esta carta ya fue reclamada en este mensaje.", ephemeral=True)
                 return
@@ -25,43 +32,35 @@ class ReclamarCarta(discord.ui.View):
             usuario_id = str(interaction.user.id)
             servidor_id = str(interaction.guild.id)
 
-            # Cargar todas las cartas
             cartas_guardadas = cargar_cartas()
             carta_info = next((c for c in cartas_guardadas if c["id"] == self.carta_id), None)
             if carta_info is None:
                 await interaction.response.send_message("No se encontró información de esta carta.", ephemeral=True)
                 return
 
-            # Cargar propiedades desde el Gist remoto
             propiedades = cargar_propiedades()
-
-            # Inicializar estructuras si no existen
-            if servidor_id not in propiedades:
-                propiedades[servidor_id] = {}
-            if usuario_id not in propiedades[servidor_id]:
-                propiedades[servidor_id][usuario_id] = []
-
-            # Registrar la carta (permitiendo duplicados)
-            propiedades[servidor_id][usuario_id].append(self.carta_id)
-
-            # Guardar en el Gist remoto
+            propiedades.setdefault(servidor_id, {}).setdefault(usuario_id, []).append(self.carta_id)
             guardar_propiedades(propiedades)
 
-            # Actualizar el embed
-            self.embed.color = discord.Color.from_rgb(0, 0, 0)
+            # Reconstruir embed con formato unificado
+            nombre_carta = carta_info.get("nombre", f"ID {self.carta_id}")
+            rareza = carta_info.get("rareza", "N")
+            color = self.colores.get(rareza, 0x8c8c8c)
+
+            self.embed = discord.Embed(
+                title=f"{nombre_carta} [{rareza}]",
+                color=color,
+                description=(
+                    f"**Atributo:** {carta_info.get('atributo', '—')}\n"
+                    f"**Tipo:** {carta_info.get('tipo', '—')}\n"
+                    f"❤️ {carta_info.get('health', '—')} | ⚔️ {carta_info.get('attack', '—')} | "
+                    f"🛡️ {carta_info.get('defense', '—')} | 💨 {carta_info.get('speed', '—')}"
+                )
+            )
             self.embed.set_footer(text=f"Carta reclamada por {interaction.user.display_name}")
             self.reclamada = True
             self.clear_items()  # Quita el botón tras reclamar
 
-            # Mostrar tipo de carta (si existe)
-            nombre_carta = carta_info["nombre"]
-            tipo_carta = carta_info.get("atributo")
-            if tipo_carta:
-                self.embed.title = f"{nombre_carta} — {tipo_carta}"
-            else:
-                self.embed.title = nombre_carta
-
-            # Imagen (remota o local)
             archivo = None
             if self.imagen_ruta and self.imagen_ruta.startswith("http"):
                 self.embed.set_image(url=self.imagen_ruta)
@@ -69,16 +68,14 @@ class ReclamarCarta(discord.ui.View):
                 archivo = discord.File(self.imagen_ruta, filename="carta.png")
                 self.embed.set_image(url="attachment://carta.png")
             else:
-                self.embed.description = "⚠️ Imagen no encontrada."
+                self.embed.description += "\n⚠️ Imagen no encontrada."
 
-            # Editar mensaje original
             await interaction.response.edit_message(
                 embed=self.embed,
                 attachments=[archivo] if archivo else [],
                 view=self
             )
 
-            # Mensaje de confirmación público
             await interaction.followup.send(
                 f"{interaction.user.mention} ha reclamado **{nombre_carta}**",
                 ephemeral=False
