@@ -188,6 +188,19 @@ class Cartas(commands.Cog):
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
     
     
+    import datetime
+import random
+import discord
+from discord.ext import commands
+
+from core.gist_propiedades import cargar_propiedades, guardar_propiedades
+from core.gist_settings import cargar_settings, guardar_settings
+from core.cartas import cargar_cartas, cartas_por_id
+from views.navegador_paquete import NavegadorPaquete  # nueva clase basada en Navegador
+
+class Cartas(commands.Cog):
+    # ...
+
     @commands.command(help="Abre un paquete diario de 5 cartas", extras={"categoria": "Cartas 🃏"})
     async def paquete(self, ctx):
         servidor_id = str(ctx.guild.id)
@@ -234,39 +247,18 @@ class Cartas(commands.Cog):
         usuario_cartas.extend([c["id"] for c in nuevas_cartas])
         guardar_propiedades(propiedades)
 
-        # --- Mostrar todas las cartas en un único embed ---
-        colores = {
-            "UR": 0x8841f2,
-            "KSR": 0xabfbff,
-            "SSR": 0x57ffae,
-            "SR": 0xfcb63d,
-            "R": 0xfc3d3d,
-            "N": 0x8c8c8c
-        }
+        # --- Mostrar con NavegadorPaquete ---
+        cartas_info = cartas_por_id()
+        cartas_ids = [c["id"] for c in nuevas_cartas]
+        vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
+        embed, archivo = vista.mostrar()
 
-        embed = discord.Embed(
-            title=f"🎁 Paquete diario de {ctx.author.display_name}",
-            description="Has recibido 5 cartas nuevas:",
-            color=0x57ffae
+        await ctx.send(
+            f"🎁 {ctx.author.mention} ha abierto su paquete diario de 5 cartas:",
+            embed=embed,
+            view=vista
         )
 
-        for carta in nuevas_cartas:
-            rareza = carta.get("rareza", "N")
-            color = colores.get(rareza, 0x8c8c8c)
-
-            # Añadir cada carta como un campo
-            embed.add_field(
-                name=f"{carta['nombre']} [{rareza}]",
-                value=(
-                    f"**Atributo:** {carta.get('atributo', '—')} | "
-                    f"**Tipo:** {carta.get('tipo', '—')}\n"
-                    f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
-                    f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
-                ),
-                inline=False
-            )
-
-        await ctx.send(embed=embed)
 
 
 
