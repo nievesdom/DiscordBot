@@ -4,13 +4,13 @@ import discord
 class Navegador(discord.ui.View):
     def __init__(self, ctx, cartas_ids, cartas_info, dueño):
         super().__init__(timeout=120)  # La vista expira tras 2 minutos
-        self.ctx = ctx  # Contexto del comando
-        self.cartas_ids = cartas_ids  # Lista de IDs de cartas del usuario
-        self.cartas_info = cartas_info  # Diccionario con info de cada carta
-        self.dueño = dueño  # Usuario dueño de la colección
-        self.orden = "original"  # Estado del orden actual ("original" o "alfabetico")
-        self.i = 0  # Índice de la carta actual
-        self.msg = None  # Mensaje que contiene el embed
+        self.ctx = ctx
+        self.cartas_ids = cartas_ids
+        self.cartas_info = cartas_info
+        self.dueño = dueño
+        self.orden = "original"
+        self.i = 0
+        self.msg = None
 
         # Colores por rareza
         self.colores = {
@@ -21,14 +21,29 @@ class Navegador(discord.ui.View):
             "R": 0xfc3d3d,
             "N": 0x8c8c8c
         }
+        
+        # Diccionario de atributos con símbolo japonés
+        self.atributos = {
+            "heart": "心",
+            "technique": "技",
+            "body": "体",
+            "light": "陽",
+            "shadow": "陰"
+        }
 
-    # Devuelve la lista ordenada según el estado actual
+        # Diccionario de tipos con emoji
+        self.tipos = {
+            "attack": "⚔️ Attack",
+            "defense": "🛡️ Defense",
+            "recovery": "❤️ Recovery",
+            "support": "✨ Support"
+        }
+
     def lista(self):
         if self.orden == "alfabetico":
             return sorted(self.cartas_ids, key=lambda cid: self.cartas_info.get(str(cid), {}).get("nombre", "").lower())
         return self.cartas_ids
 
-    # Crea el embed y usa la imagen desde el JSON
     def mostrar(self):
         lista_actual = self.lista()
         carta_id = str(lista_actual[self.i])
@@ -38,19 +53,28 @@ class Navegador(discord.ui.View):
         color = self.colores.get(rareza, 0x8c8c8c)
         imagen = carta.get("imagen")
 
+        # Formato de atributo y tipo
+        atributo_raw = str(carta.get("atributo", "—")).lower()
+        tipo_raw = str(carta.get("tipo", "—")).lower()
+
+        attr_symbol = self.atributos.get(atributo_raw, "")
+        attr_name = atributo_raw.capitalize() if atributo_raw != "—" else "—"
+        atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
+
+        tipo_fmt = self.tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
+
         embed = discord.Embed(
             title=f"{nombre} [{rareza}]",
             color=color,
             description=(
-                f"**Attribute:** {carta.get('atributo', '—')}\n"
-                f"**Type:** {carta.get('tipo', '—')}\n"
+                f"**Atributo:** {atributo_fmt}\n"
+                f"**Tipo:** {tipo_fmt}\n"
                 f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
                 f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
             )
         )
         embed.set_footer(text=f"Carta {self.i + 1} de {len(lista_actual)} • Propiedad de {self.dueño.display_name}")
 
-        # Mostrar la imagen directamente desde la URL
         if imagen and imagen.startswith("http"):
             embed.set_image(url=imagen)
             return embed, None
@@ -58,7 +82,6 @@ class Navegador(discord.ui.View):
             embed.description = "⚠️ Imagen no encontrada."
             return embed, None
 
-    # Actualiza el mensaje con la carta actual
     async def actualizar(self):
         lista_actual = self.lista()
         if self.i >= len(lista_actual):

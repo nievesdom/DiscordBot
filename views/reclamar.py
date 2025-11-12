@@ -21,6 +21,23 @@ class ReclamarCarta(discord.ui.View):
             "R": 0xfc3d3d,
             "N": 0x8c8c8c
         }
+        
+        # Diccionario de atributos con color y símbolo
+        atributos = {
+            "heart": ("心", 0xFF0000),       # rojo
+            "technique": ("技", 0x00FF00),   # verde
+            "body": ("体", 0x0000FF),        # azul
+            "light": ("陽", 0xFFFF00),       # amarillo
+            "shadow": ("陰", 0x800080)       # morado/magenta
+        }
+
+        # Diccionario de tipos con emoji
+        tipos = {
+            "attack": "⚔️ Attack",
+            "defense": "🛡️ Defense",
+            "recovery": "❤️ Recovery",
+            "support": "✨ Support"
+        }
 
     @discord.ui.button(label="Reclamar carta 🐉", style=discord.ButtonStyle.success)
     async def reclamar(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -28,31 +45,58 @@ class ReclamarCarta(discord.ui.View):
             if self.reclamada:
                 await interaction.response.send_message("Esta carta ya fue reclamada en este mensaje.", ephemeral=True)
                 return
-
+    
             usuario_id = str(interaction.user.id)
             servidor_id = str(interaction.guild.id)
-
+    
             cartas_guardadas = cargar_cartas()
             carta_info = next((c for c in cartas_guardadas if c["id"] == self.carta_id), None)
             if carta_info is None:
                 await interaction.response.send_message("No se encontró información de esta carta.", ephemeral=True)
                 return
-
+    
             propiedades = cargar_propiedades()
             propiedades.setdefault(servidor_id, {}).setdefault(usuario_id, []).append(self.carta_id)
             guardar_propiedades(propiedades)
-
+    
+            # Diccionario de símbolos de atributos
+            atributos = {
+                "heart": "心",
+                "technique": "技",
+                "body": "体",
+                "light": "陽",
+                "shadow": "陰",
+            }
+    
+            # Diccionario de tipos con emoji
+            tipos = {
+                "attack": "⚔️ Attack",
+                "defense": "🛡️ Defense",
+                "recovery": "❤️ Recovery",
+                "support": "✨ Support",
+            }
+    
             # Reconstruir embed con formato unificado
             nombre_carta = carta_info.get("nombre", f"ID {self.carta_id}")
             rareza = carta_info.get("rareza", "N")
             color = self.colores.get(rareza, 0x8c8c8c)
-
+    
+            atributo_raw = str(carta_info.get("atributo", "—")).lower()
+            tipo_raw = str(carta_info.get("tipo", "—")).lower()
+    
+            # Formato de atributo y tipo
+            attr_symbol = atributos.get(atributo_raw, "")
+            attr_name = atributo_raw.capitalize() if atributo_raw != "—" else "—"
+            atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
+    
+            tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
+    
             self.embed = discord.Embed(
                 title=f"{nombre_carta} [{rareza}]",
                 color=color,
                 description=(
-                    f"**Atributo:** {carta_info.get('atributo', '—')}\n"
-                    f"**Tipo:** {carta_info.get('tipo', '—')}\n"
+                    f"**Atributo:** {atributo_fmt}\n"
+                    f"**Tipo:** {tipo_fmt}\n"
                     f"❤️ {carta_info.get('health', '—')} | ⚔️ {carta_info.get('attack', '—')} | "
                     f"🛡️ {carta_info.get('defense', '—')} | 💨 {carta_info.get('speed', '—')}"
                 )
@@ -61,6 +105,8 @@ class ReclamarCarta(discord.ui.View):
             self.reclamada = True
             self.clear_items()  # Quita el botón tras reclamar
 
+
+            # Imagen
             archivo = None
             if self.imagen_ruta and self.imagen_ruta.startswith("http"):
                 self.embed.set_image(url=self.imagen_ruta)

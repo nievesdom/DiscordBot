@@ -5,6 +5,7 @@ import json
 import random
 from urllib.parse import quote
 from core.gist_settings import cargar_settings, guardar_settings
+from views.navegador_paquete import NavegadorPaquete
 import datetime
 
 # Para tener comandos que solo pueda usar el creador del bot (yo)
@@ -48,17 +49,44 @@ class Cartas(commands.Cog):
             "R": 0xfc3d3d,
             "N": 0x8c8c8c
         }
-
+        
+        # Diccionario de atributos con símbolo japonés
+        atributos = {
+            "heart": "心",
+            "technique": "技",
+            "body": "体",
+            "light": "陽",
+            "shadow": "陰",
+        }
+        
+        # Diccionario de tipos con emoji
+        tipos = {
+            "attack": "⚔️ Attack",
+            "defense": "🛡️ Defense",
+            "recovery": "❤️ Recovery",
+            "support": "✨ Support",
+        }
+        
         rareza = elegida.get("rareza", "N")
         color = colores.get(rareza, 0x8c8c8c)
-
-        # Embed con formato unificado (igual que NavegadorPaquete)
+        
+        atributo_raw = str(elegida.get("atributo", "—")).lower()
+        tipo_raw = str(elegida.get("tipo", "—")).lower()
+        
+        # Formato de atributo y tipo
+        attr_symbol = atributos.get(atributo_raw, "")
+        attr_name = atributo_raw.capitalize() if atributo_raw != "—" else "—"
+        atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
+        
+        tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
+        
+        # Embed con formato unificado
         embed = discord.Embed(
             title=f"{elegida.get('nombre', 'Carta')} [{rareza}]",
-            color=color,
+            color=color,  # color por rareza
             description=(
-                f"**Atributo:** {elegida.get('atributo', '—')}\n"
-                f"**Tipo:** {elegida.get('tipo', '—')}\n"
+                f"**Atributo:** {atributo_fmt}\n"
+                f"**Tipo:** {tipo_fmt}\n"
                 f"❤️ {elegida.get('health', '—')} | ⚔️ {elegida.get('attack', '—')} | "
                 f"🛡️ {elegida.get('defense', '—')} | 💨 {elegida.get('speed', '—')}"
             )
