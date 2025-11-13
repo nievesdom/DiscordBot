@@ -134,6 +134,7 @@ class Cartas(commands.Cog):
             vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
             embed, archivo = vista.mostrar()
 
+            # Si puede borrar el mensaje con el comando, lo hace
             if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 try:
                     await ctx.message.delete()

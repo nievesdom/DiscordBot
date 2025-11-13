@@ -13030,5 +13030,41 @@
     "attack": 306,
     "defense": 189,
     "speed": 235
+  },
+  {
+    "id": 1087,
+    "nombre": "UR Goro Majima ('12 Decisive Battle II)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Goro%20Majima%20%28%2712%20Decisive%20Battle%20II%29.png",
+    "atributo": "technique",
+    "tipo": "support",
+    "health": 954,
+    "attack": 277,
+    "defense": 285,
+    "speed": 184
+  },
+  {
+    "id": 1088,
+    "nombre": "UR Masaru Watase (Invocation)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Masaru%20Watase%20%28Invocation%29.png",
+    "atributo": "shadow",
+    "tipo": "attack",
+    "health": 869,
+    "attack": 296,
+    "defense": 245,
+    "speed": 215
+  },
+  {
+    "id": 1089,
+    "nombre": "UR Taiga Saejima ('12 Decisive Battle II)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Taiga%20Saejima%20%28%2712%20Decisive%20Battle%20II%29.png",
+    "atributo": "light",
+    "tipo": "support",
+    "health": 1101,
+    "attack": 344,
+    "defense": 260,
+    "speed": 229
   }
 ]
