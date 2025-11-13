@@ -19,7 +19,9 @@ class Generales(commands.Cog):
 
 
     @commands.command(help="Repite lo que escriba el usuario")
-    async def decir(self, ctx, *, arg):
+    async def decir(self, ctx, *, arg = None):
+        if arg == None:
+            arg = "¿Qué quieres que diga? Escríbelo tras el comando. Ej: `y!decir Buenos días`"
         await ctx.send(arg)
 
 
