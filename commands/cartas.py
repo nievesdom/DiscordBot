@@ -82,7 +82,7 @@ class Cartas(commands.Cog):
         
         # Embed con formato unificado
         embed = discord.Embed(
-            title=f"{elegida.get('nombre', 'Carta')} [{rareza}]",
+            title=f"{elegida.get('nombre', 'Carta')}",
             color=color,  # color por rareza
             description=(
                 f"**Atributo:** {atributo_fmt}\n"

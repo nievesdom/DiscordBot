@@ -92,7 +92,7 @@ class ReclamarCarta(discord.ui.View):
             tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
     
             self.embed = discord.Embed(
-                title=f"{nombre_carta} [{rareza}]",
+                title=f"{nombre_carta}",
                 color=color,
                 description=(
                     f"**Atributo:** {atributo_fmt}\n"

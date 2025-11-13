@@ -64,7 +64,7 @@ class Navegador(discord.ui.View):
         tipo_fmt = self.tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
 
         embed = discord.Embed(
-            title=f"{nombre} [{rareza}]",
+            title=f"{nombre}",
             color=color,
             description=(
                 f"**Atributo:** {atributo_fmt}\n"
