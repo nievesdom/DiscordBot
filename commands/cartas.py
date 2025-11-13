@@ -153,22 +153,26 @@ class Cartas(commands.Cog):
     @commands.command(help="Muestra la colección de cartas en modo texto", extras={"categoria": "Cartas 🃏"})
     async def coleccion(self, ctx, mencionado: discord.Member = None):
         try:
+            # Determina el objetivo de este comando según si se ha mencionado a otro usuario
             objetivo = mencionado or ctx.author
             servidor_id = str(ctx.guild.id)
             usuario_id = str(objetivo.id)
 
+            # Carga las cartas del usuario y comprueba que tenga alguna
             propiedades = cargar_propiedades()
             cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
             if not cartas_ids:
                 await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
                 return
 
+            # Ordena las cartas en la lista
             cartas_info = cartas_por_id()
             nombres = [cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}") for cid in cartas_ids]
             nombres = sorted(nombres, key=lambda s: s.lower())
 
             texto = f"{ctx.author.mention}, estas son tus cartas ({len(nombres)}):\n" + "\n".join(nombres)
 
+            # Si ocupa más de 2000 caracteres, divide el texto en varios mensajes
             if len(texto) <= 2000:
                 await ctx.send(texto)
             else:
@@ -187,24 +191,24 @@ class Cartas(commands.Cog):
         if palabra is None:
             await ctx.send("Introduce un término tras el comando para buscar cartas. Ejemplo: y!buscar Yamai")
             return
-    
+
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
-    
+
         # Cargar todas las cartas y filtrar las que contienen la palabra buscada
         cartas = cargar_cartas()
         coincidencias = [c for c in cartas if palabra.lower() in c["nombre"].lower()]
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
-    
+
         # Si no hay coincidencias, se notifica al usuario
         if not coincidencias:
             await ctx.send(f"No se encontraron cartas que contengan '{palabra}'.")
             return
-    
+
         # Cargar propiedades para ver qué cartas posee el usuario
         propiedades = cargar_propiedades()
         cartas_usuario = propiedades.get(servidor_id, {}).get(usuario_id, [])
-    
+
         # Crear el mensaje con formato diff
         mensaje = "```diff\n"
         for c in coincidencias:
@@ -217,13 +221,12 @@ class Cartas(commands.Cog):
             else:
                 mensaje += f"- {nombre}\n"
         mensaje += "```"
-    
+
         # Dividir el mensaje si supera el límite de Discord
         bloques = [mensaje[i:i+1900] for i in range(0, len(mensaje), 1900)]
         for b in bloques:
             await ctx.send(b)
-    
-        # Mostrar el recuento de coincidencias al final
+
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
 
     
@@ -232,12 +235,14 @@ class Cartas(commands.Cog):
     async def paquete(self, ctx):
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
-        # --- SETTINGS: controlar límite diario ---
+        
+        # Comprueba si el usuario ya ha abierto un paquete hoy
         settings = cargar_settings()
         servidor_settings = settings.setdefault(servidor_id, {})
         usuario_settings = servidor_settings.setdefault(usuario_id, {})
         hoy = datetime.date.today().isoformat()
         ahora = datetime.datetime.now()
+        
         if usuario_settings.get("ultimo_paquete") == hoy:
             # Calcular tiempo restante hasta medianoche
             mañana = ahora + datetime.timedelta(days=1)
@@ -247,30 +252,36 @@ class Cartas(commands.Cog):
             minutos = resto // 60
             await ctx.send(
                 f"🚫 {ctx.author.mention}, ya has abierto tu paquete de hoy.\n"
-                f"⏳ Podrás abrir otro en {horas}h {minutos}m."
+                f"Podrás abrir otro en {horas}h {minutos}m."
             )
             return
-        # --- CARTAS: cargar todas ---
+        
+        # Cargar las cartas
         cartas = cargar_cartas()
         if not cartas:
             await ctx.send("❌ No hay cartas disponibles en el archivo.")
             return
+        
         # Elegir 5 cartas aleatorias
         nuevas_cartas = random.sample(cartas, 5)
-        # Guardar fecha en settings.json
+        
+        # Guardar fecha de apertura del paquete en settings.json
         usuario_settings["ultimo_paquete"] = hoy
         guardar_settings(settings)
-        # Guardar cartas en propiedades.json
+        
+        # Guardar las cartas nuevas en propiedades.json
         propiedades = cargar_propiedades()
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
         usuario_cartas.extend([c["id"] for c in nuevas_cartas])
         guardar_propiedades(propiedades)
-        # --- Mostrar con NavegadorPaquete ---
+        
+        # Mostrar las cartas obtenidas en el paquete
         cartas_info = cartas_por_id()
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
         embed, archivo = vista.mostrar()
+        
         # Guardar el mensaje en la vista para que los botones funcionen
         vista.msg = await ctx.send(
             f"🎁 {ctx.author.mention} ha abierto su paquete diario de 5 cartas:",
@@ -281,10 +292,12 @@ class Cartas(commands.Cog):
 
     @commands.command(help="Muestra una carta específica por nombre", extras={"categoria": "Cartas 🃏"})
     async def mostrar(self, ctx, *, nombre=None):
+        # Comprueba que se haya escrito un nombre
         if not nombre:
             await ctx.send("⚠️ Debes escribir el nombre de la carta después del comando. Ejemplo: `y!mostrar Yamai`")
             return
 
+        # Carga las cartas
         cartas = cargar_cartas()
         if not cartas:
             await ctx.send("❌ No hay cartas disponibles en el archivo.")
@@ -322,7 +335,8 @@ class Cartas(commands.Cog):
             "recovery": "❤️ Recovery",
             "support": "✨ Support"
         }
-
+        
+        # Determina el color según la rareza y el resto de características de la carta
         rareza = carta.get("rareza", "N")
         color = colores.get(rareza, 0x8c8c8c)
 
@@ -335,7 +349,7 @@ class Cartas(commands.Cog):
 
         tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
 
-        # Embed con formato unificado
+        # Embed con formato
         embed = discord.Embed(
             title=f"{carta.get('nombre', 'Carta')}",
             color=color,
@@ -346,22 +360,17 @@ class Cartas(commands.Cog):
                 f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
             )
         )
-
+        
+        # Carga la imagen de la carta
         ruta_img = carta.get("imagen")
         archivo = None
 
         if ruta_img and ruta_img.startswith("http"):
             embed.set_image(url=ruta_img)
-        elif ruta_img and os.path.exists(ruta_img):
-            archivo = discord.File(ruta_img, filename="carta.png")
-            embed.set_image(url="attachment://carta.png")
         else:
             embed.description += "\n⚠️ Imagen no encontrada."
-
-        if archivo:
-            await ctx.send(file=archivo, embed=embed)
-        else:
-            await ctx.send(embed=embed)
+            
+        await ctx.send(embed=embed)
 
 
 
