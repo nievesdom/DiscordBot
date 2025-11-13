@@ -149,6 +149,7 @@ class Cartas(commands.Cog):
             print(f"[ERROR] en comando album: {type(e).__name__} - {e}")
             await ctx.send("Ha ocurrido un error al intentar mostrar el álbum.")
 
+
     @commands.command(help="Muestra la colección de cartas en modo texto", extras={"categoria": "Cartas 🃏"})
     async def coleccion(self, ctx, mencionado: discord.Member = None):
         try:
@@ -178,6 +179,7 @@ class Cartas(commands.Cog):
         except Exception as e:
             print(f"[ERROR] en comando coleccion: {type(e).__name__} - {e}")
             await ctx.send("Ha ocurrido un error al intentar mostrar tu colección.")
+
 
     @commands.command(help="Busca cartas de RGGO.", extras={"categoria": "Cartas 🃏"})
     async def buscar(self, ctx, *, palabra=None):
