@@ -183,73 +183,49 @@ class Cartas(commands.Cog):
 
     @commands.command(help="Busca cartas de RGGO.", extras={"categoria": "Cartas 🃏"})
     async def buscar(self, ctx, *, palabra=None):
-        # Si el usuario no escribe ningún término de búsqueda, se le indica el formato correcto.
+        # Verificar que el usuario introduzca una palabra de búsqueda
         if palabra is None:
             await ctx.send("Introduce un término tras el comando para buscar cartas. Ejemplo: y!buscar Yamai")
             return
     
-        # Guardar los identificadores del servidor y del usuario que ejecuta el comando.
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
     
-        # Cargar todas las cartas disponibles desde el archivo o base de datos.
+        # Cargar todas las cartas y filtrar las que contienen la palabra buscada
         cartas = cargar_cartas()
-    
-        # Buscar coincidencias cuyo nombre contenga la palabra introducida (sin distinguir mayúsculas/minúsculas).
         coincidencias = [c for c in cartas if palabra.lower() in c["nombre"].lower()]
-    
-        # Ordenar las cartas encontradas alfabéticamente por nombre.
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
     
-        # Si no hay resultados, se notifica al usuario.
+        # Si no hay coincidencias, se notifica al usuario
         if not coincidencias:
             await ctx.send(f"No se encontraron cartas que contengan '{palabra}'.")
             return
     
-        # Cargar las propiedades (cartas poseídas por los usuarios).
+        # Cargar propiedades para ver qué cartas posee el usuario
         propiedades = cargar_propiedades()
+        cartas_usuario = propiedades.get(servidor_id, {}).get(usuario_id, [])
     
-        # Obtener todas las cartas que tiene el usuario actual.
-        cartas_usuario = set(propiedades.get(servidor_id, {}).get(usuario_id, []))
-    
-        # Obtener todas las cartas que tiene alguien en el servidor.
-        cartas_servidor = set()
-        if servidor_id in propiedades:
-            for usuario in propiedades[servidor_id]:
-                cartas_servidor.update(propiedades[servidor_id][usuario])
-    
-        # Comenzar el bloque de texto con formato diff para mostrar los colores.
+        # Crear el mensaje con formato diff
         mensaje = "```diff\n"
-    
-        # Recorrer todas las cartas encontradas en la búsqueda.
         for c in coincidencias:
-            cid = str(c["id"])  # ID de la carta.
-            nombre = c["nombre"]  # Nombre de la carta.
-    
-            # Si el usuario tiene la carta → línea verde (+)
+            cid = str(c["id"])
+            nombre = c["nombre"]
+            # Si el usuario tiene la carta, se muestra en verde (+)
             if cid in map(str, cartas_usuario):
                 mensaje += f"+ {nombre}\n"
-    
-            # Si otro usuario del servidor la tiene → línea naranja (!)
-            elif cid in map(str, cartas_servidor):
-                mensaje += f"! {nombre}\n"
-    
-            # Si nadie la tiene → línea gris (-)
+            # Si no la tiene, se muestra en rojo (-)
             else:
                 mensaje += f"- {nombre}\n"
-    
-        # Cerrar el bloque diff.
         mensaje += "```"
     
-        # Discord tiene un límite de 2000 caracteres por mensaje, así que se divide en fragmentos seguros.
+        # Dividir el mensaje si supera el límite de Discord
         bloques = [mensaje[i:i+1900] for i in range(0, len(mensaje), 1900)]
-    
-        # Enviar cada bloque por separado.
         for b in bloques:
-            await ctx.send(f"\n{b}\n")
+            await ctx.send(b)
     
-        # Finalmente, mostrar el total de resultados encontrados.
+        # Mostrar el recuento de coincidencias al final
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
+
     
 
     @commands.command(help="Abre un paquete diario de 5 cartas", extras={"categoria": "Cartas 🃏"})
@@ -303,6 +279,89 @@ class Cartas(commands.Cog):
         )
 
 
+    @commands.command(help="Muestra una carta específica por nombre", extras={"categoria": "Cartas 🃏"})
+    async def mostrar(self, ctx, *, nombre=None):
+        if not nombre:
+            await ctx.send("⚠️ Debes escribir el nombre de la carta después del comando. Ejemplo: `y!mostrar Yamai`")
+            return
+
+        cartas = cargar_cartas()
+        if not cartas:
+            await ctx.send("❌ No hay cartas disponibles en el archivo.")
+            return
+
+        # Buscar carta por nombre (coincidencia parcial, insensible a mayúsculas)
+        carta = next((c for c in cartas if nombre.lower() in c["nombre"].lower()), None)
+        if not carta:
+            await ctx.send(f"❌ No se encontró ninguna carta que contenga '{nombre}'.")
+            return
+
+        # Colores por rareza
+        colores = {
+            "UR": 0x8841f2,
+            "KSR": 0xabfbff,
+            "SSR": 0x57ffae,
+            "SR": 0xfcb63d,
+            "R": 0xfc3d3d,
+            "N": 0x8c8c8c
+        }
+
+        # Atributos con símbolo japonés
+        atributos = {
+            "heart": "心",
+            "technique": "技",
+            "body": "体",
+            "light": "陽",
+            "shadow": "陰"
+        }
+
+        # Tipos con emoji
+        tipos = {
+            "attack": "⚔️ Attack",
+            "defense": "🛡️ Defense",
+            "recovery": "❤️ Recovery",
+            "support": "✨ Support"
+        }
+
+        rareza = carta.get("rareza", "N")
+        color = colores.get(rareza, 0x8c8c8c)
+
+        atributo_raw = str(carta.get("atributo", "—")).lower()
+        tipo_raw = str(carta.get("tipo", "—")).lower()
+
+        attr_symbol = atributos.get(atributo_raw, "")
+        attr_name = atributo_raw.capitalize() if atributo_raw != "—" else "—"
+        atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
+
+        tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
+
+        # Embed con formato unificado
+        embed = discord.Embed(
+            title=f"{carta.get('nombre', 'Carta')}",
+            color=color,
+            description=(
+                f"**Atributo:** {atributo_fmt}\n"
+                f"**Tipo:** {tipo_fmt}\n"
+                f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
+                f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
+            )
+        )
+
+        ruta_img = carta.get("imagen")
+        archivo = None
+
+        if ruta_img and ruta_img.startswith("http"):
+            embed.set_image(url=ruta_img)
+        elif ruta_img and os.path.exists(ruta_img):
+            archivo = discord.File(ruta_img, filename="carta.png")
+            embed.set_image(url="attachment://carta.png")
+        else:
+            embed.description += "\n⚠️ Imagen no encontrada."
+
+        if archivo:
+            await ctx.send(file=archivo, embed=embed)
+        else:
+            await ctx.send(embed=embed)
 
 
 
