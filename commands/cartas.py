@@ -181,39 +181,72 @@ class Cartas(commands.Cog):
 
     @commands.command(help="Busca cartas de RGGO.", extras={"categoria": "Cartas 🃏"})
     async def buscar(self, ctx, *, palabra=None):
+        # Si el usuario no escribe ningún término de búsqueda, se le indica el formato correcto.
         if palabra is None:
             await ctx.send("Introduce un término tras el comando para buscar cartas. Ejemplo: y!buscar Yamai")
             return
-
+    
+        # Guardar los identificadores del servidor y del usuario que ejecuta el comando.
         servidor_id = str(ctx.guild.id)
+        usuario_id = str(ctx.author.id)
+    
+        # Cargar todas las cartas disponibles desde el archivo o base de datos.
         cartas = cargar_cartas()
+    
+        # Buscar coincidencias cuyo nombre contenga la palabra introducida (sin distinguir mayúsculas/minúsculas).
         coincidencias = [c for c in cartas if palabra.lower() in c["nombre"].lower()]
+    
+        # Ordenar las cartas encontradas alfabéticamente por nombre.
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
-
+    
+        # Si no hay resultados, se notifica al usuario.
         if not coincidencias:
             await ctx.send(f"No se encontraron cartas que contengan '{palabra}'.")
             return
-
+    
+        # Cargar las propiedades (cartas poseídas por los usuarios).
         propiedades = cargar_propiedades()
-        cartas_con_dueño = set()
+    
+        # Obtener todas las cartas que tiene el usuario actual.
+        cartas_usuario = set(propiedades.get(servidor_id, {}).get(usuario_id, []))
+    
+        # Obtener todas las cartas que tiene alguien en el servidor.
+        cartas_servidor = set()
         if servidor_id in propiedades:
             for usuario in propiedades[servidor_id]:
-                for carta_id in propiedades[servidor_id][usuario]:
-                    cartas_con_dueño.add(str(carta_id))
-
+                cartas_servidor.update(propiedades[servidor_id][usuario])
+    
+        # Comenzar el bloque de texto con formato diff para mostrar los colores.
         mensaje = "```diff\n"
+    
+        # Recorrer todas las cartas encontradas en la búsqueda.
         for c in coincidencias:
-            tipo = c.get("atributo", "sin tipo")
-            if str(c["id"]) in cartas_con_dueño:
-                mensaje += f"! {c['nombre']} ({tipo})\n"
+            cid = str(c["id"])  # ID de la carta.
+            nombre = c["nombre"]  # Nombre de la carta.
+    
+            # Si el usuario tiene la carta → línea verde (+)
+            if cid in map(str, cartas_usuario):
+                mensaje += f"+ {nombre}\n"
+    
+            # Si otro usuario del servidor la tiene → línea naranja (!)
+            elif cid in map(str, cartas_servidor):
+                mensaje += f"! {nombre}\n"
+    
+            # Si nadie la tiene → línea gris (-)
             else:
-                mensaje += f"+ {c['nombre']} ({tipo})\n"
+                mensaje += f"- {nombre}\n"
+    
+        # Cerrar el bloque diff.
         mensaje += "```"
-
+    
+        # Discord tiene un límite de 2000 caracteres por mensaje, así que se divide en fragmentos seguros.
         bloques = [mensaje[i:i+1900] for i in range(0, len(mensaje), 1900)]
+    
+        # Enviar cada bloque por separado.
         for b in bloques:
             await ctx.send(f"\n{b}\n")
-
+    
+        # Finalmente, mostrar el total de resultados encontrados.
         await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
     
 
@@ -266,6 +299,8 @@ class Cartas(commands.Cog):
             embed=embed,
             view=vista
         )
+
+
 
 
 
