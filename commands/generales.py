@@ -20,28 +20,35 @@ class Generales(commands.Cog):
 
     @commands.command(help="Repite lo que escriba el usuario")
     async def decir(self, ctx, *, arg = None):
+        # Si no se escribe nada tras el comando, avisa
         if arg == None:
             arg = "¿Qué quieres que diga? Escríbelo tras el comando. Ej: `y!decir Buenos días`"
         await ctx.send(arg)
 
 
     @commands.command(help="Cuenta hasta un número introducido por el usuario", extras={"categoria": "General 👤"})
-    async def contar(self, ctx, numero: int = "10"):
+    async def contar(self, ctx, numero: int = 10):
         try:
-            # Validación: ¿es un número entero positivo?
-            numero_int = int(numero)
-            if numero_int <= 0:
+            # Comprueba si se ha introducido un número entero positivo
+            if numero <= 0:
                 await ctx.send("❌ Prueba tú a contar hasta ese número y luego me comentas. Ej: `y!contar 5`.")
                 return
         except ValueError:
-            await ctx.send("❌ Introduce un número o la tenemos. Ej: `y!contar 5`.")
+            await ctx.send("❌ Introduce un número válido. Ej: `y!contar 5`.")
             return
+
+        # Mensaje inicial
         mensaje = await ctx.send("Contando... 0")
+
         async def contar_mensaje():
+            # Bucle para contar desde 1 hasta el número introducido
             for i in range(1, numero + 1):
+                # Espera 1 segundo entre números
                 await asyncio.sleep(1)
                 await mensaje.edit(content=f"Contando... {i}")
             await mensaje.edit(content=f"✅ Ya he terminado de contar hasta {numero}")
+
+        # Ejecuta la función de conteo como tarea asincrónica
         asyncio.create_task(contar_mensaje())
 
 
@@ -53,11 +60,12 @@ class Generales(commands.Cog):
             color=discord.Color.blurple()
         )
     
-        # 🔒 Lista manual de categorías y comandos
+        # Lista manual de categorías y comandos
         categorias = {
             "General 👤": ["hola", "decir", "contar", "ayuda"],
-            "Cartas 🃏": ["carta", "album", "coleccion", "buscar"],
-            "Wiki 🌐": ["wiki", "personaje"]
+            "Cartas 🃏": ["carta", "album", "coleccion", "buscar", "paquete", "mostrar"],
+            "Wiki 🌐": ["wiki", "personaje"],
+            "Moderación 🔨": ["migrar", "etiquetas1", "etiquetas2"]
         }
     
         # Agrupar comandos por nombre
@@ -73,28 +81,7 @@ class Generales(commands.Cog):
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
     
         await ctx.send(embed=embed)
-
-    @commands.command(help="Recarga todos los módulos del bot sin reiniciarlo", extras={"categoria": "Sistema ⚙️"})
-    @commands.is_owner()  # Solo el dueño del bot puede usarlo
-    async def recargar(self, ctx):
-        recargados = 0
-        errores = []
-    
-        for extension in list(self.bot.extensions.keys()):
-            try:
-                self.bot.reload_extension(extension)
-                recargados += 1
-            except Exception as e:
-                errores.append(f"❌ {extension}: {e}")
-    
-        if errores:
-            mensaje = f"Se recargaron {recargados} módulos, pero hubo errores:\n" + "\n".join(errores)
-        else:
-            mensaje = f"✅ Se recargaron correctamente {recargados} módulos."
-    
-        await ctx.send(mensaje)
-
-
+        
 
 async def setup(bot):
     await bot.add_cog(Generales(bot))
