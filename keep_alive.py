@@ -16,7 +16,6 @@ def home():
     return "Servidor Flask funcionando."
 
 # Ruta para servir imágenes desde la carpeta "cartas"
-# Ejemplo: http://localhost:8080/cartas/imagen.png
 @app.route("/cartas/<nombre>")
 def servir_imagen(nombre):
     # Busca y devuelve el archivo solicitado dentro de la carpeta de imágenes

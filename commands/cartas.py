@@ -294,7 +294,7 @@ class Cartas(commands.Cog):
     async def mostrar(self, ctx, *, nombre=None):
         # Comprueba que se haya escrito un nombre
         if not nombre:
-            await ctx.send("⚠️ Debes escribir el nombre de la carta después del comando. Ejemplo: `y!mostrar Yamai`")
+            await ctx.send("⚠️ Debes escribir el nombre de la carta después del comando. Ejemplo: `y!mostrar UR Yutaka Yamai (LADIW)`")
             return
 
         # Carga las cartas

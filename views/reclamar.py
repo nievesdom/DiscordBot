@@ -6,7 +6,7 @@ from core.cartas import cargar_cartas
 # Reclamar una carta
 class ReclamarCarta(discord.ui.View):
     def __init__(self, carta_id, embed, imagen_ruta):
-        super().__init__(timeout=60)  # El botón expira tras 1 minuto
+        super().__init__(timeout=180)  # El botón expira tras 3 minutos
         self.carta_id = carta_id
         self.embed = embed
         self.imagen_ruta = imagen_ruta
@@ -42,13 +42,15 @@ class ReclamarCarta(discord.ui.View):
     @discord.ui.button(label="Reclamar carta 🐉", style=discord.ButtonStyle.success)
     async def reclamar(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
+            # Si ya se ha reclamado, avisa al usuario
             if self.reclamada:
-                await interaction.response.send_message("Esta carta ya fue reclamada en este mensaje.", ephemeral=True)
+                await interaction.response.send_message("Esta carta ya ha sido reclamada.", ephemeral=True)
                 return
     
             usuario_id = str(interaction.user.id)
             servidor_id = str(interaction.guild.id)
-    
+
+            # Se cargan las cartas y se busca la carta correspondiente entre ellas
             cartas_guardadas = cargar_cartas()
             carta_info = next((c for c in cartas_guardadas if c["id"] == self.carta_id), None)
             if carta_info is None:
