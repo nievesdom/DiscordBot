@@ -30,15 +30,17 @@ class Cartas(commands.Cog):
     
     def __init__(self, bot):
         self.bot = bot
+        self.bloqueados = set()  # Usuarios en intercambio activo
 
     @commands.command(help="Saca una carta aleatoria de RGGO", extras={"categoria": "Cartas 🃏"})
     async def carta(self, ctx):
-        cartas = cargar_cartas()  # Cargar todas las cartas
+        # Cargar todas las cartas
+        cartas = cargar_cartas()
         if not cartas:
             await ctx.send("No hay cartas guardadas en el archivo.")
             return
 
-        elegida = random.choice(cartas)  # Elegir una al azar
+        elegida = random.choice(cartas)  # Elegir una carta al azar
 
         # Colores por rareza
         colores = {
@@ -375,80 +377,108 @@ class Cartas(commands.Cog):
 
 
 
+    @commands.command(help="Inicia un intercambio interactivo con otro usuario")
+    async def intercambiar(self, ctx, usuario2: discord.Member = None, *, carta1: str = None):
+        """
+        Flujo:
+        1. Usuario 1 propone carta y menciona a Usuario 2.
+        2. Bot espera que Usuario 2 escriba el nombre de su carta.
+        3. Bot espera que Usuario 1 escriba 'aceptar' o 'denegar'.
+        4. Se realiza o cancela el intercambio.
+        """
 
+        # Validar argumentos
+        if usuario2 is None or carta1 is None:
+            await ctx.send("⚠️ Uso correcto: `y!intercambiar @usuario2 <nombre de tu carta>`")
+            return
 
-    # Solo para el dueño del bot
-    @commands.command(help=None)
-    @commands.check(es_dueno)
-    async def actualizar_img(self, ctx):
-        with open("cartas/cartas.json", "r", encoding="utf-8") as f:
-            cartas = json.load(f)
+        # Bloqueo: evitar que un usuario esté en dos intercambios a la vez
+        if ctx.author.id in self.bloqueados or usuario2.id in self.bloqueados:
+            await ctx.send("🚫 Uno de los usuarios ya está en un intercambio en curso.")
+            return
 
-        BASE_URL = "https://discordbot-n4ts.onrender.com/cartas/"
+        propiedades = gist_propiedades.cargar_propiedades()
+        coleccion1 = propiedades.get(str(ctx.author.id), [])
 
-        for carta in cartas:
-            nombre_archivo = f"{carta['nombre']}.png"
-            nombre_codificado = quote(nombre_archivo)
-            carta["imagen"] = BASE_URL + nombre_codificado
+        # Verificar que Usuario 1 tenga la carta
+        if carta1 not in coleccion1:
+            await ctx.send(f"❌ No tienes la carta '{carta1}'.")
+            return
 
-        with open("cartas/cartas.json", "w", encoding="utf-8") as f:
-            json.dump(cartas, f, ensure_ascii=False, indent=2)
+        # Bloquear a ambos usuarios
+        self.bloqueados.add(ctx.author.id)
+        self.bloqueados.add(usuario2.id)
 
-        await ctx.send("✅ Rutas de imágenes actualizadas correctamente.")
+        await ctx.send(
+            f"📨 {usuario2.mention}, {ctx.author.mention} quiere intercambiar su carta **{carta1}** contigo.\n"
+            f"Escribe el nombre de la carta que ofreces a cambio (tienes 2 minutos)."
+        )
 
-    @commands.command(help=None)
-    @commands.check(es_dueno)
-    async def actualizar_cartas(self, ctx):
-        carpeta = "cartas"
-        archivo_json = os.path.join(carpeta, "cartas.json")
-        os.makedirs(carpeta, exist_ok=True)
-
-        if os.path.exists(archivo_json):
-            with open(archivo_json, "r", encoding="utf-8") as f:
-                try:
-                    cartas_existentes = json.load(f)
-                except json.JSONDecodeError:
-                    cartas_existentes = []
-        else:
-            cartas_existentes = []
-
-        nombres_existentes = {c["nombre"] for c in cartas_existentes}
-        imagenes = [f for f in os.listdir(carpeta) if f.lower().endswith(".png")]
-        rarezas = ["UR", "KSR", "SSR", "SR", "R", "N"]
-        max_id = max((c.get("id", 0) for c in cartas_existentes), default=0)
-
-        nuevas = 0
-        for imagen in imagenes:
-            nombre = imagen.replace(".png", "")
-            if nombre in nombres_existentes:
-                continue
-
-            rareza = next((r for r in rarezas if nombre.startswith(r + " ")), "N")
-            max_id += 1
-            nueva_carta = {
-                "id": max_id,
-                "nombre": nombre,
-                "rareza": rareza,
-                "imagen": os.path.join(carpeta, imagen)
-            }
-
-            cartas_existentes.append(nueva_carta)
-            nuevas += 1
-            print(f"[*] Añadida: {nombre} (ID {max_id}, Rareza {rareza})")
+        # Esperar respuesta de Usuario 2
+        def check_usuario2(m):
+            return m.author.id == usuario2.id and m.channel == ctx.channel
 
         try:
-            with open(archivo_json, "w", encoding="utf-8") as f:
-                json.dump(cartas_existentes, f, ensure_ascii=False, indent=2)
-            print("[OK] Archivo cartas.json actualizado correctamente.")
-        except Exception as e:
-            print(f"[ERROR] No se pudo guardar el archivo JSON: {e}")
+            respuesta2 = await self.bot.wait_for("message", timeout=120, check=check_usuario2)
+        except asyncio.TimeoutError:
+            await ctx.send("⌛ Tiempo agotado. El intercambio ha sido cancelado.")
+            self.bloqueados.discard(ctx.author.id)
+            self.bloqueados.discard(usuario2.id)
+            return
 
-        await ctx.send(f"Se han añadido {nuevas} cartas nuevas al archivo cartas.json.")
-        
-    @actualizar_cartas.error
-    async def actualizar_cartas_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            await ctx.send("🚫 Este comando solo puede usarlo el creador del bot.")
+        carta2 = respuesta2.content.strip()
+        coleccion2 = propiedades.get(str(usuario2.id), [])
+
+        # Verificar que Usuario 2 tenga la carta
+        if carta2 not in coleccion2:
+            await ctx.send(f"❌ {usuario2.mention} no tiene la carta '{carta2}'. Intercambio cancelado.")
+            self.bloqueados.discard(ctx.author.id)
+            self.bloqueados.discard(usuario2.id)
+            return
+
+        await ctx.send(
+            f"📨 {ctx.author.mention}, {usuario2.mention} ofrece su carta **{carta2}**.\n"
+            f"Escribe `aceptar` o `denegar` (tienes 2 minutos)."
+        )
+
+        # Esperar respuesta de Usuario 1
+        def check_usuario1(m):
+            return m.author.id == ctx.author.id and m.channel == ctx.channel and m.content.lower() in ["aceptar", "denegar"]
+
+        try:
+            respuesta1 = await self.bot.wait_for("message", timeout=120, check=check_usuario1)
+        except asyncio.TimeoutError:
+            await ctx.send("⌛ Tiempo agotado. El intercambio ha sido cancelado.")
+            self.bloqueados.discard(ctx.author.id)
+            self.bloqueados.discard(usuario2.id)
+            return
+
+        decision = respuesta1.content.lower()
+        if decision == "denegar":
+            await ctx.send(f"❌ {ctx.author.mention} ha rechazado el intercambio.")
+            self.bloqueados.discard(ctx.author.id)
+            self.bloqueados.discard(usuario2.id)
+            return
+
+        # ✅ Realizar intercambio
+        coleccion1.remove(carta1)
+        coleccion2.remove(carta2)
+        coleccion1.append(carta2)
+        coleccion2.append(carta1)
+
+        propiedades[str(ctx.author.id)] = coleccion1
+        propiedades[str(usuario2.id)] = coleccion2
+        gist_propiedades.guardar_propiedades(propiedades)
+
+        await ctx.send(
+            f"✅ Intercambio realizado:\n"
+            f"- {ctx.author.mention} entregó **{carta1}** y recibió **{carta2}**\n"
+            f"- {usuario2.mention} entregó **{carta2}** y recibió **{carta1}**"
+        )
+
+        # Liberar bloqueo
+        self.bloqueados.discard(ctx.author.id)
+        self.bloqueados.discard(usuario2.id)
 
 
 async def setup(bot):
