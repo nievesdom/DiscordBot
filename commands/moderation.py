@@ -10,6 +10,19 @@ AO3_REGEX = re.compile(r"https?://archiveofourown\.org/works/\d+", re.IGNORECASE
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        
+    # -------------------- RESTRICCIÓN GLOBAL DEL COG --------------------
+    async def cog_check(self, ctx: commands.Context):
+        # Solo permite ejecutar comandos del Cog si el usuario tiene "Gestionar mensajes"
+        return ctx.author.guild_permissions.manage_messages
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        # Mensaje amable si falla por permisos al usar comandos de este Cog
+        if isinstance(error, commands.CheckFailure) and ctx.command and ctx.command.cog_name == self.__class__.__name__:
+            await ctx.send("🚫 Necesitas el permiso 'Gestionar mensajes' para usar estos comandos.")
+        # Deja que otros errores se manejen por el handler global del bot (si existe)
+        
 
     # -------------------- PARSEO DE EMBED --------------------
     def _parse_embed(self, embed: discord.Embed):
