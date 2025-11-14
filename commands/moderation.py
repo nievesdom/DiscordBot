@@ -97,7 +97,7 @@ class Moderation(commands.Cog):
 
 
         if not canal_origen or not foro_destino:
-            await ctx.send("Debes mencionar el canal de origen y el foro destino. Puedes elegir el límite de mensajes que comprobar también. Ej: 'y!migrar #fics_rec #forum limit'")
+            await ctx.send("Debes mencionar el canal de origen y el foro destino. También puedes elegir el límite de mensajes a comprobar. Ej: `y!migrar #fics_rec #forum limit`")
             return
 
         count = 0

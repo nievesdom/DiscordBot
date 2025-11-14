@@ -26,6 +26,7 @@ async def on_ready():
     await bot.load_extension("commands.cartas")
     await bot.load_extension("commands.wiki")
     await bot.load_extension("commands.moderation")
+    await bot.load_extension("commands.cartas_auto")
 
 # Ejecutar el bot
 bot.run(TOKEN)
