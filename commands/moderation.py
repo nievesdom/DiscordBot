@@ -93,14 +93,11 @@ class Moderation(commands.Cog):
 
     # -------------------- MIGRACIÓN --------------------
     @commands.command(help="Migra mensajes del bot de AO3: migrar #canal_origen #foro_destino")
-    async def migrar(self, ctx, canal_origen: discord.TextChannel, foro_destino: discord.ForumChannel, limite: int = None):
-        """
-        Recorre los mensajes de un canal de origen y crea threads en el foro destino.
-        - Se pasan los canales usando menciones: #canal_origen #foro_destino
-        """
+    async def migrar(self, ctx, canal_origen: discord.TextChannel = None, foro_destino: discord.ForumChannel = None, limite: int = None):
+
 
         if not canal_origen or not foro_destino:
-            await ctx.send("Debe mencionar ambos canales: canal de origen y foro destino")
+            await ctx.send("Debes mencionar el canal de origen y el foro destino. Puedes elegir el límite de mensajes que comprobar también. Ej: 'y!migrar #fics_rec #forum limit'")
             return
 
         count = 0
