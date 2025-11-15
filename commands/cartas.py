@@ -19,14 +19,6 @@ OWNER_ID = 182920174276575232
 def es_dueno(ctx):
     return ctx.author.id == OWNER_ID
 
-# Función auxiliar: busca el ID de una carta a partir de su nombre en cartas.json
-def buscar_id_por_nombre(nombre_carta):
-    with open("cartas/cartas.json", "r", encoding="utf-8") as f:
-        cartas = json.load(f)
-    # Busca la primera carta cuyo nombre contenga el texto introducido (insensible a mayúsculas)
-    carta = next((c for c in cartas if nombre_carta.lower() in c["nombre"].lower()), None)
-    return carta["id"] if carta else None, carta["nombre"] if carta else None
-
 
 
 class Cartas(commands.Cog):
@@ -396,7 +388,7 @@ class Cartas(commands.Cog):
 
         # Validar que se han pasado los argumentos necesarios
         if usuario2 is None or carta1 is None:
-            await ctx.send("Uso correcto: `y!trade @usuario2 <nombre de tu carta>`")
+            await ctx.send("Faltan argumentos. Ej: `y!trade @usuario2 <nombre de tu carta>`")
             return
 
         # Evitar que un usuario participe en dos intercambios simultáneos
@@ -407,19 +399,34 @@ class Cartas(commands.Cog):
         propiedades = cargar_propiedades()
         # Colección de Usuario 1 en este servidor
         coleccion1 = propiedades.get(str(ctx.guild.id), {}).get(str(ctx.author.id), [])
-
-        # Buscar el ID de la carta que Usuario 1 quiere dar
-        id_carta1, nombre_real1 = buscar_id(carta1)
-        if not id_carta1 or id_carta1 not in coleccion1:
-            await ctx.send(f"No tienes la carta '{carta1}'.")
+        
+        # Cargar el archivo de cartas
+        cartas = cargar_cartas()
+        if not cartas:
+            await ctx.send("❌ No hay cartas disponibles en el archivo.")
             return
 
+        # Buscar carta por nombre (coincidencia parcial, insensible a mayúsculas)        
+        for c in cartas:
+            if carta1.lower() in c["nombre"].lower():
+                carta1_id = c["id"]
+                
+        # Si no se encuentra el nombre de la carta en el archivo
+        if not carta1_id:
+            await ctx.send(f"❌ No se ha encontrado la carta {carta1}.")
+            return
+        
+        # Comprobar si la carta introducida está en la colección del usuario
+        if not carta1_id in coleccion1:
+            await ctx.send(f"❌ No tienes la carta {c} con id {carta1_id}.")
+            return
+        
         # Bloquear a ambos usuarios mientras dure el intercambio
         self.bloqueados.add(ctx.author.id)
         self.bloqueados.add(usuario2.id)
 
         await ctx.send(
-            f"{usuario2.mention}, {ctx.author.mention} quiere intercambiar su carta **{nombre_real1}** contigo.\n"
+            f"{usuario2.mention}, {ctx.author.mention} quiere intercambiar su carta **{c["nombre"]}** contigo.\n"
             f"Escribe el nombre de la carta que ofreces a cambio (tienes 2 minutos)."
         )
 
@@ -438,17 +445,27 @@ class Cartas(commands.Cog):
 
         carta2 = respuesta2.content.strip()
         coleccion2 = propiedades.get(str(ctx.guild.id), {}).get(str(usuario2.id), [])
-
-        # Buscar el ID de la carta que Usuario 2 ofrece
-        id_carta2, nombre_real2 = buscar_id(carta2)
-        if not id_carta2 or id_carta2 not in coleccion2:
-            await ctx.send(f"{usuario2.mention} no tiene la carta '{carta2}'. Intercambio cancelado.")
+        
+        # Buscar carta por nombre (coincidencia parcial, insensible a mayúsculas)        
+        for c2 in cartas:
+            if carta2.lower() in c2["nombre"].lower():
+                carta2_id = c2["id"]
+                
+        # Si no se encuentra el nombre de la carta en el archivo
+        if not carta2_id:
+            await ctx.send(f"❌ No se ha encontrado la carta {carta2}. Intercambio cancelado.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
+        
+        # Comprobar si la carta introducida está en la colección del usuario
+        if not carta2_id in coleccion2:
+            await ctx.send(f"❌ No tienes la carta {c2} con id {carta2_id}. Intercambio cancelado.")
+            return
+
 
         await ctx.send(
-            f"{ctx.author.mention}, {usuario2.mention} ofrece su carta **{nombre_real2}**.\n"
+            f"{ctx.author.mention}, {usuario2.mention} ofrece su carta **{c2}** a cambio de tu carta **{c}**.\n"
             f"Escribe `aceptar` o `denegar` (tienes 2 minutos)."
         )
 
@@ -472,10 +489,10 @@ class Cartas(commands.Cog):
             return
 
         # Realizar el intercambio usando IDs
-        coleccion1.remove(id_carta1)
-        coleccion2.remove(id_carta2)
-        coleccion1.append(id_carta2)
-        coleccion2.append(id_carta1)
+        coleccion1.remove(carta1_id)
+        coleccion2.remove(carta2_id)
+        coleccion1.append(carta2_id)
+        coleccion2.append(carta1_id)
 
         # Guardar cambios en propiedades
         propiedades[str(ctx.guild.id)][str(ctx.author.id)] = coleccion1
@@ -484,8 +501,8 @@ class Cartas(commands.Cog):
 
         await ctx.send(
             f"Intercambio realizado:\n"
-            f"- {ctx.author.mention} entregó **{nombre_real1}** y recibió **{nombre_real2}**\n"
-            f"- {usuario2.mention} entregó **{nombre_real2}** y recibió **{nombre_real1}**"
+            f"- {ctx.author.mention} entregó **{c}** y recibió **{c2}**\n"
+            f"- {usuario2.mention} entregó **{c2}** y recibió **{c}**"
         )
 
         # Liberar bloqueo para que puedan iniciar otros intercambios
