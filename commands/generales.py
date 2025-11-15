@@ -71,10 +71,10 @@ class Generales(commands.Cog):
     
         # Lista manual de categorías y comandos
         categorias = {
-            "General 👤": ["feedback", "help", "updates"],
-            "Cards 🃏": ["album", "collection", "search", "pack", "show"],
-            "Wiki 🌐": ["wiki", "character"],
-            "Moderation 🔨": ["migrate", "tags1", "tags2"]
+            "👤 General": ["feedback", "help", "updates"],
+            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
+            "🌐 Wiki": ["wiki", "character"],
+            "🔨 Moderation": ["migrate", "tags1", "tags2"]
         }
     
         # Agrupar comandos por nombre
