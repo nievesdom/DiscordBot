@@ -44,7 +44,7 @@ class Wiki(commands.Cog):
 
 
     @commands.command(help="Sends a random character name.", extras={"categoria": "Wiki 🌐"})
-    async def personaje(self, ctx):
+    async def character(self, ctx):
         # URL base de la API
         url = "https://yakuza.fandom.com/api.php"
 

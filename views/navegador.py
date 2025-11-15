@@ -107,7 +107,7 @@ class Navegador(discord.ui.View):
         await interaction.response.defer()
 
     # Botón para cambiar el orden de visualización
-    @discord.ui.button(label="📆 Orden: por fecha", style=discord.ButtonStyle.primary, custom_id="orden")
+    @discord.ui.button(label="📆 Order: by date", style=discord.ButtonStyle.primary, custom_id="orden")
     async def cambiar(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.orden = "alfabetico" if self.orden == "original" else "original"
         self.i = 0  # Reiniciar índice
