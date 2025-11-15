@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands
 import os
@@ -287,7 +288,7 @@ class Cartas(commands.Cog):
         
         # Guardar el mensaje en la vista para que los botones funcionen
         vista.msg = await ctx.send(
-            f"🎁 {ctx.author.mention} ha abierto su paquete diario de 5 cartas:",
+            f"{ctx.author.mention} ha abierto su paquete diario de 5 cartas:",
             embed=embed,
             view=vista
         )
@@ -378,7 +379,7 @@ class Cartas(commands.Cog):
 
 
     @commands.command(help="Inicia un intercambio interactivo con otro usuario")
-    async def intercambiar(self, ctx, usuario2: discord.Member = None, *, carta1: str = None):
+    async def trade(self, ctx, usuario2: discord.Member = None, *, carta1: str = None):
         """
         Flujo:
         1. Usuario 1 propone carta y menciona a Usuario 2.
@@ -397,7 +398,7 @@ class Cartas(commands.Cog):
             await ctx.send("🚫 Uno de los usuarios ya está en un intercambio en curso.")
             return
 
-        propiedades = gist_propiedades.cargar_propiedades()
+        propiedades = cargar_propiedades()
         coleccion1 = propiedades.get(str(ctx.author.id), [])
 
         # Verificar que Usuario 1 tenga la carta
@@ -460,7 +461,7 @@ class Cartas(commands.Cog):
             self.bloqueados.discard(usuario2.id)
             return
 
-        # ✅ Realizar intercambio
+        # Realizar intercambio
         coleccion1.remove(carta1)
         coleccion2.remove(carta2)
         coleccion1.append(carta2)
@@ -468,7 +469,7 @@ class Cartas(commands.Cog):
 
         propiedades[str(ctx.author.id)] = coleccion1
         propiedades[str(usuario2.id)] = coleccion2
-        gist_propiedades.guardar_propiedades(propiedades)
+        guardar_propiedades(propiedades)
 
         await ctx.send(
             f"✅ Intercambio realizado:\n"
