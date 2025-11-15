@@ -15,7 +15,7 @@ class Wiki(commands.Cog):
         self.bot = bot  # Referencia al bot principal
 
 
-    @commands.command(help="Busca un término en la wiki de Yakuza", extras={"categoria": "Wiki 🌐"})
+    @commands.command(help="Searches a term in the yakuza Wiki.", extras={"categoria": "Wiki 🌐"})
     async def wiki(self, ctx, *, termino: str):
         # Reemplazar espacios por "+" para formar la consulta
         termino_enc = termino.replace(' ', '+')
@@ -32,13 +32,18 @@ class Wiki(commands.Cog):
         if data["query"]["search"]:
             mejor = data["query"]["search"][0]["title"]
             enlace = f"https://yakuza.fandom.com/wiki/{mejor.replace(' ', '_')}"
-            await ctx.send(f"Aquí tienes el resultado más relevante para tu búsqueda:\n{enlace}")
+            try:
+                # Intentar enviar el mensaje por DM al autor
+                await ctx.author.send(f"Here's the best coincidence for your search:\n{enlace}")
+            except discord.Forbidden:
+                # Si el usuario tiene bloqueados los DMs, avisar en el canal
+                await ctx.send("⚠️ I couldn't send you a direct message. Please check your privacy settings.")
         else:
             # Si no hay resultados, enviar mensaje de error
-            await ctx.send("Lo siento, no he encontrado nada.")
+            await ctx.send("Sorry, I couldn't find anything.")
 
 
-    @commands.command(help="Devuelve un personaje aleatorio de la wiki", extras={"categoria": "Wiki 🌐"})
+    @commands.command(help="Sends a random character name.", extras={"categoria": "Wiki 🌐"})
     async def personaje(self, ctx):
         # URL base de la API
         url = "https://yakuza.fandom.com/api.php"
@@ -71,10 +76,8 @@ class Wiki(commands.Cog):
 
         # Elegir un personaje aleatorio de la lista
         elegido = random.choice(personajes)
-
-        # Formar el enlace a su página en la wiki
-        enlace = f"https://yakuza.fandom.com/wiki/{elegido.replace(' ', '_')}"
-        await ctx.send(enlace)
+        
+        await ctx.send(elegido)
         
 
 

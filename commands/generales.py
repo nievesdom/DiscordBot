@@ -62,7 +62,7 @@ class Generales(commands.Cog):
         await ctx.send("Here is the feedback form. I appreciate your input! https://forms.gle/Y4e2TpHRgpfZ18Hj6")
 
 
-    @commands.command(help="Muestra todos los comandos disponibles", extras={"categoria": "General 👤"})
+    @commands.command(help="Shows all available commands.", extras={"categoria": "General 👤"})
     async def help(self, ctx):
         embed = discord.Embed(
             title="📖 Available commands:",

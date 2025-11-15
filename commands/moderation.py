@@ -20,7 +20,7 @@ class Moderation(commands.Cog):
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         # Mensaje amable si falla por permisos al usar comandos de este Cog
         if isinstance(error, commands.CheckFailure) and ctx.command and ctx.command.cog_name == self.__class__.__name__:
-            await ctx.send("🚫 Necesitas el permiso 'Gestionar mensajes' para usar estos comandos.")
+            await ctx.send("🚫 You need 'Manage messages' permission to use this command.")
         # Deja que otros errores se manejen por el handler global del bot (si existe)
         
 
@@ -92,12 +92,12 @@ class Moderation(commands.Cog):
         return nombre_post[:100] if len(nombre_post) > 100 else nombre_post
 
     # -------------------- MIGRACIÓN --------------------
-    @commands.command(help="Migrates AO3 linker's embed messages into from the specified channel to the specified forum. Ex: `y!migrate #origin_channel #target_forum (message_limit)`", extras={"categoria": "Moderation 🔨"})
+    @commands.command(help="Migrates AO3 linker's embed messages into from the specified channel to the specified forum. Ex: `y!migrate #origin_channel #target_forum (message_limit)`.", extras={"categoria": "Moderation 🔨"})
     async def migrate(self, ctx, canal_origen: discord.TextChannel = None, foro_destino: discord.ForumChannel = None, limite: int = None):
 
 
         if not canal_origen or not foro_destino:
-            await ctx.send("You must mention the origin channel and the target forum. You can also choose the maximum limit of messages for me to check. Ex: `y!migrate #origin_channel #target_forum (message_limit)`")
+            await ctx.send("You must mention the origin channel and the target forum. You can also choose the maximum limit of messages for me to check. Ex: `y!migrate #origin_channel #target_forum (message_limit)`.")
             return
 
         count = 0
@@ -141,7 +141,7 @@ class Moderation(commands.Cog):
 
 
     # -------------------- ETIQUETAS 1 --------------------
-    @commands.command(help="Lists the most common relationship and character tags from this channel's AO3 linker embed messages", extras={"categoria": "Moderation 🔨"})
+    @commands.command(help="Lists the most common relationship and character tags from this channel's AO3 linker embed messages.", extras={"categoria": "Moderation 🔨"})
     async def tags1(self, ctx, limite: int = None, min_cantidad: int = 1):
         relaciones = []
         personajes = []
@@ -175,8 +175,8 @@ class Moderation(commands.Cog):
 
 
     # -------------------- ETIQUETAS 2 --------------------
-    @commands.command(help="Lists the most common additional tags from this channel's AO3 linker embed messages", extras={"categoria": "Moderation 🔨"})
-    async def etiquetas2(self, ctx, limite: int = None, min_cantidad: int = 1):
+    @commands.command(help="Lists the most common additional tags from this channel's AO3 linker embed messages.", extras={"categoria": "Moderation 🔨"})
+    async def tags2(self, ctx, limite: int = None, min_cantidad: int = 1):
         adicionales = []
 
         async for msg in ctx.channel.history(limit=limite):

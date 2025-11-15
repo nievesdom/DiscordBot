@@ -34,7 +34,7 @@ class Cartas(commands.Cog):
 
     # Solo el sueño del bot puede usar este comando
     @commands.check(es_dueno)
-    @commands.command(help="Saca una carta aleatoria de RGGO", extras={"categoria": "Cartas 🃏"})
+    @commands.command(help="Saca una carta aleatoria de RGGO.", extras={"categoria": "Cartas 🃏"})
     async def carta(self, ctx):
         # Cargar todas las cartas
         cartas = cargar_cartas()
@@ -117,7 +117,7 @@ class Cartas(commands.Cog):
             await ctx.send(embed=embed, view=vista)
 
 
-    @commands.command(help="Shows a user's card collection. Mention another user if you want to see their collection instead. Ex: `y!album (@user)`", extras={"categoria": "Cards 🃏"})
+    @commands.command(help="Shows a user's card collection. Mention another user if you want to see their collection instead. Ex: `y!album (@user)`.", extras={"categoria": "Cards 🃏"})
     async def album(self, ctx, mencionado: discord.Member = None):
         try:
             # Si se menciona a una persona, ese será el objetivo, si no lo será el autor del mensaje
@@ -155,7 +155,7 @@ class Cartas(commands.Cog):
             await ctx.send("An error happened while trying to show your album. Please, try again later or contact my creator.")
 
 
-    @commands.command(help="Shows a user's card collection in text mode. Mention another user if you want to see their collection instead. Ex: `y!collection (@user)`", extras={"categoria": "Cards 🃏"})
+    @commands.command(help="Shows a user's card collection in text mode. Mention another user if you want to see their collection instead. Ex: `y!collection (@user)`.", extras={"categoria": "Cards 🃏"})
     async def collection(self, ctx, mencionado: discord.Member = None):
         try:
             # Determina el objetivo de este comando según si se ha mencionado a otro usuario
@@ -190,8 +190,8 @@ class Cartas(commands.Cog):
             await ctx.send("An error happened while trying to show your collection. Please, try again later or contact my creator.")
 
 
-    @commands.command(help="Searches a list of RGGO cards that contain a term. Ex: `y!search Tanimura`", extras={"categoria": "Cards 🃏"})
-    async def buscar(self, ctx, *, palabra=None):
+    @commands.command(help="Searches a list of RGGO cards that contain a term. Ex: `y!search Tanimura`.", extras={"categoria": "Cards 🃏"})
+    async def search(self, ctx, *, palabra=None):
         # Verificar que el usuario introduzca una palabra de búsqueda
         if palabra is None:
             await ctx.send("Introduce un término tras el comando para buscar cartas. Ejemplo: y!buscar Yamai")
@@ -236,8 +236,8 @@ class Cartas(commands.Cog):
 
     
 
-    @commands.command(help="Opens a daily pack of 5 cards", extras={"categoria": "Cards 🃏"})
-    async def paquete(self, ctx):
+    @commands.command(help="Opens a daily pack of 5 cards.", extras={"categoria": "Cards 🃏"})
+    async def pack(self, ctx):
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
         
@@ -293,7 +293,7 @@ class Cartas(commands.Cog):
         )
 
 
-    @commands.command(help="Shows a card's image and data. Ex: `y!show UR Yutaka Yamai (LADIW)`", extras={"categoria": "Cards 🃏"})
+    @commands.command(help="Shows a card's image and data. Ex: `y!show UR Yutaka Yamai (LADIW)`.", extras={"categoria": "Cards 🃏"})
     async def show(self, ctx, *, nombre=None):
         # Comprueba que se haya escrito un nombre
         if not nombre:
@@ -376,7 +376,7 @@ class Cartas(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command(help="Starts a card trade with another user. Ex: `y!trade @user UR Yutaka Yamai (LADIW)`", extras={"categoria": "Cards 🃏"})
+    @commands.command(help="Starts a card trade with another user. Ex: `y!trade @user UR Yutaka Yamai (LADIW)`.", extras={"categoria": "Cards 🃏"})
     async def trade(self, ctx, usuario2: discord.Member = None, *, carta1: str = None):
         """
         Flujo del intercambio:
