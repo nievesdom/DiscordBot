@@ -32,6 +32,8 @@ class Cartas(commands.Cog):
         self.bot = bot
         self.bloqueados = set()  # Usuarios en intercambio activo
 
+    # Solo el sueño del bot puede usar este comando
+    @commands.check(es_dueno)
     @commands.command(help="Saca una carta aleatoria de RGGO", extras={"categoria": "Cartas 🃏"})
     async def carta(self, ctx):
         # Cargar todas las cartas
@@ -87,8 +89,8 @@ class Cartas(commands.Cog):
             title=f"{elegida.get('nombre', 'Carta')}",
             color=color,  # color por rareza
             description=(
-                f"**Atributo:** {atributo_fmt}\n"
-                f"**Tipo:** {tipo_fmt}\n"
+                f"**Attribute:** {atributo_fmt}\n"
+                f"**Type:** {tipo_fmt}\n"
                 f"❤️ {elegida.get('health', '—')} | ⚔️ {elegida.get('attack', '—')} | "
                 f"🛡️ {elegida.get('defense', '—')} | 💨 {elegida.get('speed', '—')}"
             )
@@ -104,7 +106,7 @@ class Cartas(commands.Cog):
             archivo = discord.File(ruta_img, filename="carta.png")
             embed.set_image(url="attachment://carta.png")
         else:
-            embed.description += "\n⚠️ Imagen no encontrada."
+            embed.description += "\n⚠️ Card image not found."
 
         # Vista para reclamar la carta (se mantiene)
         vista = ReclamarCarta(elegida["id"], embed, ruta_img)
@@ -115,7 +117,7 @@ class Cartas(commands.Cog):
             await ctx.send(embed=embed, view=vista)
 
 
-    @commands.command(help="Muestra la colección de cartas de forma visual. Menciona a otro usuario para ver su colección.", extras={"categoria": "Cartas 🃏"})
+    @commands.command(help="Shows a user's card collection. Mention another user if you want to see their collection instead. Ex: `y!album (@user)`", extras={"categoria": "Cards 🃏"})
     async def album(self, ctx, mencionado: discord.Member = None):
         try:
             # Si se menciona a una persona, ese será el objetivo, si no lo será el autor del mensaje
@@ -128,7 +130,7 @@ class Cartas(commands.Cog):
             cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
             # Si no tiene cartas aún, se dice
             if not cartas_ids:
-                await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
+                await ctx.send(f"{objetivo.display_name} has no cards yet.")
                 return
 
             # Busca la información de las cartas para mostrarla
@@ -150,11 +152,11 @@ class Cartas(commands.Cog):
 
         except Exception as e:
             print(f"[ERROR] en comando album: {type(e).__name__} - {e}")
-            await ctx.send("Ha ocurrido un error al intentar mostrar el álbum.")
+            await ctx.send("An error happened while trying to show your album. Please, try again later or contact my creator.")
 
 
-    @commands.command(help="Muestra la colección de cartas en modo texto", extras={"categoria": "Cartas 🃏"})
-    async def coleccion(self, ctx, mencionado: discord.Member = None):
+    @commands.command(help="Shows a user's card collection in text mode. Mention another user if you want to see their collection instead. Ex: `y!collection (@user)`", extras={"categoria": "Cards 🃏"})
+    async def collection(self, ctx, mencionado: discord.Member = None):
         try:
             # Determina el objetivo de este comando según si se ha mencionado a otro usuario
             objetivo = mencionado or ctx.author
@@ -165,7 +167,7 @@ class Cartas(commands.Cog):
             propiedades = cargar_propiedades()
             cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
             if not cartas_ids:
-                await ctx.send(f"{objetivo.display_name} no tiene ninguna carta todavía.")
+                await ctx.send(f"{objetivo.display_name} has no cards yet.")
                 return
 
             # Ordena las cartas en la lista
@@ -173,7 +175,7 @@ class Cartas(commands.Cog):
             nombres = [cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}") for cid in cartas_ids]
             nombres = sorted(nombres, key=lambda s: s.lower())
 
-            texto = f"{ctx.author.mention}, estas son tus cartas ({len(nombres)}):\n" + "\n".join(nombres)
+            texto = f"{ctx.author.mention}, these are your cards ({len(nombres)}):\n" + "\n".join(nombres)
 
             # Si ocupa más de 2000 caracteres, divide el texto en varios mensajes
             if len(texto) <= 2000:
@@ -185,10 +187,10 @@ class Cartas(commands.Cog):
 
         except Exception as e:
             print(f"[ERROR] en comando coleccion: {type(e).__name__} - {e}")
-            await ctx.send("Ha ocurrido un error al intentar mostrar tu colección.")
+            await ctx.send("An error happened while trying to show your collection. Please, try again later or contact my creator.")
 
 
-    @commands.command(help="Busca cartas de RGGO.", extras={"categoria": "Cartas 🃏"})
+    @commands.command(help="Searches a list of RGGO cards that contain a term. Ex: `y!search Tanimura`", extras={"categoria": "Cards 🃏"})
     async def buscar(self, ctx, *, palabra=None):
         # Verificar que el usuario introduzca una palabra de búsqueda
         if palabra is None:
@@ -230,11 +232,11 @@ class Cartas(commands.Cog):
         for b in bloques:
             await ctx.send(b)
 
-        await ctx.send(f"Se han encontrado {len(coincidencias)} cartas que contienen '{palabra}'.")
+        await ctx.send(f"{len(coincidencias)} cards found containing '{palabra}'.")
 
     
 
-    @commands.command(help="Abre un paquete diario de 5 cartas", extras={"categoria": "Cartas 🃏"})
+    @commands.command(help="Opens a daily pack of 5 cards", extras={"categoria": "Cards 🃏"})
     async def paquete(self, ctx):
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
@@ -254,15 +256,13 @@ class Cartas(commands.Cog):
             horas, resto = divmod(restante.seconds, 3600)
             minutos = resto // 60
             await ctx.send(
-                f"🚫 {ctx.author.mention}, ya has abierto tu paquete de hoy.\n"
-                f"Podrás abrir otro en {horas}h {minutos}m."
-            )
+                f"🚫 {ctx.author.mention}, you already opened today's pack, come back in {horas}h {minutos}m.")
             return
         
         # Cargar las cartas
         cartas = cargar_cartas()
         if not cartas:
-            await ctx.send("❌ No hay cartas disponibles en el archivo.")
+            await ctx.send("❌ No cards available. Please, contact my creator.")
             return
         
         # Elegir 5 cartas aleatorias
@@ -287,29 +287,29 @@ class Cartas(commands.Cog):
         
         # Guardar el mensaje en la vista para que los botones funcionen
         vista.msg = await ctx.send(
-            f"{ctx.author.mention} ha abierto su paquete diario de 5 cartas:",
+            f"{ctx.author.mention} opened their daily pack:",
             embed=embed,
             view=vista
         )
 
 
-    @commands.command(help="Muestra una carta específica por nombre", extras={"categoria": "Cartas 🃏"})
-    async def mostrar(self, ctx, *, nombre=None):
+    @commands.command(help="Shows a card's image and data. Ex: `y!show UR Yutaka Yamai (LADIW)`", extras={"categoria": "Cards 🃏"})
+    async def show(self, ctx, *, nombre=None):
         # Comprueba que se haya escrito un nombre
         if not nombre:
-            await ctx.send("⚠️ Debes escribir el nombre de la carta después del comando. Ejemplo: `y!mostrar UR Yutaka Yamai (LADIW)`")
+            await ctx.send("⚠️ You must write a card's name with the command. Ex: `y!show UR Yutaka Yamai (LADIW)`")
             return
 
         # Carga las cartas
         cartas = cargar_cartas()
         if not cartas:
-            await ctx.send("❌ No hay cartas disponibles en el archivo.")
+            await ctx.send("❌ No cards available. Please, contact my creator.")
             return
 
         # Buscar carta por nombre (coincidencia parcial, insensible a mayúsculas)
         carta = next((c for c in cartas if nombre.lower() in c["nombre"].lower()), None)
         if not carta:
-            await ctx.send(f"❌ No se encontró ninguna carta que contenga '{nombre}'.")
+            await ctx.send(f"❌ No card found containing '{nombre}'.")
             return
 
         # Colores por rareza
@@ -357,8 +357,8 @@ class Cartas(commands.Cog):
             title=f"{carta.get('nombre', 'Carta')}",
             color=color,
             description=(
-                f"**Atributo:** {atributo_fmt}\n"
-                f"**Tipo:** {tipo_fmt}\n"
+                f"**Attribute:** {atributo_fmt}\n"
+                f"**Type:** {tipo_fmt}\n"
                 f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
                 f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
             )
@@ -371,12 +371,12 @@ class Cartas(commands.Cog):
         if ruta_img and ruta_img.startswith("http"):
             embed.set_image(url=ruta_img)
         else:
-            embed.description += "\n⚠️ Imagen no encontrada."
+            embed.description += "\n⚠️ Image not found. Please, contact my creator."
             
         await ctx.send(embed=embed)
 
 
-    @commands.command(help="Inicia un intercambio interactivo con otro usuario")
+    @commands.command(help="Starts a card trade with another user. Ex: `y!trade @user UR Yutaka Yamai (LADIW)`", extras={"categoria": "Cards 🃏"})
     async def trade(self, ctx, usuario2: discord.Member = None, *, carta1: str = None):
         """
         Flujo del intercambio:
@@ -388,12 +388,12 @@ class Cartas(commands.Cog):
     
         # Validar que se han pasado los argumentos necesarios
         if usuario2 is None or carta1 is None:
-            await ctx.send("⚠️ Uso correcto: `y!trade @usuario2 <nombre de tu carta>`")
+            await ctx.send("⚠️ You need to mention a user and a card to trade. Ex: `y!trade @user UR Yutaka Yamai (LADIW)`")
             return
     
         # Evitar que un usuario participe en dos intercambios simultáneos
         if ctx.author.id in self.bloqueados or usuario2.id in self.bloqueados:
-            await ctx.send("🚫 Uno de los usuarios ya está en un intercambio en curso.")
+            await ctx.send("🚫 One or more of the users is already in an active trade. Finish that before starting a new trade.")
             return
     
         propiedades = cargar_propiedades()
@@ -403,7 +403,7 @@ class Cartas(commands.Cog):
         # Cargar el archivo de cartas
         cartas = cargar_cartas()
         if not cartas:
-            await ctx.send("❌ No hay cartas disponibles en el archivo.")
+            await ctx.send("❌ No cards available. Please, contact my creator.")
             return
     
         # Buscar carta1 por nombre
@@ -416,11 +416,11 @@ class Cartas(commands.Cog):
                 break
             
         if not carta1_obj:
-            await ctx.send(f"❌ No se ha encontrado la carta {carta1}.")
+            await ctx.send(f"❌ The card '{carta1}' hasn't been found.")
             return
     
         if carta1_id not in coleccion1:
-            await ctx.send(f"❌ No tienes la carta {carta1_obj['nombre']} (id {carta1_id}).")
+            await ctx.send(f"❌ You don't have a card named {carta1}.")
             return
     
         # Bloquear a ambos usuarios mientras dure el intercambio
@@ -428,8 +428,8 @@ class Cartas(commands.Cog):
         self.bloqueados.add(usuario2.id)
     
         await ctx.send(
-            f"📨 {usuario2.mention}, {ctx.author.mention} quiere intercambiar su carta **{carta1_obj['nombre']}** contigo.\n"
-            f"Escribe el nombre de la carta que ofreces a cambio (tienes 2 minutos)."
+            f"Hey, {usuario2.mention}, {ctx.author.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
+            f"Write the name of a card you want to exchange (you have 2 minutes)."
         )
     
         # Función de comprobación: solo aceptar mensajes de Usuario 2 en el mismo canal
@@ -439,7 +439,7 @@ class Cartas(commands.Cog):
         try:
             respuesta2 = await self.bot.wait_for("message", timeout=120, check=check_usuario2)
         except asyncio.TimeoutError:
-            await ctx.send("⌛ Tiempo agotado. El intercambio ha sido cancelado.")
+            await ctx.send("⌛ Time's up. The trade has been cancelled.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
@@ -457,40 +457,44 @@ class Cartas(commands.Cog):
                 break
             
         if not carta2_obj:
-            await ctx.send(f"❌ No se ha encontrado la carta {carta2}. Intercambio cancelado.")
+            await ctx.send(f"❌ The card {carta2} hasn't been found. Trade cancelled.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
     
         if carta2_id not in coleccion2:
-            await ctx.send(f"❌ {usuario2.mention} no tiene la carta {carta2_obj['nombre']} (id {carta2_id}). Intercambio cancelado.")
+            await ctx.send(f"❌ {usuario2.mention}, you don't have acard named {carta2}. Trade cancelled.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
     
         await ctx.send(
-            f"📨 {ctx.author.mention}, {usuario2.mention} ofrece su carta **{carta2_obj['nombre']}** "
-            f"a cambio de tu carta **{carta1_obj['nombre']}**.\n"
-            f"Escribe `aceptar` o `denegar` (tienes 2 minutos)."
+            f"{usuario2.mention} offers their card **{carta2_obj['nombre']}** in exchange of your card **{carta1_obj['nombre']}**.\n"
+            f"Write `accept` o `reject` (you have two minutes)."
         )
     
         # Función de comprobación: solo aceptar mensajes de Usuario 1 con 'aceptar' o 'denegar'
         def check_usuario1(m):
-            return m.author.id == ctx.author.id and m.channel == ctx.channel and m.content.lower() in ["aceptar", "denegar"]
+            return m.author.id == ctx.author.id and m.channel == ctx.channel and m.content.lower() in ["accept", "reject"]
     
         try:
             respuesta1 = await self.bot.wait_for("message", timeout=120, check=check_usuario1)
         except asyncio.TimeoutError:
-            await ctx.send("⌛ Tiempo agotado. El intercambio ha sido cancelado.")
+            await ctx.send("⌛ Time's up. The trade has been cancelled.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
     
-        if respuesta1.content.lower() == "denegar":
-            await ctx.send(f"❌ {ctx.author.mention} ha rechazado el intercambio.")
+        if respuesta1.content.lower() == "reject":
+            await ctx.send(f"❌ {usuario2.mention}, {ctx.author.display_name} has rejected the trade.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
+        
+        # Volver a cargar propiedades para refrescar las colecciones
+        propiedades = cargar_propiedades()
+        coleccion1 = propiedades.get(str(ctx.guild.id), {}).get(str(ctx.author.id), [])
+        coleccion2 = propiedades.get(str(ctx.guild.id), {}).get(str(usuario2.id), [])
     
         # Realizar el intercambio usando IDs
         coleccion1.remove(carta1_id)
@@ -504,9 +508,9 @@ class Cartas(commands.Cog):
         guardar_propiedades(propiedades)
     
         await ctx.send(
-            f"✅ Intercambio realizado:\n"
-            f"- {ctx.author.mention} entregó **{carta1_obj['nombre']}** y recibió **{carta2_obj['nombre']}**\n"
-            f"- {usuario2.mention} entregó **{carta2_obj['nombre']}** y recibió **{carta1_obj['nombre']}**"
+            f"✅ Trade successful:\n"
+            f"- {ctx.author.mention} traded **{carta1_obj['nombre']}** and received **{carta2_obj['nombre']}**\n"
+            f"- {usuario2.mention} traded **{carta2_obj['nombre']}** and received **{carta1_obj['nombre']}**"
         )
     
         # Liberar bloqueo para que puedan iniciar otros intercambios

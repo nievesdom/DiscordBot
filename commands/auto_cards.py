@@ -37,34 +37,42 @@ class CartasAuto(commands.Cog):
         guardar_settings(self.settings)
 
     @commands.command(
-        help="Activa o desactiva cartas automáticas.\nUso: !cartas_auto #canal max_horas max_diarias\nEjemplo: !cartas_auto #cartas 5 5"
-    )
+        help="Activates or deactivates automatic card spawning. Activate: `y!auto_cards #channel (max_hour_wait) (max_daily_number)`. Deactivate: `y!auto_cards`", extras={"categoria": "Cards 🃏"})
     @commands.has_permissions(administrator=True)
-    async def cartas_auto(self, ctx, canal: discord.TextChannel = None, max_horas: int = None, max_diarias: int = None):
+    async def auto_cards(self, ctx, canal: discord.TextChannel = None, max_horas: int = None, max_diarias: int = None):
         gid = str(ctx.guild.id)
         config = self.settings["guilds"].get(gid)
 
-        # Validación de parámetros: requiere canal, horas máximas y máximo diario
-        if canal is None or max_horas is None or max_diarias is None:
-            await ctx.send("⚠️ Debes indicar canal, horas máximas y máximo diario.\nEjemplo: `!cartas_auto #cartas 5 5`")
+        # Caso 1: sin argumentos → desactivar
+        if canal is None and max_horas is None and max_diarias is None:
+            if config and config.get("enabled"):
+                config["enabled"] = False
+                # Cancelar tarea si existe
+                if gid in self.tasks:
+                    try:
+                        self.tasks[gid].cancel()
+                    except Exception:
+                        pass
+                    self.tasks.pop(gid, None)
+                # Limpiar atributos
+                config["count"] = 0
+                config.pop("next_spawn", None)
+                guardar_settings(self.settings)
+                await ctx.send(f"❌ Automatic card spawning deactivated.")
+            else:
+                await ctx.send("⚠️ Automatic card spawning is already deactivated. If you want to activate it, use the command like this: `y!auto_cards #channel (max_hour_wait) (max_daily_number)`")
             return
 
-        # Toggle: si ya está activado → desactivar y cancelar tarea
-        if config and config.get("enabled"):
-            config["enabled"] = False
-            # Cancelar tarea si existe
-            if gid in self.tasks:
-                try:
-                    self.tasks[gid].cancel()
-                except Exception:
-                    pass
-                self.tasks.pop(gid, None)
-            # Limpiar atributos
-            config["count"] = 0
-            config.pop("next_spawn", None)
-            guardar_settings(self.settings)
-            await ctx.send(f"❌ Cartas automáticas desactivadas en {ctx.guild.name}.")
+        # Caso 2: activar o reconfigurar → canal obligatorio
+        if canal is None:
+            await ctx.send("⚠️ You must at least include in the command the channel where spawning will occur. Use like this: `y!auto_cards #channel (max_hour_wait) (max_daily_number)`")
             return
+
+        # Valores por defecto si no se pasan horas o máximo diario
+        if max_horas is None:
+            max_horas = 5  # ejemplo de valor por defecto
+        if max_diarias is None:
+            max_diarias = 5  # ejemplo de valor por defecto
 
         # Activar con nuevos parámetros (mínimo de horas siempre 0)
         self.settings["guilds"][gid] = {
@@ -76,9 +84,10 @@ class CartasAuto(commands.Cog):
             "last_reset": datetime.date.today().isoformat()
         }
         guardar_settings(self.settings)
+
         # Crear tarea independiente para este servidor
         self.tasks[gid] = self.bot.loop.create_task(self.spawn_for_guild(ctx.guild.id))
-        await ctx.send(f"✅ Cartas automáticas activadas en {canal.mention}, cada 0–{max_horas}h, máximo {max_diarias} al día.")
+        await ctx.send(f"✅ Automatic card spawning enabled in {canal.mention}, every 0 to {max_horas}h for a maximum of {max_diarias} daily cards. Please, make sure I have permission to write and share media in that channel.")
 
     async def spawn_for_guild(self, gid: int):
         # Tarea independiente que controla apariciones automáticas en un servidor
@@ -173,8 +182,8 @@ class CartasAuto(commands.Cog):
                 title=f"{carta.get('nombre', 'Carta')}",
                 color=color,
                 description=(
-                    f"**Atributo:** {atributo_fmt}\n"
-                    f"**Tipo:** {tipo_fmt}\n"
+                    f"**Attribute:** {atributo_fmt}\n"
+                    f"**Type:** {tipo_fmt}\n"
                     f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
                     f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
                 )
@@ -189,7 +198,7 @@ class CartasAuto(commands.Cog):
                 archivo = discord.File(ruta_img, filename="carta.png")
                 embed.set_image(url="attachment://carta.png")
             else:
-                embed.description += "\n⚠️ Imagen no encontrada."
+                embed.description += "\n⚠️ Card image not found. Please, contact my creator."
 
             # Vista para reclamar (usa tu clase de views/reclamar.py)
             vista = ReclamarCarta(carta_id, embed, ruta_img)
@@ -210,17 +219,17 @@ class CartasAuto(commands.Cog):
             config["count"] += 1
             guardar_settings(self.settings)
 
-    @commands.command(help="Muestra el estado de las cartas automáticas en este servidor")
+    @commands.command(help="Shows the status of automatic card spawning in the server", extras={"categoria": "Cards 🃏"})
     @commands.has_permissions(administrator=True)
     async def estado_cartas(self, ctx):
         gid = str(ctx.guild.id)
         config = self.settings["guilds"].get(gid)
         if not config or not config.get("enabled"):
-            await ctx.send("❌ Las cartas automáticas están desactivadas en este servidor.")
+            await ctx.send("❌ Automatic card spawning is deactivated.")
             return
 
         # Calcular tiempo restante (si hay próxima aparición programada)
-        tiempo_str = "No programado."
+        tiempo_str = "No more cards today."
         if "next_spawn" in config:
             try:
                 next_spawn = datetime.datetime.fromisoformat(config["next_spawn"])
@@ -231,17 +240,17 @@ class CartasAuto(commands.Cog):
                     minutos_restantes = minutos % 60
                     tiempo_str = f"{horas}h {minutos_restantes}m"
                 else:
-                    tiempo_str = "Programado, pendiente de enviar."
+                    tiempo_str = "Programmed, pending."
             except Exception:
-                tiempo_str = "No programado."
+                tiempo_str = "No more cards today."
 
         await ctx.send(
-            f"📊 Estado de cartas automáticas:\n"
-            f"- Canal: <#{config['channel_id']}>\n"
-            f"- Intervalo: 0–{config['interval'][1]} horas\n"
-            f"- Máximo diario: {config['max_daily']}\n"
-            f"- Lanzadas hoy: {config['count']}\n"
-            f"- Próxima carta en: {tiempo_str}"
+            f"📊 Automatic card spawning status:\n"
+            f"- Channel: <#{config['channel_id']}>\n"
+            f"- Interval: 0–{config['interval'][1]} hours\n"
+            f"- Maximum daily cards: {config['max_daily']}\n"
+            f"- Cards spawned today: {config['count']}\n"
+            f"- Next card in: {tiempo_str}"
         )
 
 async def setup(bot):

@@ -39,7 +39,7 @@ class ReclamarCarta(discord.ui.View):
             "support": "✨ Support"
         }
 
-    @discord.ui.button(label="Reclamar carta 🐉", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Claim 🐉", style=discord.ButtonStyle.success)
     async def reclamar(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             # Si ya se ha reclamado, avisa al usuario
@@ -97,8 +97,8 @@ class ReclamarCarta(discord.ui.View):
                 title=f"{nombre_carta}",
                 color=color,
                 description=(
-                    f"**Atributo:** {atributo_fmt}\n"
-                    f"**Tipo:** {tipo_fmt}\n"
+                    f"**Attribute:** {atributo_fmt}\n"
+                    f"**Type:** {tipo_fmt}\n"
                     f"❤️ {carta_info.get('health', '—')} | ⚔️ {carta_info.get('attack', '—')} | "
                     f"🛡️ {carta_info.get('defense', '—')} | 💨 {carta_info.get('speed', '—')}"
                 )
@@ -116,7 +116,7 @@ class ReclamarCarta(discord.ui.View):
                 archivo = discord.File(self.imagen_ruta, filename="carta.png")
                 self.embed.set_image(url="attachment://carta.png")
             else:
-                self.embed.description += "\n⚠️ Imagen no encontrada."
+                self.embed.description += "\n⚠️ Image not found. Please, contact my creator."
 
             await interaction.response.edit_message(
                 embed=self.embed,
@@ -125,7 +125,7 @@ class ReclamarCarta(discord.ui.View):
             )
 
             await interaction.followup.send(
-                f"{interaction.user.mention} ha reclamado **{nombre_carta}**",
+                f"{interaction.user.display_name} claimed **{nombre_carta}**",
                 ephemeral=False
             )
 
@@ -134,6 +134,6 @@ class ReclamarCarta(discord.ui.View):
         except Exception as e:
             print(f"[ERROR] en ReclamarCarta: {type(e).__name__} - {e}")
             try:
-                await interaction.response.send_message("Ocurrió un error al reclamar la carta.", ephemeral=True)
+                await interaction.response.send_message("Sorry, an error occured while trying to claim this card.", ephemeral=True)
             except discord.InteractionResponded:
-                await interaction.followup.send("Ocurrió un error al reclamar la carta.", ephemeral=True)
+                await interaction.followup.send("Sorry, an error occured while trying to claim this card.", ephemeral=True)

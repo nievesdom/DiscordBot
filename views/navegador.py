@@ -67,19 +67,19 @@ class Navegador(discord.ui.View):
             title=f"{nombre}",
             color=color,
             description=(
-                f"**Atributo:** {atributo_fmt}\n"
-                f"**Tipo:** {tipo_fmt}\n"
+                f"**Attribute:** {atributo_fmt}\n"
+                f"**Type:** {tipo_fmt}\n"
                 f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
                 f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
             )
         )
-        embed.set_footer(text=f"Carta {self.i + 1} de {len(lista_actual)} • Propiedad de {self.dueño.display_name}")
+        embed.set_footer(text=f"Card {self.i + 1} out of {len(lista_actual)} • {self.dueño.display_name}'s album")
 
         if imagen and imagen.startswith("http"):
             embed.set_image(url=imagen)
             return embed, None
         else:
-            embed.description = "⚠️ Imagen no encontrada."
+            embed.description = "⚠️ Image not found. Please, contact my creator."
             return embed, None
 
     async def actualizar(self):
@@ -111,7 +111,7 @@ class Navegador(discord.ui.View):
     async def cambiar(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.orden = "alfabetico" if self.orden == "original" else "original"
         self.i = 0  # Reiniciar índice
-        nuevo_label = "🔤 Orden: alfabético" if self.orden == "alfabetico" else "📆 Orden: por fecha"
+        nuevo_label = "🔤 Order: alphabetic" if self.orden == "alfabetico" else "📆 Order: by date"
         for item in self.children:
             if isinstance(item, discord.ui.Button) and item.custom_id == "orden":
                 item.label = nuevo_label

@@ -60,21 +60,21 @@ class NavegadorPaquete(discord.ui.View):
             title=f"{nombre}",
             color=color,
             description=(
-                f"**Atributo:** {atributo_fmt}\n"
-                f"**Tipo:** {tipo_fmt}\n"
+                f"**Attribute:** {atributo_fmt}\n"
+                f"**Type:** {tipo_fmt}\n"
                 f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
                 f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
             )
         )
         embed.set_footer(
-            text=f"Carta {self.i + 1} de {len(self.cartas_ids)} • Paquete diario de {self.dueño.display_name}"
+            text=f"Card {self.i + 1} out of {len(self.cartas_ids)} • {self.dueño.display_name}'s daily pack"
         )
 
         if imagen and imagen.startswith("http"):
             embed.set_image(url=imagen)
             return embed, None
         else:
-            embed.description += "\n⚠️ Imagen no encontrada."
+            embed.description += "\n⚠️ Card image not found. Please, contact my creator."
             return embed, None
 
     async def actualizar(self):

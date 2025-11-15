@@ -92,12 +92,12 @@ class Moderation(commands.Cog):
         return nombre_post[:100] if len(nombre_post) > 100 else nombre_post
 
     # -------------------- MIGRACIÓN --------------------
-    @commands.command(help="Migra mensajes del bot de AO3: migrar #canal_origen #foro_destino")
-    async def migrar(self, ctx, canal_origen: discord.TextChannel = None, foro_destino: discord.ForumChannel = None, limite: int = None):
+    @commands.command(help="Migrates AO3 linker's embed messages into from the specified channel to the specified forum. Ex: `y!migrate #origin_channel #target_forum (message_limit)`", extras={"categoria": "Moderation 🔨"})
+    async def migrate(self, ctx, canal_origen: discord.TextChannel = None, foro_destino: discord.ForumChannel = None, limite: int = None):
 
 
         if not canal_origen or not foro_destino:
-            await ctx.send("Debes mencionar el canal de origen y el foro destino. También puedes elegir el límite de mensajes a comprobar. Ej: `y!migrar #fics_rec #forum limit`")
+            await ctx.send("You must mention the origin channel and the target forum. You can also choose the maximum limit of messages for me to check. Ex: `y!migrate #origin_channel #target_forum (message_limit)`")
             return
 
         count = 0
@@ -132,17 +132,17 @@ class Moderation(commands.Cog):
                 obras_usadas.add(link)
                 count += 1
                 print(f"📌 Migrado: {nombre_post} | Etiquetas: {', '.join([t.name for t in applied_tags]) or 'Ninguna'}")
-                await asyncio.sleep(2)
+                await asyncio.sleep(3)
 
             except discord.HTTPException as e:
                 print(f"❌ Error al crear post ({nombre_post}): {e}")
 
-        await ctx.send(f"✅ Migrados {count} mensajes únicos desde {canal_origen.mention} a {foro_destino.mention}.")
+        await ctx.send(f"✅ Successfuly migrated {count} messages from {canal_origen.mention} to {foro_destino.mention}.")
 
 
     # -------------------- ETIQUETAS 1 --------------------
-    @commands.command(help="Lista relaciones y personajes del canal actual")
-    async def etiquetas1(self, ctx, limite: int = None, min_cantidad: int = 1):
+    @commands.command(help="Lists the most common relationship and character tags from this channel's AO3 linker embed messages", extras={"categoria": "Moderation 🔨"})
+    async def tags1(self, ctx, limite: int = None, min_cantidad: int = 1):
         relaciones = []
         personajes = []
 
@@ -157,7 +157,7 @@ class Moderation(commands.Cog):
         contador_rel = Counter(relaciones)
         contador_chars = Counter(personajes)
 
-        texto = ["**Relaciones y Personajes encontrados:**"]
+        texto = ["**Relationships and characters found:**"]
         for etiqueta, cant in contador_rel.most_common():
             if cant >= min_cantidad:
                 texto.append(f" - {etiqueta} ({cant})")
@@ -166,7 +166,7 @@ class Moderation(commands.Cog):
                 texto.append(f" - {etiqueta} ({cant})")
 
         if len(texto) == 1:
-            texto.append(" - Ninguno encontrado.")
+            texto.append(" - No relevant tags found.")
 
         mensaje = "\n".join(texto)
         if len(mensaje) > 2000:
@@ -175,7 +175,7 @@ class Moderation(commands.Cog):
 
 
     # -------------------- ETIQUETAS 2 --------------------
-    @commands.command(help="Lista tags adicionales del canal actual")
+    @commands.command(help="Lists the most common additional tags from this channel's AO3 linker embed messages", extras={"categoria": "Moderation 🔨"})
     async def etiquetas2(self, ctx, limite: int = None, min_cantidad: int = 1):
         adicionales = []
 
@@ -187,13 +187,13 @@ class Moderation(commands.Cog):
             adicionales.extend(etiquetas_adicionales)
 
         contador = Counter(adicionales)
-        texto = ["**Tags adicionales encontrados:**"]
+        texto = ["**Additional tags found:**"]
         for etiqueta, cant in contador.most_common():
             if cant >= min_cantidad:
                 texto.append(f" - {etiqueta} ({cant})")
 
         if len(texto) == 1:
-            texto.append(" - Ninguno encontrado.")
+            texto.append(" - No relevant tags found.")
 
         mensaje = "\n".join(texto)
         if len(mensaje) > 2000:

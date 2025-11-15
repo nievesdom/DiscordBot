@@ -52,20 +52,29 @@ class Generales(commands.Cog):
         asyncio.create_task(contar_mensaje())
 
 
-    @commands.command(help="Muestra todos los comandos disponibles")
-    async def ayuda(self, ctx):
+    @commands.command(help="Show the latest updates and what's coming up.", extras={"categoria": "General 👤"})
+    async def updates(self, ctx):
+        await ctx.send("Latest update: bot published, yaay!\nNewly added cards:\n- UR Kasuga Ichiban (Festival II)\n- UR Mayumi Seto (Festival)\nComing up: card combat.")
+    
+
+    @commands.command(help="Send the feedback form link.", extras={"categoria": "General 👤"})
+    async def feedback(self, ctx):
+        await ctx.send("Here is the feedback form. I appreciate your input! https://forms.gle/Y4e2TpHRgpfZ18Hj6")
+
+
+    @commands.command(help="Muestra todos los comandos disponibles", extras={"categoria": "General 👤"})
+    async def help(self, ctx):
         embed = discord.Embed(
-            title="📖 Comandos disponibles",
-            description="Aquí tienes los comandos agrupados por categoría:",
+            title="📖 Available commands:",
             color=discord.Color.blurple()
         )
     
         # Lista manual de categorías y comandos
         categorias = {
-            "General 👤": ["hola", "decir", "contar", "ayuda"],
-            "Cartas 🃏": ["carta", "album", "coleccion", "buscar", "paquete", "mostrar"],
-            "Wiki 🌐": ["wiki", "personaje"],
-            "Moderación 🔨": ["migrar", "etiquetas1", "etiquetas2"]
+            "General 👤": ["feedback", "help", "updates"],
+            "Cards 🃏": ["album", "collection", "search", "pack", "show"],
+            "Wiki 🌐": ["wiki", "character"],
+            "Moderation 🔨": ["migrate", "tags1", "tags2"]
         }
     
         # Agrupar comandos por nombre
