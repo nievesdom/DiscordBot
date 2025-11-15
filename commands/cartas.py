@@ -8,6 +8,10 @@ from urllib.parse import quote
 from core.gist_settings import cargar_settings, guardar_settings
 from views.navegador_paquete import NavegadorPaquete
 import datetime
+from core.gist_propiedades import cargar_propiedades, guardar_propiedades
+from core.cartas import cargar_cartas, cartas_por_id
+from views.navegador import Navegador
+from views.reclamar import ReclamarCarta
 
 # Para tener comandos que solo pueda usar el creador del bot (yo)
 OWNER_ID = 182920174276575232
@@ -15,11 +19,14 @@ OWNER_ID = 182920174276575232
 def es_dueno(ctx):
     return ctx.author.id == OWNER_ID
 
-# Importar funciones desde módulos core y views
-from core.gist_propiedades import cargar_propiedades, guardar_propiedades
-from core.cartas import cargar_cartas, cartas_por_id
-from views.navegador import Navegador
-from views.reclamar import ReclamarCarta
+# Función auxiliar: busca el ID de una carta a partir de su nombre en cartas.json
+def buscar_id_por_nombre(nombre_carta):
+    with open("cartas/cartas.json", "r", encoding="utf-8") as f:
+        cartas = json.load(f)
+    # Busca la primera carta cuyo nombre contenga el texto introducido (insensible a mayúsculas)
+    carta = next((c for c in cartas if nombre_carta.lower() in c["nombre"].lower()), None)
+    return carta["id"] if carta else None, carta["nombre"] if carta else None
+
 
 
 class Cartas(commands.Cog):
@@ -377,109 +384,114 @@ class Cartas(commands.Cog):
         await ctx.send(embed=embed)
 
 
-
     @commands.command(help="Inicia un intercambio interactivo con otro usuario")
     async def trade(self, ctx, usuario2: discord.Member = None, *, carta1: str = None):
         """
-        Flujo:
-        1. Usuario 1 propone carta y menciona a Usuario 2.
-        2. Bot espera que Usuario 2 escriba el nombre de su carta.
-        3. Bot espera que Usuario 1 escriba 'aceptar' o 'denegar'.
-        4. Se realiza o cancela el intercambio.
+        Flujo del intercambio:
+        1. Usuario 1 propone una carta y menciona a Usuario 2.
+        2. El bot espera que Usuario 2 escriba el nombre de la carta que ofrece a cambio.
+        3. El bot espera que Usuario 1 escriba 'aceptar' o 'denegar'.
+        4. Se realiza o cancela el intercambio según la respuesta.
         """
 
-        # Validar argumentos
+        # Validar que se han pasado los argumentos necesarios
         if usuario2 is None or carta1 is None:
-            await ctx.send("⚠️ Uso correcto: `y!intercambiar @usuario2 <nombre de tu carta>`")
+            await ctx.send("Uso correcto: `y!trade @usuario2 <nombre de tu carta>`")
             return
 
-        # Bloqueo: evitar que un usuario esté en dos intercambios a la vez
+        # Evitar que un usuario participe en dos intercambios simultáneos
         if ctx.author.id in self.bloqueados or usuario2.id in self.bloqueados:
-            await ctx.send("🚫 Uno de los usuarios ya está en un intercambio en curso.")
+            await ctx.send("Uno de los usuarios ya está en un intercambio en curso.")
             return
 
         propiedades = cargar_propiedades()
-        coleccion1 = propiedades.get(str(ctx.author.id), [])
+        # Colección de Usuario 1 en este servidor
+        coleccion1 = propiedades.get(str(ctx.guild.id), {}).get(str(ctx.author.id), [])
 
-        # Verificar que Usuario 1 tenga la carta
-        if carta1 not in coleccion1:
-            await ctx.send(f"❌ No tienes la carta '{carta1}'.")
+        # Buscar el ID de la carta que Usuario 1 quiere dar
+        id_carta1, nombre_real1 = buscar_id(carta1)
+        if not id_carta1 or id_carta1 not in coleccion1:
+            await ctx.send(f"No tienes la carta '{carta1}'.")
             return
 
-        # Bloquear a ambos usuarios
+        # Bloquear a ambos usuarios mientras dure el intercambio
         self.bloqueados.add(ctx.author.id)
         self.bloqueados.add(usuario2.id)
 
         await ctx.send(
-            f"📨 {usuario2.mention}, {ctx.author.mention} quiere intercambiar su carta **{carta1}** contigo.\n"
+            f"{usuario2.mention}, {ctx.author.mention} quiere intercambiar su carta **{nombre_real1}** contigo.\n"
             f"Escribe el nombre de la carta que ofreces a cambio (tienes 2 minutos)."
         )
 
-        # Esperar respuesta de Usuario 2
+        # Función de comprobación: solo aceptar mensajes de Usuario 2 en el mismo canal
         def check_usuario2(m):
             return m.author.id == usuario2.id and m.channel == ctx.channel
 
         try:
+            # Esperar hasta 2 minutos la respuesta de Usuario 2
             respuesta2 = await self.bot.wait_for("message", timeout=120, check=check_usuario2)
         except asyncio.TimeoutError:
-            await ctx.send("⌛ Tiempo agotado. El intercambio ha sido cancelado.")
+            await ctx.send("Tiempo agotado. El intercambio ha sido cancelado.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
 
         carta2 = respuesta2.content.strip()
-        coleccion2 = propiedades.get(str(usuario2.id), [])
+        coleccion2 = propiedades.get(str(ctx.guild.id), {}).get(str(usuario2.id), [])
 
-        # Verificar que Usuario 2 tenga la carta
-        if carta2 not in coleccion2:
-            await ctx.send(f"❌ {usuario2.mention} no tiene la carta '{carta2}'. Intercambio cancelado.")
+        # Buscar el ID de la carta que Usuario 2 ofrece
+        id_carta2, nombre_real2 = buscar_id(carta2)
+        if not id_carta2 or id_carta2 not in coleccion2:
+            await ctx.send(f"{usuario2.mention} no tiene la carta '{carta2}'. Intercambio cancelado.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
 
         await ctx.send(
-            f"📨 {ctx.author.mention}, {usuario2.mention} ofrece su carta **{carta2}**.\n"
+            f"{ctx.author.mention}, {usuario2.mention} ofrece su carta **{nombre_real2}**.\n"
             f"Escribe `aceptar` o `denegar` (tienes 2 minutos)."
         )
 
-        # Esperar respuesta de Usuario 1
+        # Función de comprobación: solo aceptar mensajes de Usuario 1 con 'aceptar' o 'denegar'
         def check_usuario1(m):
             return m.author.id == ctx.author.id and m.channel == ctx.channel and m.content.lower() in ["aceptar", "denegar"]
 
         try:
+            # Esperar hasta 2 minutos la respuesta de Usuario 1
             respuesta1 = await self.bot.wait_for("message", timeout=120, check=check_usuario1)
         except asyncio.TimeoutError:
-            await ctx.send("⌛ Tiempo agotado. El intercambio ha sido cancelado.")
+            await ctx.send("Tiempo agotado. El intercambio ha sido cancelado.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
 
-        decision = respuesta1.content.lower()
-        if decision == "denegar":
-            await ctx.send(f"❌ {ctx.author.mention} ha rechazado el intercambio.")
+        if respuesta1.content.lower() == "denegar":
+            await ctx.send(f"{ctx.author.mention} ha rechazado el intercambio.")
             self.bloqueados.discard(ctx.author.id)
             self.bloqueados.discard(usuario2.id)
             return
 
-        # Realizar intercambio
-        coleccion1.remove(carta1)
-        coleccion2.remove(carta2)
-        coleccion1.append(carta2)
-        coleccion2.append(carta1)
+        # Realizar el intercambio usando IDs
+        coleccion1.remove(id_carta1)
+        coleccion2.remove(id_carta2)
+        coleccion1.append(id_carta2)
+        coleccion2.append(id_carta1)
 
-        propiedades[str(ctx.author.id)] = coleccion1
-        propiedades[str(usuario2.id)] = coleccion2
+        # Guardar cambios en propiedades
+        propiedades[str(ctx.guild.id)][str(ctx.author.id)] = coleccion1
+        propiedades[str(ctx.guild.id)][str(usuario2.id)] = coleccion2
         guardar_propiedades(propiedades)
 
         await ctx.send(
-            f"✅ Intercambio realizado:\n"
-            f"- {ctx.author.mention} entregó **{carta1}** y recibió **{carta2}**\n"
-            f"- {usuario2.mention} entregó **{carta2}** y recibió **{carta1}**"
+            f"Intercambio realizado:\n"
+            f"- {ctx.author.mention} entregó **{nombre_real1}** y recibió **{nombre_real2}**\n"
+            f"- {usuario2.mention} entregó **{nombre_real2}** y recibió **{nombre_real1}**"
         )
 
-        # Liberar bloqueo
+        # Liberar bloqueo para que puedan iniciar otros intercambios
         self.bloqueados.discard(ctx.author.id)
         self.bloqueados.discard(usuario2.id)
+
 
 
 async def setup(bot):
