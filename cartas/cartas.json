@@ -13066,5 +13066,29 @@
     "attack": 344,
     "defense": 260,
     "speed": 229
+  },
+  {
+    "id": 1090,
+    "nombre": "UR Ichiban Kasuga (Festival II)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Ichiban%20Kasuga%20%28Festival%20II%29.png",
+    "atributo": "technique",
+    "tipo": "attack",
+    "health": 1004,
+    "attack": 385,
+    "defense": 290,
+    "speed": 158
+  },
+  {
+    "id": 1091,
+    "nombre": "UR Mayumi Seto (Festival)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Mayumi%20Seto%20%28Festival%29.png",
+    "atributo": "technique",
+    "tipo": "support",
+    "health": 970,
+    "attack": 343,
+    "defense": 268,
+    "speed": 182
   }
 ]
