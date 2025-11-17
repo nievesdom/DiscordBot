@@ -56,6 +56,7 @@ class NavegadorPaquete(discord.ui.View):
 
         tipo_fmt = self.tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
 
+        # Crear embed
         embed = discord.Embed(
             title=f"{nombre}",
             color=color,
@@ -66,10 +67,12 @@ class NavegadorPaquete(discord.ui.View):
                 f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
             )
         )
+        # Footer del embed
         embed.set_footer(
             text=f"Card {self.i + 1} out of {len(self.cartas_ids)} • {self.dueño.display_name}'s daily pack"
         )
 
+        # Comprobar que la imagen existe
         if imagen and imagen.startswith("http"):
             embed.set_image(url=imagen)
             return embed, None
@@ -77,6 +80,7 @@ class NavegadorPaquete(discord.ui.View):
             embed.description += "\n⚠️ Card image not found. Please, contact my creator."
             return embed, None
 
+    # Actualizar vista
     async def actualizar(self):
         embed, archivo = self.mostrar()
         if archivo:
@@ -84,13 +88,14 @@ class NavegadorPaquete(discord.ui.View):
         else:
             await self.msg.edit(embed=embed, view=self)
 
-
+    # Botón anterior
     @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
     async def atras(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.i = (self.i - 1) % len(self.cartas_ids)
         await self.actualizar()
         await interaction.response.defer()
 
+    # Botón siguiente
     @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
     async def siguiente(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.i = (self.i + 1) % len(self.cartas_ids)

@@ -36,8 +36,7 @@ class CartasAuto(commands.Cog):
             self.settings["guilds"][gid].pop("next_spawn", None)
         guardar_settings(self.settings)
 
-    @commands.command(
-        help="Activates or deactivates automatic card spawning. Activate: `y!auto_cards #channel (max_hour_wait) (max_daily_number)`. Deactivate: `y!auto_cards`", extras={"categoria": "Cards 🃏"})
+    @commands.command(help="Activates or deactivates automatic card spawning. Activate: `y!auto_cards #channel (max_hour_wait) (max_daily_number)`. Deactivate: `y!auto_cards`", extras={"categoria": "Cards 🃏"})
     @commands.has_permissions(administrator=True)
     async def auto_cards(self, ctx, canal: discord.TextChannel = None, max_horas: int = None, max_diarias: int = None):
         gid = str(ctx.guild.id)

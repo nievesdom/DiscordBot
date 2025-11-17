@@ -12,6 +12,7 @@ from core.gist_propiedades import cargar_propiedades, guardar_propiedades
 from core.cartas import cargar_cartas, cartas_por_id
 from views.navegador import Navegador
 from views.reclamar import ReclamarCarta
+from discord import app_commands
 
 # Para tener comandos que solo pueda usar el creador del bot (yo)
 OWNER_ID = 182920174276575232
@@ -117,42 +118,56 @@ class Cartas(commands.Cog):
             await ctx.send(embed=embed, view=vista)
 
 
-    @commands.command(help="Shows a user's card collection. Mention another user if you want to see their collection instead. Ex: `y!album (@user)`.", extras={"categoria": "Cards 🃏"})
-    async def album(self, ctx, mencionado: discord.Member = None):
+    # Slash command para mostrar el álbum de cartas
+    @app_commands.command(
+        name="album",
+        description="Shows a user's card collection. Mention another user to see their collection."
+    )
+    async def album(self, interaction: discord.Interaction, user: discord.Member = None):
+        """
+        Slash command /album
+        - Si se menciona a un usuario, muestra su colección.
+        - Si no, muestra la colección del autor del comando.
+        """
+
         try:
-            # Si se menciona a una persona, ese será el objetivo, si no lo será el autor del mensaje
-            objetivo = mencionado or ctx.author
-            servidor_id = str(ctx.guild.id)
+            # Determinar objetivo: usuario mencionado o autor
+            objetivo = user or interaction.user
+            servidor_id = str(interaction.guild.id)
             usuario_id = str(objetivo.id)
 
-            # Carga el archivo de propiedades y guarda las del objetivo
+            # Cargar propiedades y obtener cartas del usuario
             propiedades = cargar_propiedades()
             cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
-            # Si no tiene cartas aún, se dice
+
             if not cartas_ids:
-                await ctx.send(f"{objetivo.display_name} has no cards yet.")
+                await interaction.response.send_message(
+                    f"{objetivo.display_name} has no cards yet.",
+                    ephemeral=True  # Solo visible para quien ejecuta el comando
+                )
                 return
 
-            # Busca la información de las cartas para mostrarla
+            # Buscar información de las cartas
             cartas_info = cartas_por_id()
-            vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
+            vista = Navegador(interaction, cartas_ids, cartas_info, objetivo)
             embed, archivo = vista.mostrar()
 
-            # Si puede borrar el mensaje con el comando, lo hace
-            if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
-                try:
-                    await ctx.message.delete()
-                except discord.Forbidden:
-                    pass
-
+            # Enviar respuesta con embed y vista
             if archivo:
-                vista.msg = await ctx.send(file=archivo, embed=embed, view=vista)
+                vista.msg = await interaction.response.send_message(
+                    file=archivo, embed=embed, view=vista
+                )
             else:
-                vista.msg = await ctx.send(embed=embed, view=vista)
+                vista.msg = await interaction.response.send_message(
+                    embed=embed, view=vista
+                )
 
         except Exception as e:
-            print(f"[ERROR] en comando album: {type(e).__name__} - {e}")
-            await ctx.send("An error happened while trying to show your album. Please, try again later or contact my creator.")
+            print(f"[ERROR] en slash command album: {type(e).__name__} - {e}")
+            await interaction.response.send_message(
+                "An error happened while trying to show the album. Please, try again later or contact my creator.",
+                ephemeral=True
+            )
 
 
     @commands.command(help="Shows a user's card collection in text mode. Mention another user if you want to see their collection instead. Ex: `y!collection (@user)`.", extras={"categoria": "Cards 🃏"})

@@ -13,32 +13,32 @@ class Generales(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(help="Saluda al usuario", extras={"categoria": "General 👤"})
+    @commands.command(help="Says hola to the user.", extras={"categoria": "General 👤"})
     async def hola(self, ctx):
         await ctx.send(f"¡Hola, {ctx.author.mention}!")
 
 
-    @commands.command(help="Repite lo que escriba el usuario")
-    async def decir(self, ctx, *, arg = None):
+    @commands.command(help="Repeats what the user says. Usage: `y!say <argument>`", extras={"categoria": "General 👤"})
+    async def say(self, ctx, *, arg = None):
         # Si no se escribe nada tras el comando, avisa
         if arg == None:
-            arg = "¿Qué quieres que diga? Escríbelo tras el comando. Ej: `y!decir Buenos días`"
+            arg = "What do you want me to say? Write it after the command. Ex: `y!say Good morning`"
         await ctx.send(arg)
 
 
-    @commands.command(help="Cuenta hasta un número introducido por el usuario", extras={"categoria": "General 👤"})
+    @commands.command(help="Counts up to the chosen number. Usage: `y!count <number>`", extras={"categoria": "General 👤"})
     async def contar(self, ctx, numero: int = 10):
         try:
             # Comprueba si se ha introducido un número entero positivo
             if numero <= 0:
-                await ctx.send("❌ Prueba tú a contar hasta ese número y luego me comentas. Ej: `y!contar 5`.")
+                await ctx.send("❌ You count up to that number and then tell me about it. Use a positive number. Ex: `y!count 5`.")
                 return
         except ValueError:
-            await ctx.send("❌ Introduce un número válido. Ej: `y!contar 5`.")
+            await ctx.send("❌ Choose a valid number. Ex: `y!count 5`.")
             return
 
         # Mensaje inicial
-        mensaje = await ctx.send("Contando... 0")
+        mensaje = await ctx.send("Counting... 0")
 
         async def contar_mensaje():
             # Bucle para contar desde 1 hasta el número introducido
@@ -46,7 +46,7 @@ class Generales(commands.Cog):
                 # Espera 1 segundo entre números
                 await asyncio.sleep(1)
                 await mensaje.edit(content=f"Contando... {i}")
-            await mensaje.edit(content=f"✅ Ya he terminado de contar hasta {numero}")
+            await mensaje.edit(content=f"✅ Finished counting to {numero}")
 
         # Ejecuta la función de conteo como tarea asincrónica
         asyncio.create_task(contar_mensaje())
@@ -54,7 +54,7 @@ class Generales(commands.Cog):
 
     @commands.command(help="Show the latest updates and what's coming up.", extras={"categoria": "General 👤"})
     async def updates(self, ctx):
-        await ctx.send("Latest update: bot published, yaay!\nNewly added cards:\n- UR Kasuga Ichiban (Festival II)\n- UR Mayumi Seto (Festival)\nComing up: card combat.")
+        await ctx.send("**Version:** 1.0\n**Latest update:** bot published, yaay!\n**Newly added cards:**\n- UR Kasuga Ichiban (Festival II)\n- UR Mayumi Seto (Festival)\n**Coming up:** card combat.")
     
 
     @commands.command(help="Send the feedback form link.", extras={"categoria": "General 👤"})
@@ -71,8 +71,8 @@ class Generales(commands.Cog):
     
         # Lista manual de categorías y comandos
         categorias = {
-            "👤 General": ["feedback", "help", "updates"],
-            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
+            "👤 General": ["count", "feedback", "help", "hola", "say", "updates"],
+            "🃏 Cards": ["auto_cards", "album", "collection", "search", "pack", "show"],
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["migrate", "tags1", "tags2"]
         }
@@ -80,6 +80,7 @@ class Generales(commands.Cog):
         # Agrupar comandos por nombre
         comandos_dict = {c.name: c for c in self.bot.commands if c.help}
     
+        # Listar el nombre de los comandos y la ayuda
         for nombre_cat, lista_comandos in categorias.items():
             texto = ""
             for nombre in lista_comandos:
