@@ -27,7 +27,7 @@ class Generales(commands.Cog):
 
 
     @commands.command(help="Counts up to the chosen number. Usage: `y!count <number>`", extras={"categoria": "General 👤"})
-    async def contar(self, ctx, numero: int = 10):
+    async def count(self, ctx, numero: int = 10):
         try:
             # Comprueba si se ha introducido un número entero positivo
             if numero <= 0:
