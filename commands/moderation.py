@@ -43,24 +43,60 @@ class Moderation(commands.Cog):
         relationships = []
         characters = []
         additional_tags = []
+        
+        # Diccionarios de simplificación
+        REL_SIMPLIFICACIONES = {
+            "Kiryu Kazuma/Majima Goro": ["Kiryu/Majima"],
+            "Dojima Daigo/Mine Yoshitaka": ["Daigo/Mine"],
+            "Kiryu Kazuma & Sawamura Haruka": ["Kiryu & Haruka"],
+            "Dojima Daigo & Kiryu Kazuma": ["Daigo & Kiryu"],
+            "Dojima Daigo/Shinada Tatsuo": ["Daigo/Shinada"],
+            "Dojima Daigo & Sawamura Haruka": ["Daigo & Haruka"],
+            "Kiryu Kazuma & Nishikiyama Akira": ["Kiryu & Nishiki"],
+            "Kiryu Kazuma & Majima Goro": ["Kiryu & Majima"],
+            "Dojima Daigo & Majima Goro": ["Daigo & Majima"],
+            "Majima Goro & Sawamura Haruka": ["Majima & Haruka"],
+            "Sawamura Haruka/Usami Yuta": ["Haruka/Yuta"],
+            "Kasuga Ichiban/Zhao Tianyou": ["Ichiban/Zhao"],
+        }
 
-        # Recorrer los campos del embed para extraer información
+        TAG_SIMPLIFICACIONES = {
+            "Alternate Universe - Canon Divergence": ["Alternate Universe"],
+            "Established Relationship": ["Established Relation"],
+            "Domestic Fluff": ["Fluff", "Domestic"],
+            "Angst/Fluff": ["Angst", "Fluff"],
+            "Emotional Hurt/Comfort": ["Hurt/Comfort"],
+            "Fluff and Angst": ["Fluff", "Angst"],
+        }
+
+        # Función genérica para simplificar listas de tags
+        def simplificar(tags, reglas):
+            resultado = []
+            for tag in tags:
+                if tag in reglas:
+                    resultado.extend(reglas[tag])  # puede añadir uno o varios
+                else:
+                    resultado.append(tag)
+            return resultado
+
+        # Recorrer campos del embed
         for field in embed.fields:
             nombre = field.name.lower().strip(": ")
             valor = field.value.strip()
             if "rating" in nombre:
-                # Limpiar el rating y simplificar algunos valores para que coincidan con nuestras etiquetas
                 rating = re.sub(r"^[:\w\s]*:", "", valor).strip(" :")
                 if rating == "Teen And Up Audiences":
                     rating = "Teen And Up"
             elif "categories" in nombre:
                 categories = [v.strip() for v in valor.split(",") if v.strip()]
             elif "relationships" in nombre:
-                relationships = [v.strip() for v in valor.split(",") if v.strip()]
+                raw_rels = [v.strip() for v in valor.split(",") if v.strip()]
+                relationships = simplificar(raw_rels, REL_SIMPLIFICACIONES)
             elif "characters" in nombre:
                 characters = [v.strip() for v in valor.split(",") if v.strip()]
             elif "additional tags" in nombre:
-                additional_tags = [v.strip() for v in valor.split(",") if v.strip()]
+                raw_tags = [v.strip() for v in valor.split(",") if v.strip()]
+                additional_tags = simplificar(raw_tags, TAG_SIMPLIFICACIONES)
 
         # Construir conjuntos de etiquetas principales y adicionales
         etiquetas_principales = set()
