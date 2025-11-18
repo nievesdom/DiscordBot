@@ -32,8 +32,8 @@ class Cartas(commands.Cog):
         self.bot = bot
         self.bloqueados = set()  # Usuarios en intercambio activo
 
-    # Solo el sueño del bot puede usar este comando
-    @commands.check(es_dueno)
+    # Solo el dueño del bot puede usar este comando, quitado para que puedas probarlo si quieres
+    # @commands.check(es_dueno)
     @commands.command(help="Saca una carta aleatoria de RGGO.", extras={"categoria": "Cartas 🃏"})
     async def carta(self, ctx):
         # Cargar todas las cartas
