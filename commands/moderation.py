@@ -74,6 +74,7 @@ class Moderation(commands.Cog):
             "Angst/Fluff": ["Angst", "Fluff"],
             "Emotional Hurt/Comfort": ["Hurt/Comfort"],
             "Fluff and Angst": ["Fluff", "Angst"],
+            "Mine Yoshitaka Lives": ["Mine Lives"],
         }
 
         # Función genérica para simplificar listas de tags
