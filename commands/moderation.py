@@ -168,7 +168,8 @@ class Moderation(commands.Cog):
                 continue
 
             link = link_match.group(0)
-            titulo, autor, etiquetas_principales, _, relationships, characters = self._parse_embed(embed)
+            # ⚠️ IMPORTANTE: ahora también recibimos etiquetas_adicionales
+            titulo, autor, etiquetas_principales, etiquetas_adicionales, relationships, characters = self._parse_embed(embed)
 
             # Ignorar si no hay autor o si el enlace ya fue migrado
             if not autor or link in obras_usadas:
@@ -176,8 +177,12 @@ class Moderation(commands.Cog):
                 
             # Formatear título y preparar etiquetas
             nombre_post = self._formatear_titulo(titulo, autor, relationships, characters)
+
+            # 🔹 Unir etiquetas principales y adicionales
+            todas_etiquetas = etiquetas_principales.union(etiquetas_adicionales)
+
             etiquetas_foro = {tag.name: tag for tag in foro_destino.available_tags}
-            applied_tags = [etiquetas_foro[n] for n in etiquetas_principales if n in etiquetas_foro]
+            applied_tags = [etiquetas_foro[n] for n in todas_etiquetas if n in etiquetas_foro]
 
             try:
                 # Crear hilo en el foro con título, enlace y etiquetas
