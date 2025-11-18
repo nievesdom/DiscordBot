@@ -58,6 +58,11 @@ class Moderation(commands.Cog):
             "Majima Goro & Sawamura Haruka": ["Majima & Haruka"],
             "Sawamura Haruka/Usami Yuta": ["Haruka/Yuta"],
             "Kasuga Ichiban/Zhao Tianyou": ["Ichiban/Zhao"],
+            "Dojima Daigo & Dojima Yayoi": ["Daigo & Yayoi"],
+            "Majima Goro/Saejima Taiga": ["Majima/Saejima"],
+            "Majima Goro & Saejima Taiga": ["Majima & Saejima"],
+            "Kazama Shintaro | Fuma & Kashiwagi Osamu": ["Kazama & Kashiwagi"],
+            "Kazama Shintaro | Fuma & Kiryu Kazuma": ["Kazama & Kiryu"],
         }
 
         TAG_SIMPLIFICACIONES = {
