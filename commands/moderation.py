@@ -63,6 +63,8 @@ class Moderation(commands.Cog):
             "Majima Goro & Saejima Taiga": ["Majima & Saejima"],
             "Kazama Shintaro | Fuma & Kashiwagi Osamu": ["Kazama & Kashiwagi"],
             "Kazama Shintaro | Fuma & Kiryu Kazuma": ["Kazama & Kiryu"],
+            "Akiyama Shun/Hana": ["Akiyama/Hana"],
+            
         }
 
         TAG_SIMPLIFICACIONES = {
