@@ -64,6 +64,8 @@ class Moderation(commands.Cog):
             "Kazama Shintaro | Fuma & Kashiwagi Osamu": ["Kazama & Kashiwagi"],
             "Kazama Shintaro | Fuma & Kiryu Kazuma": ["Kazama & Kiryu"],
             "Akiyama Shun/Hana": ["Akiyama/Hana"],
+            "Kiryu Kazuma/Nishikiyama Akira": ["Kiryu/Nishiki"],
+            "Baba Shigeki/Saejima Taiga": ["Baba/Saejima"],
             
         }
 
