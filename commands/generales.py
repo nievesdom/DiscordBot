@@ -45,7 +45,7 @@ class Generales(commands.Cog):
             for i in range(1, numero + 1):
                 # Espera 1 segundo entre números
                 await asyncio.sleep(1)
-                await mensaje.edit(content=f"Contando... {i}")
+                await mensaje.edit(content=f"Counting... {i}")
             await mensaje.edit(content=f"✅ Finished counting to {numero}")
 
         # Ejecuta la función de conteo como tarea asincrónica
