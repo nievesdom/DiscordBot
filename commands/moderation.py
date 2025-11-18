@@ -75,6 +75,11 @@ class Moderation(commands.Cog):
             "Emotional Hurt/Comfort": ["Hurt/Comfort"],
             "Fluff and Angst": ["Fluff", "Angst"],
             "Mine Yoshitaka Lives": ["Mine Lives"],
+            "Plot What Plot/Porn Without Plot": ["Porn Without Plot"],
+            "Trans Male Character": ["Trans Character"],
+            "Trans Female Character": ["Trans Character"],
+            "Trans": ["Trans Character"],
+            "T4T": ["Trans Character"],
         }
 
         # Función genérica para simplificar listas de tags
