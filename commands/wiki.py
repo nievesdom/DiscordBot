@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 import aiohttp
 import random
+from discord import app_commands
 
-# Clase que agrupa los comandos relacionados con la wiki de Yakuza
 class Wiki(commands.Cog):
     def categoría(nombre):
         def decorador(comando):
@@ -14,9 +14,9 @@ class Wiki(commands.Cog):
     def __init__(self, bot):
         self.bot = bot  # Referencia al bot principal
 
-
-    @commands.command(help="Searches a term in the yakuza Wiki.", extras={"categoria": "Wiki 🌐"})
-    async def wiki(self, ctx, *, termino: str):
+    @app_commands.command(name="wiki", description="Searches a term in the Yakuza Wiki.")
+    @app_commands.describe(termino="Término a buscar en la wiki")
+    async def wiki(self, interaction: discord.Interaction, *, termino: str):
         # Reemplazar espacios por "+" para formar la consulta
         termino_enc = termino.replace(' ', '+')
 
@@ -34,17 +34,17 @@ class Wiki(commands.Cog):
             enlace = f"https://yakuza.fandom.com/wiki/{mejor.replace(' ', '_')}"
             try:
                 # Intentar enviar el mensaje por DM al autor
-                await ctx.author.send(f"Here's the best coincidence for your search:\n{enlace}")
+                await interaction.user.send(f"Here's the best coincidence for your search:\n{enlace}")
+                await interaction.response.send_message("📬 I sent you a DM with the result!", ephemeral=True)
             except discord.Forbidden:
                 # Si el usuario tiene bloqueados los DMs, avisar en el canal
-                await ctx.send("⚠️ I couldn't send you a direct message. Please check your privacy settings.")
+                await interaction.response.send_message("⚠️ I couldn't send you a direct message. Please check your privacy settings.", ephemeral=True)
         else:
             # Si no hay resultados, enviar mensaje de error
-            await ctx.send("Sorry, I couldn't find anything.")
+            await interaction.response.send_message("Sorry, I couldn't find anything.", ephemeral=True)
 
-
-    @commands.command(help="Sends a random character name.", extras={"categoria": "Wiki 🌐"})
-    async def character(self, ctx):
+    @app_commands.command(name="character", description="Sends a random character name.")
+    async def character(self, interaction: discord.Interaction):
         # URL base de la API
         url = "https://yakuza.fandom.com/api.php"
 
@@ -77,10 +77,7 @@ class Wiki(commands.Cog):
         # Elegir un personaje aleatorio de la lista
         elegido = random.choice(personajes)
         
-        await ctx.send(elegido)
-        
-
+        await interaction.response.send_message(elegido)
 
 async def setup(bot):
     await bot.add_cog(Wiki(bot))
-
