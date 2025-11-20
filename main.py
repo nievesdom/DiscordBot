@@ -5,6 +5,8 @@ import logging
 from keep_alive import iniciar_servidor
 import asyncio
 
+GUILD_ID = 286617766516228096  # ID del servidor de pruebas
+
 bot = commands.Bot(command_prefix='y!', intents=INTENTS, help_command=None)
 
 iniciar_servidor()
@@ -12,8 +14,9 @@ iniciar_servidor()
 @bot.event
 async def on_ready():
     print(f'Bot conectado como {bot.user}')
-    synced = await bot.tree.sync()
-    print(f"Slash commands sincronizados: {len(synced)} comandos.")
+    # Sincroniza solo los guild commands para pruebas rápidas
+    synced = await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
+    print(f"Slash commands sincronizados en el guild de pruebas: {len(synced)} comandos.")
 
 async def main():
     async with bot:
