@@ -6,7 +6,7 @@ from core.cartas import cargar_cartas
 # Reclamar una carta
 class ReclamarCarta(discord.ui.View):
     def __init__(self, carta_id, embed, imagen_ruta):
-        super().__init__(timeout=300)  # El botón expira tras 5 minutos
+        super().__init__(timeout=600)  # El botón expira tras 10 minutos
         self.carta_id = carta_id
         self.embed = embed
         self.imagen_ruta = imagen_ruta
