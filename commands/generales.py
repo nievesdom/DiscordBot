@@ -62,8 +62,8 @@ class Generales(commands.Cog):
     async def feedback(self, ctx):
         await ctx.send("Here is the feedback form. I appreciate your input! https://forms.gle/Y4e2TpHRgpfZ18Hj6")
         
-    @commands.tree.command(name="ping", description="Responde con Pong!")
-    async def ping(interaction: discord.Interaction):
+    @app_commands.command(name="ping", description="Responde con Pong!")
+    async def ping(self, interaction):
         await interaction.response.send_message("Pong!")
 
 
