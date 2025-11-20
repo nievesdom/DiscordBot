@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+from discord import app_commands
 
 class Generales(commands.Cog):
     
@@ -60,6 +61,11 @@ class Generales(commands.Cog):
     @commands.command(help="Send the feedback form link.", extras={"categoria": "General 👤"})
     async def feedback(self, ctx):
         await ctx.send("Here is the feedback form. I appreciate your input! https://forms.gle/Y4e2TpHRgpfZ18Hj6")
+        
+    @commands.tree.command(name="ping", description="Responde con Pong!")
+    async def ping(interaction: discord.Interaction):
+        await interaction.response.send_message("Pong!")
+
 
 
     @commands.command(help="Shows all available commands.", extras={"categoria": "General 👤"})

@@ -3,6 +3,7 @@ from discord.ext import commands
 from config import TOKEN, INTENTS
 import logging
 from keep_alive import iniciar_servidor
+from discord import app_commands
 
 # Configuración de los logs
 logging.basicConfig(
@@ -27,6 +28,7 @@ async def on_ready():
     await bot.load_extension("commands.wiki")
     await bot.load_extension("commands.moderation")
     await bot.load_extension("commands.auto_cards")
+    await bot.load_extension("commands.battle")
 
 # Ejecutar el bot
 bot.run(TOKEN)
