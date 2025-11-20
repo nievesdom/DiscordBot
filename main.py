@@ -1,11 +1,8 @@
 import discord
 from discord.ext import commands
 from config import TOKEN, INTENTS
-import logging
 from keep_alive import iniciar_servidor
 import asyncio
-
-GUILD_ID = 286617766516228096  # ID del servidor de pruebas
 
 bot = commands.Bot(command_prefix='y!', intents=INTENTS, help_command=None)
 
@@ -14,12 +11,13 @@ iniciar_servidor()
 @bot.event
 async def on_ready():
     print(f'Bot conectado como {bot.user}')
-    # Sincroniza solo los guild commands para pruebas rápidas
-    synced = await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
-    print(f"Slash commands sincronizados en el guild de pruebas: {len(synced)} comandos.")
+    # Sincroniza globalmente todos los slash commands
+    synced = await bot.tree.sync()
+    print(f"Slash commands globales sincronizados: {len(synced)} comandos.")
 
 async def main():
     async with bot:
+        # Carga tus cogs normalmente, no hace falta registrar comando por comando
         await bot.load_extension("commands.generales")
         await bot.load_extension("commands.cartas")
         await bot.load_extension("commands.wiki")
