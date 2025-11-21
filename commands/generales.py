@@ -17,16 +17,6 @@ class Generales(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # NECESARIO para registrar los slash commands en el guild de pruebas
-    async def cog_load(self):
-        self.bot.tree.add_command(self.hola, guild=GUILD)
-        self.bot.tree.add_command(self.say, guild=GUILD)
-        self.bot.tree.add_command(self.count, guild=GUILD)
-        self.bot.tree.add_command(self.updates, guild=GUILD)
-        self.bot.tree.add_command(self.feedback, guild=GUILD)
-        self.bot.tree.add_command(self.ping, guild=GUILD)
-        self.bot.tree.add_command(self.help, guild=GUILD)
-
     @app_commands.command(name="hola", description="Says hola to the user.")
     async def hola(self, interaction: discord.Interaction):
         # Envía un saludo al usuario que ejecuta el comando
@@ -78,40 +68,39 @@ class Generales(commands.Cog):
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
-        @app_commands.command(name="help", description="Shows all available slash commands.")
-        async def help(self, interaction: discord.Interaction):
-            # ⚠️ Hacemos defer para evitar que la interacción caduque mientras construimos la lista
-            await interaction.response.defer(ephemeral=True)
-    
-            # 📌 Obtenemos todos los comandos registrados en el árbol de slash commands
-            # Si los registras por servidor, pasa el guild: get_commands(guild=interaction.guild)
-            comandos = self.bot.tree.get_commands(guild=interaction.guild)
-    
-            # Creamos el embed que contendrá la lista
-            embed = discord.Embed(
-                title="📖 Available slash commands",
-                color=discord.Color.blurple(),
-                description="Use the / prefix and let Discord guide you with parameters."
-            )
-    
-            # 🔎 Recorremos los comandos y añadimos cada uno con su descripción
-            for comando in sorted(comandos, key=lambda c: c.name):
-                # Si es un grupo de comandos (ej. /cards add, /cards remove)
-                if isinstance(comando, app_commands.Group):
-                    texto = ""
-                    for sub in comando.commands:
-                        texto += f"**/{comando.name} {sub.name}** — {sub.description or 'No description'}\n"
-                    embed.add_field(name=f"/{comando.name}", value=texto, inline=False)
-                else:
-                    # Comando normal
-                    embed.add_field(
-                        name=f"/{comando.name}",
-                        value=comando.description or "No description",
-                        inline=False
-                    )
-    
-            # 📤 Enviamos el embed como respuesta
-            await interaction.followup.send(embed=embed, ephemeral=True)
+    @app_commands.command(name="help", description="Shows all available slash commands.")
+    async def help(self, interaction: discord.Interaction):
+        # ⚠️ Hacemos defer para evitar que la interacción caduque mientras construimos la lista
+        await interaction.response.defer(ephemeral=True)
+
+        # 📌 Obtenemos todos los comandos registrados en el árbol de slash commands
+        comandos = self.bot.tree.get_commands(guild=interaction.guild)
+
+        # Creamos el embed que contendrá la lista
+        embed = discord.Embed(
+            title="📖 Available slash commands",
+            color=discord.Color.blurple(),
+            description="Use the / prefix and let Discord guide you with parameters."
+        )
+
+        # 🔎 Recorremos los comandos y añadimos cada uno con su descripción
+        for comando in sorted(comandos, key=lambda c: c.name):
+            # Si es un grupo de comandos (ej. /cards add, /cards remove)
+            if isinstance(comando, app_commands.Group):
+                texto = ""
+                for sub in comando.commands:
+                    texto += f"**/{comando.name} {sub.name}** — {sub.description or 'No description'}\n"
+                embed.add_field(name=f"/{comando.name}", value=texto, inline=False)
+            else:
+                # Comando normal
+                embed.add_field(
+                    name=f"/{comando.name}",
+                    value=comando.description or "No description",
+                    inline=False
+                )
+
+        # 📤 Enviamos el embed como respuesta
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
 
 async def setup(bot):
