@@ -282,118 +282,85 @@ class Cartas(commands.Cog):
     @app_commands.command(name="trade", description="Starts a card trade with another user")
     @app_commands.describe(user="User to trade with", card="Card to trade")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
-        # Safe defer para evitar 'interaction failed'
         await self._safe_defer(interaction, ephemeral=True)
-    
         try:
-            # ---- Comprobación de usuarios bloqueados ----
             if interaction.user.id in self.bloqueados or user.id in self.bloqueados:
                 await interaction.followup.send("🚫 One or more of the users is already in an active trade.", ephemeral=True)
                 return
-    
-            # ---- Aviso y petición de carta al segundo usuario ----
-            await interaction.followup.send(
-                f"{user.mention}, {interaction.user.display_name} wants to trade their card **{card}** with you. "
-                "Write the name of a card you want to exchange (you have 2 minutes).",
-                ephemeral=False
-            )
-    
-            # Solo acepta mensajes del usuario 2 en el mismo canal
+
+            # Message-based trade flow (keeps the original interaction style)
+            # We'll send the initial prompt and then wait for messages from the other user
+            await interaction.followup.send(f"{user.mention}, {interaction.user.display_name} wants to trade their card **{card}** with you. Write the name of a card you want to exchange (you have 2 minutes).", ephemeral=False)
+
             def check_usuario2(m):
                 return m.author.id == user.id and m.channel.id == interaction.channel_id
-    
+
             try:
                 respuesta2 = await self.bot.wait_for("message", timeout=120, check=check_usuario2)
             except asyncio.TimeoutError:
                 await interaction.followup.send("⌛ Time's up. The trade has been cancelled.")
                 return
-    
+
             carta2 = respuesta2.content.strip()
-    
-            # ---- Cargar inventarios desde archivo ----
             propiedades = cargar_propiedades()
             coleccion1 = propiedades.get(str(interaction.guild.id), {}).get(str(interaction.user.id), [])
             coleccion2 = propiedades.get(str(interaction.guild.id), {}).get(str(user.id), [])
-    
-            # ---- Cargar datos de cartas ----
+
+            # Find card objects
             cartas = cargar_cartas()
-    
-            # Buscar carta 1 (del usuario iniciador)
             carta1_obj = next((c for c in cartas if card.lower() in c["nombre"].lower()), None)
-    
-            # Buscar carta 2 (del usuario que responde)
             carta2_obj = next((c for c in cartas if carta2.lower() in c["nombre"].lower()), None)
-    
-            # ---- Validar cartas ----
+
             if not carta1_obj:
                 await interaction.followup.send(f"❌ The card '{card}' hasn't been found.", ephemeral=True)
                 return
-    
             if not carta2_obj:
                 await interaction.followup.send(f"❌ The card '{carta2}' hasn't been found. Trade cancelled.")
                 return
-    
+
             carta1_id = carta1_obj["id"]
             carta2_id = carta2_obj["id"]
-    
-            # ---- Comprobar si realmente las tienen ----
-            # (SIN cambiar tu forma original de validación)
+
             if carta1_id not in coleccion1:
                 await interaction.followup.send(f"❌ You don't have a card named {card}.", ephemeral=True)
                 return
-    
             if carta2_id not in coleccion2:
-                await interaction.followup.send(
-                    f"❌ {user.mention}, you don't have a card named {carta2}. Trade cancelled."
-                )
+                await interaction.followup.send(f"❌ {user.mention}, you don't have a card named {carta2}. Trade cancelled.")
                 return
-    
-            # ---- Pedir confirmación al usuario 1 ----
-            await interaction.followup.send(
-                f"{user.mention} offers their card **{carta2_obj['nombre']}** in exchange of your card **{carta1_obj['nombre']}**.\n"
-                "Write `accept` or `reject` (you have two minutes)."
-            )
-    
-            # Solo acepta mensaje del usuario 1 con "accept" o "reject"
+
+            await interaction.followup.send(f"{user.mention} offers their card **{carta2_obj['nombre']}** in exchange of your card **{carta1_obj['nombre']}**.\nWrite `accept` or `reject` (you have two minutes).")
+
             def check_usuario1(m):
-                return (m.author.id == interaction.user.id 
-                        and m.channel.id == interaction.channel_id 
-                        and m.content.lower() in ["accept", "reject"])
-    
+                return m.author.id == interaction.user.id and m.channel.id == interaction.channel_id and m.content.lower() in ["accept", "reject"]
+
             try:
                 respuesta1 = await self.bot.wait_for("message", timeout=120, check=check_usuario1)
             except asyncio.TimeoutError:
                 await interaction.followup.send("⌛ Time's up. The trade has been cancelled.")
                 return
-    
+
             if respuesta1.content.lower() == "reject":
-                await interaction.followup.send(
-                    f"❌ {user.mention}, {interaction.user.display_name} has rejected the trade."
-                )
+                await interaction.followup.send(f"❌ {user.mention}, {interaction.user.display_name} has rejected the trade.")
                 return
-    
-            # ---- Intercambio final (sin modificar tu logica original) ----
+
+            # perform trade
             propiedades[str(interaction.guild.id)][str(interaction.user.id)].remove(carta1_id)
             propiedades[str(interaction.guild.id)][str(user.id)].remove(carta2_id)
             propiedades[str(interaction.guild.id)][str(interaction.user.id)].append(carta2_id)
             propiedades[str(interaction.guild.id)][str(user.id)].append(carta1_id)
-    
             guardar_propiedades(propiedades)
-    
-            # ---- Mensaje de confirmación ----
+
             await interaction.followup.send(
-                f"✅ Trade successful:\n"
-                f"- {interaction.user.mention} traded **{carta1_obj['nombre']}** and received **{carta2_obj['nombre']}**\n"
+                f"✅ Trade successful:\n- {interaction.user.mention} traded **{carta1_obj['nombre']}** and received **{carta2_obj['nombre']}**\n"
                 f"- {user.mention} traded **{carta2_obj['nombre']}** and received **{carta1_obj['nombre']}**"
             )
-    
+
         except Exception as e:
             print(f"[ERROR] trade: {type(e).__name__} - {e}")
             try:
                 await interaction.followup.send("An error happened during the trade.", ephemeral=True)
             except Exception:
                 pass
-            
 
 async def setup(bot):
     await bot.add_cog(Cartas(bot))
