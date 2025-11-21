@@ -65,9 +65,9 @@ class Generales(commands.Cog):
     @app_commands.command(name="updates", description="Show the latest updates and what's coming up.")
     async def updates(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "**Version:** 1.1\n**Latest update:** compatibility with slash commands. Now you can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
+            "**Version:** 1.1\n**Latest update:** now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
             "**Newly added cards:**\n- UR Kaoru Sayama (Palace)\n- UR Homare Nishitani (Festival)\n- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:** card combat."
+            "**Coming up:** card combat!"
         )
 
     @app_commands.command(name="feedback", description="Send the feedback form link.")
@@ -78,35 +78,41 @@ class Generales(commands.Cog):
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
-    @app_commands.command(name="help", description="Shows all available commands.")
-    async def help(self, interaction: discord.Interaction):
-        embed = discord.Embed(
-            title="📖 Available commands:",
-            color=discord.Color.blurple()
-        )
+        @app_commands.command(name="help", description="Shows all available slash commands.")
+        async def help(self, interaction: discord.Interaction):
+            # ⚠️ Hacemos defer para evitar que la interacción caduque mientras construimos la lista
+            await interaction.response.defer(ephemeral=True)
+    
+            # 📌 Obtenemos todos los comandos registrados en el árbol de slash commands
+            # Si los registras por servidor, pasa el guild: get_commands(guild=interaction.guild)
+            comandos = self.bot.tree.get_commands(guild=interaction.guild)
+    
+            # Creamos el embed que contendrá la lista
+            embed = discord.Embed(
+                title="📖 Available slash commands",
+                color=discord.Color.blurple(),
+                description="Use the / prefix and let Discord guide you with parameters."
+            )
+    
+            # 🔎 Recorremos los comandos y añadimos cada uno con su descripción
+            for comando in sorted(comandos, key=lambda c: c.name):
+                # Si es un grupo de comandos (ej. /cards add, /cards remove)
+                if isinstance(comando, app_commands.Group):
+                    texto = ""
+                    for sub in comando.commands:
+                        texto += f"**/{comando.name} {sub.name}** — {sub.description or 'No description'}\n"
+                    embed.add_field(name=f"/{comando.name}", value=texto, inline=False)
+                else:
+                    # Comando normal
+                    embed.add_field(
+                        name=f"/{comando.name}",
+                        value=comando.description or "No description",
+                        inline=False
+                    )
+    
+            # 📤 Enviamos el embed como respuesta
+            await interaction.followup.send(embed=embed, ephemeral=True)
 
-        # Lista manual de categorías y comandos
-        categorias = {
-            "👤 General": ["count", "feedback", "help", "hola", "say", "updates"],
-            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
-            "🌐 Wiki": ["wiki", "character"],
-            "🔨 Moderation": ["auto_cards", "migrate", "tags1", "tags2"]
-        }
-
-        # Agrupar comandos por nombre
-        comandos_dict = {c.name: c for c in self.bot.commands if c.help}
-
-        # Listar el nombre de los comandos y la ayuda
-        for nombre_cat, lista_comandos in categorias.items():
-            texto = ""
-            for nombre in lista_comandos:
-                comando = comandos_dict.get(nombre)
-                if comando:
-                    texto += f"**/{comando.name}** → {comando.help}\n"
-            if texto:
-                embed.add_field(name=nombre_cat, value=texto, inline=False)
-
-        await interaction.response.send_message(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Generales(bot))

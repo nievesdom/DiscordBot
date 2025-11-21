@@ -269,7 +269,7 @@ class Cartas(commands.Cog):
     # /show (detalles de una carta)
     # -----------------------------
     @app_commands.command(name="show", description="Shows a card's image and data")
-    @app_commands.describe(name="Card name")
+    @app_commands.describe(name="Name of the card you want to see")
     async def show(self, interaction: discord.Interaction, name: str):
         """
         Muestra una carta concreta buscando por nombre (subcadena, no exacto).
