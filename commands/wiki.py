@@ -15,7 +15,7 @@ class Wiki(commands.Cog):
         self.bot = bot  # Referencia al bot principal
 
     @app_commands.command(name="wiki", description="Searches a term in the Yakuza Wiki.")
-    @app_commands.describe(termino="Término a buscar en la wiki")
+    @app_commands.describe(termino="Term to search for in the wiki")
     async def wiki(self, interaction: discord.Interaction, *, termino: str):
         # Reemplazar espacios por "+" para formar la consulta
         termino_enc = termino.replace(' ', '+')

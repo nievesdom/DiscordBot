@@ -13090,5 +13090,41 @@
     "attack": 343,
     "defense": 268,
     "speed": 182
+  },
+  {
+    "id": 1092,
+    "nombre": "UR Homare Nishitani (Festival)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Homare%20Nishitani%20%28Festival%29.png",
+    "atributo": "shadow",
+    "tipo": "support",
+    "health": 1002,
+    "attack": 279,
+    "defense": 196,
+    "speed": 222
+  },
+  {
+    "id": 1093,
+    "nombre": "UR Kaoru Sayama (Palace)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Kaoru%20Sayama%20%28Palace%29.png",
+    "atributo": "body",
+    "tipo": "defense",
+    "health": 1320,
+    "attack": 226,
+    "defense": 254,
+    "speed": 187
+  },
+  {
+    "id": 1094,
+    "nombre": "UR Yoshitaka Mine (Festival)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yoshitaka%20Mine%20%28Festival%29.png",
+    "atributo": "body",
+    "tipo": "defense",
+    "health": 1026,
+    "attack": 309,
+    "defense": 282,
+    "speed": 146
   }
 ]

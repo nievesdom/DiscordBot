@@ -33,14 +33,14 @@ class Generales(commands.Cog):
         await interaction.response.send_message(f"¡Hola, {interaction.user.mention}!")
 
     @app_commands.command(name="say", description="Repeats what the user says.")
-    @app_commands.describe(arg="Texto que quieres que el bot repita")
+    @app_commands.describe(arg="Text you want the bot to repeat")
     async def say(self, interaction: discord.Interaction, arg: str = None):
         if arg is None:
             arg = "What do you want me to say? Write it after the command. Ex: `/say Good morning`"
         await interaction.response.send_message(arg)
 
     @app_commands.command(name="count", description="Counts up to the chosen number.")
-    @app_commands.describe(numero="Número hasta el que quieres contar")
+    @app_commands.describe(numero="Number you want to count up to")
     async def count(self, interaction: discord.Interaction, numero: int = 10):
         try:
             if numero <= 0:
@@ -88,9 +88,9 @@ class Generales(commands.Cog):
         # Lista manual de categorías y comandos
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "say", "updates"],
-            "🃏 Cards": ["auto_cards", "album", "collection", "search", "pack", "show"],
+            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
             "🌐 Wiki": ["wiki", "character"],
-            "🔨 Moderation": ["migrate", "tags1", "tags2"]
+            "🔨 Moderation": ["auto_cards", "migrate", "tags1", "tags2"]
         }
 
         # Agrupar comandos por nombre

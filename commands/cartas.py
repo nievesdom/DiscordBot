@@ -31,7 +31,16 @@ class Cartas(commands.Cog):
             pass
 
     # ---- /carta ----
-    @app_commands.command(name="carta", description="Draws a random RGGO card")
+    def owner_only(interaction: discord.Interaction):
+        return interaction.user.id == interaction.client.owner_id
+    
+    
+    @app_commands.command(
+        name="carta",
+        description="Draws a random RGGO card",
+        default_permissions=None   # No se sugiere a nadie
+    )
+    @app_commands.check(owner_only)  # Solo el dueño puede usarlo
     async def carta(self, interaction: discord.Interaction):
         await self._safe_defer(interaction)
         try:
@@ -39,28 +48,29 @@ class Cartas(commands.Cog):
             if not cartas:
                 await interaction.followup.send("No cards available.", ephemeral=True)
                 return
-
+    
             elegida = random.choice(cartas)
+    
             colores = {"UR":0x8841f2,"KSR":0xabfbff,"SSR":0x57ffae,"SR":0xfcb63d,"R":0xfc3d3d,"N":0x8c8c8c}
             atributos = {"heart":"心","technique":"技","body":"体","light":"陽","shadow":"陰"}
             tipos = {"attack":"⚔️ Attack","defense":"🛡️ Defense","recovery":"❤️ Recovery","support":"✨ Support"}
-
+    
             rareza = elegida.get("rareza","N")
             color = colores.get(rareza,0x8c8c8c)
             attr_raw = str(elegida.get("atributo","—")).lower()
             tipo_raw = str(elegida.get("tipo","—")).lower()
-
+    
             attr_symbol = atributos.get(attr_raw,"")
             attr_name = attr_raw.capitalize() if attr_raw != "—" else "—"
             atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
             tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
-
+    
             embed = discord.Embed(
                 title=f"{elegida.get('nombre','Carta')}",
                 color=color,
                 description=f"**Attribute:** {atributo_fmt}\n**Type:** {tipo_fmt}\n❤️ {elegida.get('health','—')} | ⚔️ {elegida.get('attack','—')} | 🛡️ {elegida.get('defense','—')} | 💨 {elegida.get('speed','—')}"
             )
-
+    
             ruta_img = elegida.get("imagen")
             archivo = None
             if ruta_img and ruta_img.startswith("http"):
@@ -70,18 +80,21 @@ class Cartas(commands.Cog):
                 embed.set_image(url="attachment://carta.png")
             else:
                 embed.description += "\n⚠️ Card image not found."
-
+    
             vista = ReclamarCarta(elegida["id"], embed, ruta_img)
+    
             if archivo:
                 await interaction.followup.send(file=archivo, embed=embed, view=vista)
             else:
                 await interaction.followup.send(embed=embed, view=vista)
+    
         except Exception as e:
             print(f"[ERROR] carta: {type(e).__name__} - {e}")
             try:
                 await interaction.followup.send("An error occurred while running the command.", ephemeral=True)
             except Exception:
                 pass
+
 
     # ---- /album ----
     @app_commands.command(name="album", description="Shows a user's card collection")
