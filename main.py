@@ -11,8 +11,11 @@ iniciar_servidor()
 @bot.event
 async def on_ready():
     print(f'Bot conectado como {bot.user}')
-    synced = await bot.tree.sync()
-    print(f"Slash commands globales sincronizados: {len(synced)} comandos.")
+    # Sincroniza los comandos SOLO en tu servidor de pruebas
+    guild = discord.Object(id=286617766516228096)  # tu GUILD_ID
+    synced = await bot.tree.sync(guild=guild)
+    print(f"Slash commands sincronizados en el servidor {guild.id}: {len(synced)} comandos.")
+
 
 async def main():
     # Carga cogs normalmente

@@ -70,15 +70,15 @@ class Generales(commands.Cog):
 
     @app_commands.command(name="help", description="Shows all available slash commands.")
     async def help(self, interaction: discord.Interaction):
-        # ⚠️ Hacemos defer para evitar que la interacción caduque mientras construimos la lista
+        # Hacemos defer para evitar que la interacción caduque mientras construimos la lista
         await interaction.response.defer(ephemeral=True)
 
-        # 📌 Obtenemos todos los comandos registrados en el árbol de slash commands
+        # Obtenemos todos los comandos registrados en el árbol de slash commands
         comandos = self.bot.tree.get_commands(guild=interaction.guild)
 
         # Creamos el embed que contendrá la lista
         embed = discord.Embed(
-            title="📖 Available slash commands",
+            title="📖 Available commands",
             color=discord.Color.blurple(),
             description="Use the / prefix and let Discord guide you with parameters."
         )
@@ -99,7 +99,7 @@ class Generales(commands.Cog):
                     inline=False
                 )
 
-        # 📤 Enviamos el embed como respuesta
+        # Enviamos el embed como respuesta
         await interaction.followup.send(embed=embed, ephemeral=True)
 
 
