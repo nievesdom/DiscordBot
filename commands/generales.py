@@ -65,8 +65,8 @@ class Generales(commands.Cog):
     @app_commands.command(name="updates", description="Show the latest updates and what's coming up.")
     async def updates(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "**Version:** 1.0\n**Latest update:** bot published, yaay!\n"
-            "**Newly added cards:**\n- UR Kasuga Ichiban (Festival II)\n- UR Mayumi Seto (Festival)\n"
+            "**Version:** 1.1\n**Latest update:** compatibility with slash commands. Now you can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
+            "**Newly added cards:**\n- UR Kaoru Sayama (Palace)\n- UR Homare Nishitani (Festival)\n- UR Yoshitaka Mine (Festival)\n"
             "**Coming up:** card combat."
         )
 
