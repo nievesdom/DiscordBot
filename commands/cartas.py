@@ -320,16 +320,18 @@ class Cartas(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     # -----------------------------
-    # /trade (intercambio con botones)
+    # /trade (intercambio de cartas entre jugadores)
     # -----------------------------
     @app_commands.command(name="trade", description="Starts a card trade with another user")
     @app_commands.describe(user="User to trade with", card="Card to trade")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
         """
         Inicia un intercambio de cartas con otro usuario.
-        - Verifica que la carta del iniciador existe y la posee.
-        - Envía una TradeView con botones Accept/Reject al usuario destino.
-        - La lógica de intercambio se ejecuta dentro de TradeView al aceptar.
+        Flujo:
+        1. Usuario1 inicia el trade con su carta.
+        2. Usuario2 pulsa Accept y escribe la carta que ofrece.
+        3. Se muestra una segunda confirmación a Usuario1 con botones Accept/Reject.
+        4. Solo si Usuario1 acepta se ejecuta el intercambio en el Gist.
         """
         await self._safe_defer(interaction)
 
@@ -359,6 +361,7 @@ class Cartas(commands.Cog):
             f"Please choose whether to accept or reject.",
             view=TradeView(interaction.user, user, carta1_obj),
         )
+
 
 
 # -----------------------------

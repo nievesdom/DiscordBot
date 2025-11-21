@@ -6,18 +6,18 @@ from core.cartas import cargar_cartas
 class TradeView(View):
     def __init__(self, user1: discord.Member, user2: discord.Member, carta1_obj: dict):
         super().__init__(timeout=120)
-        self.user1 = user1        # quien inicia el trade
-        self.user2 = user2        # con quien se negocia
+        self.user1 = user1
+        self.user2 = user2
         self.carta1_obj = carta1_obj
         self.value = None
 
     @button(label="Accept", style=discord.ButtonStyle.green)
     async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Solo el segundo jugador puede pulsar este botón
         if interaction.user.id != self.user2.id:
             await interaction.response.send_message("🚫 This button is not for you.", ephemeral=True)
             return
 
-        # Pedir al usuario2 que escriba el nombre de la carta que ofrece
         await interaction.response.send_message(
             f"{self.user2.mention}, please type the name of the card you want to offer in exchange.",
             ephemeral=True
@@ -57,20 +57,13 @@ class TradeView(View):
             self.stop()
             return
 
-        # Intercambiar
-        coleccion1.remove(self.carta1_obj["id"])
-        coleccion2.remove(carta2_obj["id"])
-        coleccion1.append(carta2_obj["id"])
-        coleccion2.append(self.carta1_obj["id"])
-        propiedades[servidor_id][str(self.user1.id)] = coleccion1
-        propiedades[servidor_id][str(self.user2.id)] = coleccion2
-        guardar_propiedades(propiedades)
-
+        # ➡️ Nueva confirmación: pedir al iniciador que acepte o rechace
+        confirm_view = ConfirmTradeView(self.user1, self.user2, self.carta1_obj, carta2_obj, propiedades, servidor_id)
         await interaction.followup.send(
-            f"✅ Trade successful:\n- {self.user1.mention} traded **{self.carta1_obj['nombre']}** and received **{carta2_obj['nombre']}**\n"
-            f"- {self.user2.mention} traded **{carta2_obj['nombre']}** and received **{self.carta1_obj['nombre']}**"
+            f"{self.user1.mention}, {self.user2.display_name} offers **{carta2_obj['nombre']}** "
+            f"in exchange for your **{self.carta1_obj['nombre']}**.\nDo you accept?",
+            view=confirm_view
         )
-        self.value = "accept"
         self.stop()
 
     @button(label="Reject", style=discord.ButtonStyle.red)
@@ -80,4 +73,47 @@ class TradeView(View):
             return
         await interaction.response.send_message(f"❌ {self.user2.display_name} has rejected the trade.")
         self.value = "reject"
+        self.stop()
+
+
+class ConfirmTradeView(View):
+    """Segunda confirmación: el iniciador decide si acepta la carta ofrecida."""
+    def __init__(self, user1, user2, carta1_obj, carta2_obj, propiedades, servidor_id):
+        super().__init__(timeout=120)
+        self.user1 = user1
+        self.user2 = user2
+        self.carta1_obj = carta1_obj
+        self.carta2_obj = carta2_obj
+        self.propiedades = propiedades
+        self.servidor_id = servidor_id
+
+    @button(label="Accept Trade", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user1.id:
+            await interaction.response.send_message("🚫 Only the initiator can confirm.", ephemeral=True)
+            return
+
+        # Intercambiar cartas
+        coleccion1 = self.propiedades[self.servidor_id][str(self.user1.id)]
+        coleccion2 = self.propiedades[self.servidor_id][str(self.user2.id)]
+        coleccion1.remove(self.carta1_obj["id"])
+        coleccion2.remove(self.carta2_obj["id"])
+        coleccion1.append(self.carta2_obj["id"])
+        coleccion2.append(self.carta1_obj["id"])
+        guardar_propiedades(self.propiedades)
+
+        await interaction.response.send_message(
+            f"✅ Trade successful:\n- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "
+            f"and received **{self.carta2_obj['nombre']}**\n"
+            f"- {self.user2.mention} traded **{self.carta2_obj['nombre']}** "
+            f"and received **{self.carta1_obj['nombre']}**"
+        )
+        self.stop()
+
+    @button(label="Reject Trade", style=discord.ButtonStyle.red)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user1.id:
+            await interaction.response.send_message("🚫 Only the initiator can reject.", ephemeral=True)
+            return
+        await interaction.response.send_message(f"❌ {self.user1.display_name} has rejected the trade.")
         self.stop()
