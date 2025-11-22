@@ -11,10 +11,15 @@ iniciar_servidor()
 @bot.event
 async def on_ready():
     print(f'Bot conectado como {bot.user}')
-    # Sincroniza los comandos SOLO en tu servidor de pruebas
-    guild = discord.Object(id=286617766516228096)  # tu GUILD_ID
-    synced = await bot.tree.sync(guild=guild)
-    print(f"Slash commands sincronizados en el servidor {guild.id}: {len(synced)} comandos.")
+
+    # Sincroniza los comandos en tu servidor de pruebas (aparecen casi al instante)
+    test_guild = discord.Object(id=286617766516228096)  # tu GUILD_ID de pruebas
+    synced_test = await bot.tree.sync(guild=test_guild)
+    print(f"Slash commands sincronizados en el servidor de pruebas {test_guild.id}: {len(synced_test)} comandos.")
+
+    # Sincroniza también los comandos globales (puede tardar hasta 1h en propagarse)
+    synced_global = await bot.tree.sync()
+    print(f"Slash commands sincronizados globalmente: {len(synced_global)} comandos.")
 
 
 async def main():
