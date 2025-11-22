@@ -36,7 +36,7 @@ class Wiki(commands.Cog):
             except discord.Forbidden:
                 await interaction.response.send_message("⚠️ I couldn't send you a direct message. Please check your privacy settings.", ephemeral=True)
         else:
-            await interaction.response.send_message("Sorry, I couldn't find anything.", ephemeral=True)
+            await interaction.response.send_message("Sorry, I couldn't find anything.")
 
     @commands.command(name="wiki")
     async def wiki_prefix(self, ctx: commands.Context, *, termino: str):
@@ -52,9 +52,9 @@ class Wiki(commands.Cog):
             enlace = f"https://yakuza.fandom.com/wiki/{mejor.replace(' ', '_')}"
             try:
                 await ctx.author.send(f"Here's the best coincidence for your search:\n{enlace}")
-                await ctx.send("📬 I sent you a DM with the result!")
+                await ctx.send("📬 I sent you a DM with the result!", ephemeral=True)
             except discord.Forbidden:
-                await ctx.send("⚠️ I couldn't send you a direct message. Please check your privacy settings.")
+                await ctx.send("⚠️ I couldn't send you a direct message. Please check your privacy settings.", ephemeral=True)
         else:
             await ctx.send("Sorry, I couldn't find anything.")
 

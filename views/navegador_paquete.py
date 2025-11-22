@@ -1,103 +1,142 @@
 import discord
+from discord.ui import View, button
+from core.gist_propiedades import cargar_propiedades, guardar_propiedades
+from core.cartas import cargar_cartas
 
-# Navegar visualmente por las cartas de un paquete diario
-class NavegadorPaquete(discord.ui.View):
-    def __init__(self, ctx, cartas_ids, cartas_info, dueño):
-        super().__init__(timeout=180)  # La vista expira tras 2 minutos
-        self.ctx = ctx
-        self.cartas_ids = cartas_ids
-        self.cartas_info = cartas_info
-        self.dueño = dueño
-        self.i = 0
-        self.msg = None
+# Vista inicial del intercambio: el segundo jugador acepta o rechaza
+class TradeView(View):
+    def __init__(self, user1: discord.Member, user2: discord.Member, carta1_obj: dict, context):
+        super().__init__(timeout=120)  # La vista expira tras 2 minutos
+        self.user1 = user1              # Iniciador del trade
+        self.user2 = user2              # Segundo jugador
+        self.carta1_obj = carta1_obj    # Carta ofrecida por el iniciador
+        self.context = context          # Puede ser Interaction (slash) o Context (prefijo)
+        self.value = None               # Estado del trade
 
-        # Colores por rareza
-        self.colores = {
-            "UR": 0x8841f2,
-            "KSR": 0xabfbff,
-            "SSR": 0x57ffae,
-            "SR": 0xfcb63d,
-            "R": 0xfc3d3d,
-            "N": 0x8c8c8c
-        }
+    async def _send(self, content=None, **kwargs):
+        """
+        Método auxiliar para enviar mensajes según el tipo de contexto.
+        - Si es Interaction: usa response o followup.
+        - Si es Context: usa ctx.send.
+        """
+        if isinstance(self.context, discord.Interaction):
+            if not self.context.response.is_done():
+                return await self.context.response.send_message(content, **kwargs)
+            else:
+                return await self.context.followup.send(content, **kwargs)
+        else:
+            return await self.context.send(content, **kwargs)
 
-        # Diccionario de atributos con símbolo japonés
-        self.atributos = {
-            "heart": "心",
-            "technique": "技",
-            "body": "体",
-            "light": "陽",
-            "shadow": "陰"
-        }
+    # Botón de aceptar (solo para el segundo jugador)
+    @button(label="Accept", style=discord.ButtonStyle.green)
+    async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user2.id:
+            await interaction.response.send_message("🚫 This button is not for you.", ephemeral=True)
+            return
 
-        # Diccionario de tipos con emoji
-        self.tipos = {
-            "attack": "⚔️ Attack",
-            "defense": "🛡️ Defense",
-            "recovery": "❤️ Recovery",
-            "support": "✨ Support"
-        }
-
-    def mostrar(self):
-        carta_id = str(self.cartas_ids[self.i])
-        carta = self.cartas_info.get(carta_id, {})
-        nombre = carta.get("nombre", f"ID {carta_id}")
-        rareza = carta.get("rareza", "N")
-        color = self.colores.get(rareza, 0x8c8c8c)
-        imagen = carta.get("imagen")
-
-        # Formato de atributo y tipo
-        atributo_raw = str(carta.get("atributo", "—")).lower()
-        tipo_raw = str(carta.get("tipo", "—")).lower()
-
-        attr_symbol = self.atributos.get(atributo_raw, "")
-        attr_name = atributo_raw.capitalize() if atributo_raw != "—" else "—"
-        atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
-
-        tipo_fmt = self.tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
-
-        # Crear embed
-        embed = discord.Embed(
-            title=f"{nombre}",
-            color=color,
-            description=(
-                f"**Attribute:** {atributo_fmt}\n"
-                f"**Type:** {tipo_fmt}\n"
-                f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
-                f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}"
-            )
-        )
-        # Footer del embed
-        embed.set_footer(
-            text=f"Card {self.i + 1} out of {len(self.cartas_ids)} • {self.dueño.display_name}'s daily pack"
+        # Pedimos al segundo jugador que escriba la carta que ofrece
+        await interaction.response.send_message(
+            f"{self.user2.mention}, please type the name of the card you want to offer in exchange.",
+            ephemeral=True
         )
 
-        # Comprobar que la imagen existe
-        if imagen and imagen.startswith("http"):
-            embed.set_image(url=imagen)
-            return embed, None
-        else:
-            embed.description += "\n⚠️ Card image not found. Please, contact my creator."
-            return embed, None
+        # Check para esperar el mensaje del segundo jugador
+        def check(m):
+            return m.author.id == self.user2.id and m.channel.id == interaction.channel_id
 
-    # Actualizar vista
-    async def actualizar(self):
-        embed, archivo = self.mostrar()
-        if archivo:
-            await self.msg.edit(embed=embed, attachments=[archivo], view=self)
-        else:
-            await self.msg.edit(embed=embed, view=self)
+        try:
+            respuesta = await interaction.client.wait_for("message", timeout=120, check=check)
+        except Exception:
+            await interaction.followup.send("⌛ Time's up. Trade cancelled.")
+            self.stop()
+            return
 
-    # Botón anterior
-    @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
-    async def atras(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.i = (self.i - 1) % len(self.cartas_ids)
-        await self.actualizar()
-        await interaction.response.defer()
+        carta2_nombre = respuesta.content.strip()
+        cartas = cargar_cartas()
+        carta2_obj = next((c for c in cartas if carta2_nombre.lower() in c["nombre"].lower()), None)
 
-    # Botón siguiente
-    @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
-    async def siguiente(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.i = (self.i + 1) % len(self.cartas_ids)
-        await self.actualizar()
-        await interaction.response.defer()
+        if not carta2_obj:
+            await interaction.followup.send(f"❌ The card '{carta2_nombre}' hasn't been found. Trade cancelled.")
+            self.stop()
+            return
+
+        # Comprobamos que ambos jugadores poseen las cartas
+        propiedades = cargar_propiedades()
+        servidor_id = str(interaction.guild.id)
+        coleccion1 = propiedades.get(servidor_id, {}).get(str(self.user1.id), [])
+        coleccion2 = propiedades.get(servidor_id, {}).get(str(self.user2.id), [])
+
+        if self.carta1_obj["id"] not in coleccion1:
+            await interaction.followup.send(f"❌ You don't own {self.carta1_obj['nombre']}.")
+            self.stop()
+            return
+        if carta2_obj["id"] not in coleccion2:
+            await interaction.followup.send(f"❌ {self.user2.display_name} doesn't own {carta2_obj['nombre']}.")
+            self.stop()
+            return
+
+        # ➡️ Nueva confirmación: el iniciador decide si acepta o rechaza
+        confirm_view = ConfirmTradeView(self.user1, self.user2, self.carta1_obj, carta2_obj, propiedades, servidor_id)
+        await interaction.followup.send(
+            f"{self.user1.mention}, {self.user2.display_name} offers **{carta2_obj['nombre']}** "
+            f"in exchange for your **{self.carta1_obj['nombre']}**.\nDo you accept?",
+            view=confirm_view
+        )
+        self.stop()
+
+    # Botón de rechazar (solo para el segundo jugador)
+    @button(label="Reject", style=discord.ButtonStyle.red)
+    async def reject(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user2.id:
+            await interaction.response.send_message("🚫 This button is not for you.", ephemeral=True)
+            return
+        await interaction.response.send_message(f"❌ {self.user2.display_name} has rejected the trade.")
+        self.value = "reject"
+        self.stop()
+
+
+# Vista de confirmación: el iniciador decide si acepta la carta ofrecida
+class ConfirmTradeView(View):
+    def __init__(self, user1, user2, carta1_obj, carta2_obj, propiedades, servidor_id):
+        super().__init__(timeout=120)
+        self.user1 = user1
+        self.user2 = user2
+        self.carta1_obj = carta1_obj
+        self.carta2_obj = carta2_obj
+        self.propiedades = propiedades
+        self.servidor_id = servidor_id
+
+    # Botón para confirmar el intercambio
+    @button(label="Accept Trade", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user1.id:
+            await interaction.response.send_message("🚫 Only the initiator can confirm.", ephemeral=True)
+            return
+
+        # Intercambiamos las cartas en las colecciones
+        coleccion1 = self.propiedades[self.servidor_id][str(self.user1.id)]
+        coleccion2 = self.propiedades[self.servidor_id][str(self.user2.id)]
+        coleccion1.remove(self.carta1_obj["id"])
+        coleccion2.remove(self.carta2_obj["id"])
+        coleccion1.append(self.carta2_obj["id"])
+        coleccion2.append(self.carta1_obj["id"])
+        guardar_propiedades(self.propiedades)
+
+        print(f"[Comando] {self.user1.display_name} intercambió {self.carta1_obj['nombre']} a cambio de {self.carta2_obj['nombre']} con {self.user2.display_name} en {interaction.guild.name}.")
+
+        await interaction.response.send_message(
+            f"✅ Trade successful:\n- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "
+            f"and received **{self.carta2_obj['nombre']}**\n"
+            f"- {self.user2.mention} traded **{self.carta2_obj['nombre']}** "
+            f"and received **{self.carta1_obj['nombre']}**"
+        )
+        self.stop()
+
+    # Botón para rechazar el intercambio
+    @button(label="Reject Trade", style=discord.ButtonStyle.red)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user1.id:
+            await interaction.response.send_message("🚫 Only the initiator can reject.", ephemeral=True)
+            return
+        await interaction.response.send_message(f"❌ {self.user1.display_name} has rejected the trade.")
+        self.stop()
