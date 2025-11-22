@@ -59,25 +59,25 @@ class Cartas(commands.Cog):
         - Número de miembros en cada servidor
         """
         await interaction.response.defer(ephemeral=True)
-
+    
         guilds = self.bot.guilds
         total_servers = len(guilds)
-
-        # Creamos el embed
+    
+        # Construimos el texto con todos los servidores
+        info_lines = []
+        for g in guilds:
+            info_lines.append(f"• **{g.name}** (ID: {g.id}) → 👥 {g.member_count} members")
+    
+        # Unimos todo en un solo bloque
+        listado = "\n".join(info_lines)
+    
+        # Creamos el embed con la descripción
         embed = discord.Embed(
             title="🌐 Servers where the bot is present",
-            description=f"Currently in **{total_servers} servers**.",
+            description=f"Currently in **{total_servers} servers**:\n\n{listado}",
             color=discord.Color.green()
         )
-
-        # Añadimos cada servidor como un campo
-        for g in guilds:
-            embed.add_field(
-                name=g.name,
-                value=f"👥 {g.member_count} members",
-                inline=False
-            )
-
+    
         # Enviamos el embed como respuesta ephemeral al dueño
         await interaction.followup.send(embed=embed, ephemeral=True)
 
