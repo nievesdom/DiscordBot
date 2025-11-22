@@ -7,122 +7,126 @@ GUILD_ID = 286617766516228096
 GUILD = discord.Object(id=GUILD_ID)
 
 class Generales(commands.Cog):
-    
-    def categoría(nombre):
-        def decorador(comando):
-            comando.category = nombre
-            return comando
-        return decorador
-    
     def __init__(self, bot):
         self.bot = bot
 
+    # ---------------------------
+    # HOLA
+    # ---------------------------
     @app_commands.command(name="hola", description="Says hola to the user.")
-    async def hola(self, interaction: discord.Interaction):
-        # Envía un saludo al usuario que ejecuta el comando
+    async def hola_slash(self, interaction: discord.Interaction):
         await interaction.response.send_message(f"¡Hola, {interaction.user.mention}!")
 
+    @commands.command(name="hola")
+    async def hola_prefix(self, ctx: commands.Context):
+        await ctx.send(f"¡Hola, {ctx.author.mention}!")
+
+    # ---------------------------
+    # SAY
+    # ---------------------------
     @app_commands.command(name="say", description="Repeats what the user says.")
     @app_commands.describe(arg="Text you want the bot to repeat")
-    async def say(self, interaction: discord.Interaction, arg: str = None):
+    async def say_slash(self, interaction: discord.Interaction, arg: str = None):
         if arg is None:
-            arg = "What do you want me to say? Write it after the command. Ex: `/say Good morning`"
+            arg = "What do you want me to say? Example: `/say Good morning`"
         await interaction.response.send_message(arg)
 
+    @commands.command(name="say")
+    async def say_prefix(self, ctx: commands.Context, *, arg: str = None):
+        if arg is None:
+            arg = "What do you want me to say? Example: `y!say Good morning`"
+        await ctx.send(arg)
+
+    # ---------------------------
+    # COUNT
+    # ---------------------------
     @app_commands.command(name="count", description="Counts up to the chosen number (max 200).")
     @app_commands.describe(numero="Number you want to count up to (max 200)")
-    async def count(self, interaction: discord.Interaction, numero: int = 10):
-        try:
-            # Validación: número positivo y no mayor que 200
-            if numero <= 0:
-                await interaction.response.send_message(
-                    "❌ You must choose a positive number. Example: `/count 5`.",
-                    ephemeral=True
-                )
-                return
-            if numero > 200:
-                await interaction.response.send_message(
-                    "⚠️ Greedy! You can only count up to 200.",
-                    ephemeral=True
-                )
-                return
-        except ValueError:
-            await interaction.response.send_message(
-                "❌ Choose a valid number. Example: `/count 5`.",
-                ephemeral=True
-            )
+    async def count_slash(self, interaction: discord.Interaction, numero: int = 10):
+        if numero <= 0:
+            await interaction.response.send_message("❌ Use a positive number. Example: `/count 5`.", ephemeral=True)
+            return
+        if numero > 200:
+            await interaction.response.send_message("⚠️ You can only count up to 200.", ephemeral=True)
             return
 
-        # Mensaje inicial
-        mensaje = await interaction.response.send_message("Counting... 0", ephemeral=False)
+        await interaction.response.send_message("Counting... 0")
 
-        async def contar_mensaje():
-            # Bucle para contar desde 1 hasta el número introducido
+        async def contar():
             for i in range(1, numero + 1):
                 await asyncio.sleep(1)
                 await interaction.edit_original_response(content=f"Counting... {i}")
             await interaction.edit_original_response(content=f"✅ Finished counting to {numero}")
 
-        # Ejecuta la función de conteo como tarea asincrónica
-        asyncio.create_task(contar_mensaje())
+        asyncio.create_task(contar())
 
+    @commands.command(name="count")
+    async def count_prefix(self, ctx: commands.Context, numero: int = 10):
+        if numero <= 0:
+            await ctx.send("❌ Use a positive number. Example: `y!count 5`.")
+            return
+        if numero > 200:
+            await ctx.send("⚠️ You can only count up to 200.")
+            return
 
+        mensaje = await ctx.send("Counting... 0")
+
+        async def contar():
+            for i in range(1, numero + 1):
+                await asyncio.sleep(1)
+                await mensaje.edit(content=f"Counting... {i}")
+            await mensaje.edit(content=f"✅ Finished counting to {numero}")
+
+        asyncio.create_task(contar())
+
+    # ---------------------------
+    # UPDATES
+    # ---------------------------
     @app_commands.command(name="updates", description="Shows the latest updates and what's coming up.")
-    async def updates(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            "**Version:** 1.1\n**Patch notes:**\n- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
-            "- Fixed a bug that would cause the bot to quickly reach the request limit while trying to save the automatic cards information from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now.\n"
-            "- Other minor quality of life changes."
-            "**Newly added cards:**\n- UR Kaoru Sayama (Palace)\n- UR Homare Nishitani (Festival)\n- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:** card combat!"
-        )
+    async def updates_slash(self, interaction: discord.Interaction):
+        await interaction.response.send_message("**Version:** 1.1\n**Patch notes:** ...")
 
+    @commands.command(name="updates")
+    async def updates_prefix(self, ctx: commands.Context):
+        await ctx.send("**Version:** 1.1\n**Patch notes:** ...")
+
+    # ---------------------------
+    # FEEDBACK
+    # ---------------------------
     @app_commands.command(name="feedback", description="Send the feedback form link.")
-    async def feedback(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Here is the feedback form. I appreciate your input! https://forms.gle/Y4e2TpHRgpfZ18Hj6")
-    
+    async def feedback_slash(self, interaction: discord.Interaction):
+        await interaction.response.send_message("Feedback form: https://forms.gle/Y4e2TpHRgpfZ18Hj6")
+
+    @commands.command(name="feedback")
+    async def feedback_prefix(self, ctx: commands.Context):
+        await ctx.send("Feedback form: https://forms.gle/Y4e2TpHRgpfZ18Hj6")
+
+    # ---------------------------
+    # PING
+    # ---------------------------
     @app_commands.command(name="ping", description="Responds with Pong!, checking response time.")
-    async def ping(self, interaction: discord.Interaction):
+    async def ping_slash(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
+    @commands.command(name="ping")
+    async def ping_prefix(self, ctx: commands.Context):
+        await ctx.send("Pong!")
+
+    # ---------------------------
+    # HELP
+    # ---------------------------
     @app_commands.command(name="help", description="Shows all available commands.")
     async def help_slash(self, interaction: discord.Interaction):
-        """
-        Comando de ayuda global para slash commands.
-        - Usa un diccionario manual de categorías y comandos.
-        - Recorre el árbol de comandos y los agrupa por categoría.
-        - Muestra nombre y descripción en un embed.
-        """
         await interaction.response.defer(ephemeral=True)
-
-        # Diccionario manual de categorías y comandos (igual que tu ejemplo)
-        categorias = {
-            "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
-            "🌐 Wiki": ["wiki", "character"],
-            "🔨 Moderation": ["auto_cards", "spawning_status"]
-        }
-
-        # Obtenemos todos los slash commands registrados
-        comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
-
-        # Creamos el embed
-        embed = discord.Embed(
-            title="📖 Available slash commands:",
-            color=discord.Color.blurple()
-        )
-
-        # Recorremos categorías y añadimos comandos
-        for nombre_cat, lista_comandos in categorias.items():
-            texto = ""
-            for nombre in lista_comandos:
-                comando = comandos_dict.get(nombre)
-                if comando:
-                    texto += f"**/{comando.name}** → {comando.description or 'Sin descripción'}\n"
-            if texto:
-                embed.add_field(name=nombre_cat, value=texto, inline=False)
-
+        embed = discord.Embed(title="📖 Available slash commands:", color=discord.Color.blurple())
+        embed.add_field(name="👤 General", value="/hola, /say, /count, /updates, /feedback, /ping", inline=False)
         await interaction.followup.send(embed=embed, ephemeral=True)
+
+    @commands.command(name="help")
+    async def help_prefix(self, ctx: commands.Context):
+        embed = discord.Embed(title="📖 Available prefix commands:", color=discord.Color.blurple())
+        embed.add_field(name="👤 General", value="y!hola, y!say, y!count, y!updates, y!feedback, y!ping", inline=False)
+        await ctx.send(embed=embed)
 
 
 async def setup(bot):
