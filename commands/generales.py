@@ -68,43 +68,42 @@ class Generales(commands.Cog):
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
-    @app_commands.command(name="help", description="Shows all available commands.")
+    @app_commands.command(name="help", description="Muestra todos los comandos agrupados por categoría.")
     async def help_slash(self, interaction: discord.Interaction):
         """
-        Comando de ayuda global:
-        - Recorre todos los comandos registrados en el árbol de slash commands.
-        - Agrupa por cog si el comando pertenece a uno.
-        - Muestra nombre y descripción de cada comando.
+        Comando de ayuda global para slash commands.
+        - Usa un diccionario manual de categorías y comandos.
+        - Recorre el árbol de comandos y los agrupa por categoría.
+        - Muestra nombre y descripción en un embed.
         """
         await interaction.response.defer(ephemeral=True)
 
-        # Obtenemos todos los comandos registrados (globales y de guild)
-        comandos = self.bot.tree.get_commands()
+        # Diccionario manual de categorías y comandos (igual que tu ejemplo)
+        categorias = {
+            "👤 General": ["count", "feedback", "help", "hola", "say", "updates"],
+            "🃏 Cards": ["auto_cards", "album", "collection", "search", "pack", "show"],
+            "🌐 Wiki": ["wiki", "character"],
+            "🔨 Moderation": ["migrate", "tags1", "tags2"]
+        }
 
-        # Diccionario para agrupar por cog
-        comandos_por_cog = {}
-
-        for comando in sorted(comandos, key=lambda c: c.name):
-            # Cog asociado (si existe)
-            cog_name = getattr(comando.callback.__self__, "__cog_name__", "Sin categoría")
-            if cog_name not in comandos_por_cog:
-                comandos_por_cog[cog_name] = []
-            comandos_por_cog[cog_name].append(comando)
+        # Obtenemos todos los slash commands registrados
+        comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
 
         # Creamos el embed
         embed = discord.Embed(
-            title="📖 Available commands",
-            color=discord.Color.blurple(),
-            description="List of all the available commands."
+            title="📖 Available slash commands:",
+            color=discord.Color.blurple()
         )
 
-        # Añadimos cada grupo al embed
-        for cog_name, lista in comandos_por_cog.items():
-            texto = "\n".join(
-                f"**/{c.name}** — {c.description or 'Sin descripción'}"
-                for c in lista
-            )
-            embed.add_field(name=cog_name, value=texto, inline=False)
+        # Recorremos categorías y añadimos comandos
+        for nombre_cat, lista_comandos in categorias.items():
+            texto = ""
+            for nombre in lista_comandos:
+                comando = comandos_dict.get(nombre)
+                if comando:
+                    texto += f"**/{comando.name}** → {comando.description or 'Sin descripción'}\n"
+            if texto:
+                embed.add_field(name=nombre_cat, value=texto, inline=False)
 
         await interaction.followup.send(embed=embed, ephemeral=True)
 
