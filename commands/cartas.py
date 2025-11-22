@@ -59,17 +59,17 @@ class Cartas(commands.Cog):
         - Número de miembros en cada servidor
         """
         await interaction.response.defer(ephemeral=True)
-    
+
         guilds = self.bot.guilds
         total_servers = len(guilds)
-    
+
         # Creamos el embed
         embed = discord.Embed(
             title="🌐 Servers where the bot is present",
             description=f"Currently in **{total_servers} servers**.",
             color=discord.Color.green()
         )
-    
+
         # Añadimos cada servidor como un campo
         for g in guilds:
             embed.add_field(
@@ -77,7 +77,7 @@ class Cartas(commands.Cog):
                 value=f"👥 {g.member_count} members",
                 inline=False
             )
-    
+
         # Enviamos el embed como respuesta ephemeral al dueño
         await interaction.followup.send(embed=embed, ephemeral=True)
 
@@ -103,7 +103,7 @@ class Cartas(commands.Cog):
 
         # Mensaje que se enviará a los servidores (en inglés)
         message = (
-            "🚀 **The bot has been updated to the version 1.1 and now supports slash commands!**\n"
+            "🚀 **The bot has been updated to version 1.1 and now supports slash commands!**\n"
             "Use `/help` to see the full list of available commands or `/update` in order to see a more detailed description of all the changes.\n"
             "Sorry for the downtime and if you experienced any issues before."
         )
