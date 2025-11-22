@@ -85,7 +85,7 @@ class Generales(commands.Cog):
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
-    @app_commands.command(name="help", description="Muestra todos los comandos agrupados por categoría.")
+    @app_commands.command(name="help", description="Shows all available commands.")
     async def help_slash(self, interaction: discord.Interaction):
         """
         Comando de ayuda global para slash commands.
