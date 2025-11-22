@@ -14,41 +14,56 @@ class Wiki(commands.Cog):
     def __init__(self, bot):
         self.bot = bot  # Referencia al bot principal
 
+    # ---------------------------
+    # WIKI
+    # ---------------------------
     @app_commands.command(name="wiki", description="Searches a term in the Yakuza Wiki.")
     @app_commands.describe(termino="Term to search for in the wiki")
-    async def wiki(self, interaction: discord.Interaction, *, termino: str):
-        # Reemplazar espacios por "+" para formar la consulta
+    async def wiki_slash(self, interaction: discord.Interaction, *, termino: str):
         termino_enc = termino.replace(' ', '+')
-
-        # URL de la API de búsqueda de la wiki
         api_url = f"https://yakuza.fandom.com/api.php?action=query&list=search&srsearch={termino_enc}&format=json"
 
-        # Realizar la petición HTTP a la API
         async with aiohttp.ClientSession() as session:
             async with session.get(api_url) as resp:
-                data = await resp.json()  # Convertir la respuesta a JSON
+                data = await resp.json()
 
-        # Si hay resultados, enviar el enlace del más relevante
         if data["query"]["search"]:
             mejor = data["query"]["search"][0]["title"]
             enlace = f"https://yakuza.fandom.com/wiki/{mejor.replace(' ', '_')}"
             try:
-                # Intentar enviar el mensaje por DM al autor
                 await interaction.user.send(f"Here's the best coincidence for your search:\n{enlace}")
                 await interaction.response.send_message("📬 I sent you a DM with the result!", ephemeral=True)
             except discord.Forbidden:
-                # Si el usuario tiene bloqueados los DMs, avisar en el canal
                 await interaction.response.send_message("⚠️ I couldn't send you a direct message. Please check your privacy settings.", ephemeral=True)
         else:
-            # Si no hay resultados, enviar mensaje de error
             await interaction.response.send_message("Sorry, I couldn't find anything.", ephemeral=True)
 
-    @app_commands.command(name="character", description="Sends a random character name.")
-    async def character(self, interaction: discord.Interaction):
-        # URL base de la API
-        url = "https://yakuza.fandom.com/api.php"
+    @commands.command(name="wiki")
+    async def wiki_prefix(self, ctx: commands.Context, *, termino: str):
+        termino_enc = termino.replace(' ', '+')
+        api_url = f"https://yakuza.fandom.com/api.php?action=query&list=search&srsearch={termino_enc}&format=json"
 
-        # Parámetros para obtener miembros de la categoría "Characters"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(api_url) as resp:
+                data = await resp.json()
+
+        if data["query"]["search"]:
+            mejor = data["query"]["search"][0]["title"]
+            enlace = f"https://yakuza.fandom.com/wiki/{mejor.replace(' ', '_')}"
+            try:
+                await ctx.author.send(f"Here's the best coincidence for your search:\n{enlace}")
+                await ctx.send("📬 I sent you a DM with the result!")
+            except discord.Forbidden:
+                await ctx.send("⚠️ I couldn't send you a direct message. Please check your privacy settings.")
+        else:
+            await ctx.send("Sorry, I couldn't find anything.")
+
+    # ---------------------------
+    # CHARACTER
+    # ---------------------------
+    @app_commands.command(name="character", description="Sends a random character name.")
+    async def character_slash(self, interaction: discord.Interaction):
+        url = "https://yakuza.fandom.com/api.php"
         parametros = {
             "action": "query",
             "list": "categorymembers",
@@ -57,27 +72,44 @@ class Wiki(commands.Cog):
             "format": "json"
         }
 
-        personajes = []  # Lista para almacenar nombres de personajes
-
-        # Peticiones paginadas a la API para obtener todos los personajes
+        personajes = []
         async with aiohttp.ClientSession() as session:
             while True:
                 async with session.get(url, params=parametros) as resp:
                     data = await resp.json()
-
-                    # Filtrar solo artículos (ns == 0) y añadirlos a la lista
                     personajes += [item["title"] for item in data["query"]["categorymembers"] if item["ns"] == 0]
-
-                    # Si hay más páginas, actualizar los parámetros
                     if "continue" in data:
                         parametros.update(data["continue"])
                     else:
-                        break  # No hay más páginas
+                        break
 
-        # Elegir un personaje aleatorio de la lista
         elegido = random.choice(personajes)
-        
         await interaction.response.send_message(elegido)
+
+    @commands.command(name="character")
+    async def character_prefix(self, ctx: commands.Context):
+        url = "https://yakuza.fandom.com/api.php"
+        parametros = {
+            "action": "query",
+            "list": "categorymembers",
+            "cmtitle": "Category:Characters",
+            "cmlimit": "500",
+            "format": "json"
+        }
+
+        personajes = []
+        async with aiohttp.ClientSession() as session:
+            while True:
+                async with session.get(url, params=parametros) as resp:
+                    data = await resp.json()
+                    personajes += [item["title"] for item in data["query"]["categorymembers"] if item["ns"] == 0]
+                    if "continue" in data:
+                        parametros.update(data["continue"])
+                    else:
+                        break
+
+        elegido = random.choice(personajes)
+        await ctx.send(elegido)
 
 async def setup(bot):
     await bot.add_cog(Wiki(bot))

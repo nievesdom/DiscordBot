@@ -360,7 +360,7 @@ class Cartas(commands.Cog):
         vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
         
-        print(f"[OK] [Comando] {interaction.user.display_name} abrió un paquete de cartas en {interaction.guild.name}.")
+        print(f"[Comando] {interaction.user.display_name} abrió un paquete de cartas en {interaction.guild.name}.")
 
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)

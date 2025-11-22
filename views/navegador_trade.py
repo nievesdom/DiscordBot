@@ -101,7 +101,9 @@ class ConfirmTradeView(View):
         coleccion1.append(self.carta2_obj["id"])
         coleccion2.append(self.carta1_obj["id"])
         guardar_propiedades(self.propiedades)
-
+        
+        print(f"[Comando] {self.user1.display_name} intercambió {self.carta1_obj['nombre']} a cambio de {self.carta2_obj['nombre']} con {self.user2.display_name} en {interaction.guild.name}.")
+        
         await interaction.response.send_message(
             f"✅ Trade successful:\n- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "
             f"and received **{self.carta2_obj['nombre']}**\n"
