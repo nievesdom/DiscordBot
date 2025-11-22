@@ -42,6 +42,46 @@ class Cartas(commands.Cog):
         except discord.InteractionResponded:
             pass
         
+    # -----------------------------
+    # /servers_info (solo OWNER)
+    # -----------------------------
+    @app_commands.default_permissions()  # No visible por permisos por defecto
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)  # Solo el dueño lo puede ejecutar
+    @app_commands.command(
+        name="servers_info",
+        description="(Owner only) Shows the servers where the bot is and their member counts."
+    )
+    async def servers_info(self, interaction: discord.Interaction):
+        """
+        Muestra información de todos los servidores donde está el bot:
+        - Número total de servidores
+        - Nombre de cada servidor
+        - Número de miembros en cada servidor
+        """
+        await interaction.response.defer(ephemeral=True)
+    
+        guilds = self.bot.guilds
+        total_servers = len(guilds)
+    
+        # Creamos el embed
+        embed = discord.Embed(
+            title="🌐 Servers where the bot is present",
+            description=f"Currently in **{total_servers} servers**.",
+            color=discord.Color.green()
+        )
+    
+        # Añadimos cada servidor como un campo
+        for g in guilds:
+            embed.add_field(
+                name=g.name,
+                value=f"👥 {g.member_count} members",
+                inline=False
+            )
+    
+        # Enviamos el embed como respuesta ephemeral al dueño
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+        
         
     # -----------------------------
     # /avisar_update (solo OWNER)
