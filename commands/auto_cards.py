@@ -1,43 +1,54 @@
+"""
+CartasAuto: sistema de aparición automática de cartas en canales de Discord.
+
+Características principales:
+- Permite activar/desactivar el spawn automático de cartas por servidor.
+- Usa un sistema de autosave para reducir llamadas al Gist (se guarda cada 60s si hay cambios).
+- Captura errores de límite de GitHub y avisa en el canal configurado del servidor.
+"""
+
 import discord, random, asyncio, datetime, os
 from discord.ext import commands
 from discord import app_commands
 from core.gist_settings import cargar_settings, guardar_settings
 from core.cartas import cargar_cartas
 from views.reclamar import ReclamarCarta
+from github.GithubException import RateLimitExceededException
 
 
 class CartasAuto(commands.Cog):
     def __init__(self, bot: commands.Bot):
-        # Bot y carga inicial de settings desde Gist
+        # Guardamos referencia al bot
         self.bot = bot
+
+        # Cargamos settings desde el Gist remoto
         self.settings = cargar_settings()
         if "guilds" not in self.settings:
             self.settings["guilds"] = {}
 
-        # Diccionario de tareas por servidor (gid -> asyncio.Task)
+        # Diccionario de tareas activas por servidor (gid -> asyncio.Task)
         self.tasks: dict[str, asyncio.Task] = {}
 
-        # Bandera para indicar que hay cambios pendientes de guardar
+        # Bandera para indicar si hay cambios pendientes de guardar
         self._pending_save: bool = False
 
-        # Arrancar el bucle de autosave (guarda cada 60s si hay cambios)
+        # Arrancamos el bucle de autosave (cada 60s guarda si hay cambios)
         asyncio.create_task(self._autosave_loop())
 
         print("[INFO] CartasAuto inicializado.")
 
-        # Recrear tareas activas desde settings (por si el bot se reinicia)
+        # Recreamos tareas activas desde settings (por si el bot se reinicia)
         for gid, config in self.settings["guilds"].items():
             if config.get("enabled"):
                 print(f"[INFO] Activando cartas automáticas en servidor {gid}.")
-                # Creamos tarea de spawn por servidor
                 self.tasks[gid] = asyncio.create_task(self.spawn_for_guild(int(gid)))
 
     def cog_unload(self):
         """
         Al descargar el cog:
-        - Cancelar tareas activas.
-        - Marcar como desactivado en settings y resetear contadores.
-        - No guardar inmediatamente, solo marcar cambios y dejar que autosave haga el resto.
+        - Cancelamos todas las tareas activas.
+        - Marcamos como desactivado en settings y reseteamos contadores.
+        - No guardamos inmediatamente, solo marcamos cambios y dejamos que autosave lo suba.
         """
         print("[INFO] CartasAuto descargado. Cancelando tareas...")
         for gid, task in list(self.tasks.items()):
@@ -47,30 +58,25 @@ class CartasAuto(commands.Cog):
                 pass
         self.tasks.clear()
 
-        # Marcar configuración como desactivada para todos los servidores
         for gid in list(self.settings["guilds"].keys()):
             self.settings["guilds"][gid]["enabled"] = False
             self.settings["guilds"][gid]["count"] = 0
             self.settings["guilds"][gid].pop("next_spawn", None)
 
-        # Marcar que hay cambios, autosave se encargará de subirlos
         self.marcar_cambios()
 
     # ================================================================
-    # Sistema de autosave (cola de guardado)
+    # Sistema de autosave
     # ================================================================
     def marcar_cambios(self):
-        """
-        Marca que hay cambios pendientes para guardar en el Gist.
-        No guarda inmediatamente; el bucle _autosave_loop lo hará pasado un tiempo.
-        """
+        """Marca que hay cambios pendientes para guardar en el Gist."""
         self._pending_save = True
 
     async def _autosave_loop(self):
         """
         Bucle de autosave:
-        - Cada 60 segundos, si hay cambios pendientes, sube settings al Gist.
-        - Esto agrupa múltiples modificaciones y reduce peticiones PATCH.
+        - Cada 60 segundos, si hay cambios pendientes, intenta guardarlos en el Gist.
+        - Si se excede el límite de GitHub, avisa en los canales configurados.
         """
         while True:
             await asyncio.sleep(60)
@@ -78,16 +84,32 @@ class CartasAuto(commands.Cog):
                 try:
                     guardar_settings(self.settings)
                     print("[OK] Autosave ejecutado en Gist.")
+                except RateLimitExceededException as e:
+                    print("[ERROR] Rate limit excedido:", e)
+                    # Avisamos en todos los servidores activos
+                    for gid, config in self.settings["guilds"].items():
+                        if config.get("enabled"):
+                            guild = self.bot.get_guild(int(gid))
+                            if guild:
+                                channel = guild.get_channel(config["channel_id"])
+                                if channel:
+                                    try:
+                                        await channel.send(
+                                            "⚠️ The request limit has been reached."
+                                            "Changes won't be saved until the limit is released, please wait."
+                                        )
+                                    except Exception as send_error:
+                                        print(f"[ERROR] No se pudo enviar aviso en guild {gid}: {send_error}")
+                    # Mantenemos la bandera para reintentar en el siguiente ciclo
+                    self._pending_save = True
                 except Exception as e:
-                    # Si hay error (incluido rate limit), lo logueamos y
-                    # mantenemos la bandera para reintentar en el siguiente ciclo.
                     print("[ERROR] autosave:", e)
                 else:
-                    # Solo si guardó correctamente, limpiamos la bandera
+                    # Si guardó correctamente, limpiamos la bandera
                     self._pending_save = False
 
     # ================================================================
-    # SLASH COMMAND: auto_cards (activar/desactivar/configurar)
+    # SLASH COMMAND: auto_cards
     # ================================================================
     @app_commands.command(
         name="auto_cards",
@@ -105,74 +127,57 @@ class CartasAuto(commands.Cog):
         max_horas: int | None = None,
         max_diarias: int | None = None
     ):
-        # Defer para evitar timeouts mientras procesamos
+        """
+        Slash command para activar/desactivar el sistema de cartas automáticas.
+        - Si no se pasan argumentos, desactiva.
+        - Si se pasa canal y parámetros, activa o reconfigura.
+        """
         await interaction.response.defer(ephemeral=False)
-
         gid = str(interaction.guild_id)
         config = self.settings["guilds"].get(gid)
 
-        # ---------------------------
-        # DESACTIVAR (si no hay argumentos)
-        # ---------------------------
+        # Caso: desactivar
         if canal is None and max_horas is None and max_diarias is None:
-            # Desactivar si estaba activo
             if config and config.get("enabled"):
                 config["enabled"] = False
-
-                # Cancelar tarea del servidor si existía
                 if gid in self.tasks:
                     try:
                         self.tasks[gid].cancel()
                     except Exception:
                         pass
                     self.tasks.pop(gid, None)
-
-                # Reset de contadores y próxima aparición
                 config["count"] = 0
                 config.pop("next_spawn", None)
-
-                # Marcar cambios (no guardar inmediato)
                 self.marcar_cambios()
-
                 await interaction.followup.send("❌ Automatic card spawning deactivated.")
             else:
-                # Ya estaba desactivado
                 await interaction.followup.send(
                     "⚠️ Automatic card spawning is already deactivated. Use `/auto_cards` with a channel."
                 )
             return
 
-        # ---------------------------
-        # ACTIVAR / RECONFIGURAR
-        # ---------------------------
+        # Caso: activar/reconfigurar
         if canal is None:
-            # Para activar, el canal es obligatorio
             await interaction.followup.send(
                 "⚠️ You must specify the channel: `/auto_cards #channel (max_hour_wait) (max_daily_number)`"
             )
             return
 
-        # Valores por defecto si no se especifican
         if max_horas is None:
             max_horas = 5
         if max_diarias is None:
             max_diarias = 5
 
-        # Configuración del servidor en memoria
         self.settings["guilds"][gid] = {
             "enabled": True,
             "channel_id": canal.id,
-            "interval": [0, max_horas],  # espera entre 0 y max_horas
-            "max_daily": max_diarias,    # máximo de cartas por día
-            "count": 0,                  # cartas aparecidas hoy
+            "interval": [0, max_horas],
+            "max_daily": max_diarias,
+            "count": 0,
             "last_reset": datetime.date.today().isoformat()
         }
 
-        # Marcar cambios para que autosave los suba después
         self.marcar_cambios()
-
-        # Crear o recrear la tarea de spawn para este servidor
-        # Nota: interaction.guild_id es int, lo convertimos a int para el loop
         self.tasks[gid] = asyncio.create_task(self.spawn_for_guild(interaction.guild_id))
 
         await interaction.followup.send(
@@ -181,7 +186,7 @@ class CartasAuto(commands.Cog):
         )
 
     # ================================================================
-    # SLASH COMMAND: estado_cartas (estado actual)
+    # SLASH COMMAND: estado_cartas
     # ================================================================
     @app_commands.command(
         name="estado_cartas",
@@ -189,34 +194,29 @@ class CartasAuto(commands.Cog):
     )
     async def estado_cartas_slash(self, interaction: discord.Interaction):
         """
-        Muestra el estado del sistema de cartas automáticas para el servidor actual:
-        - Canal configurado, intervalo, máximo diario, cuántas van y tiempo restante hasta la próxima.
+        Muestra el estado actual del sistema de cartas automáticas en el servidor:
+        - Canal configurado, intervalo, máximo diario, cartas lanzadas y tiempo hasta la próxima.
         """
         gid = str(interaction.guild_id)
         config = self.settings["guilds"].get(gid)
 
-        # Si está desactivado o no hay configuración
         if not config or not config.get("enabled"):
             await interaction.response.send_message("❌ Automatic card spawning is deactivated.")
             return
 
-        # Calcular texto de tiempo restante hasta la siguiente aparición
         tiempo_str = "No more cards today."
         if "next_spawn" in config:
             try:
                 next_spawn = datetime.datetime.fromisoformat(config["next_spawn"])
                 delta = next_spawn - datetime.datetime.now()
-
                 if delta.total_seconds() > 0:
                     minutos = int(delta.total_seconds() // 60)
                     horas = minutos // 60
                     minutos_restantes = minutos % 60
                     tiempo_str = f"{horas}h {minutos_restantes}m"
                 else:
-                    # next_spawn en pasado pero aún no disparada (pendiente)
                     tiempo_str = "Programmed, pending."
             except Exception:
-                # Si falla el parseo, no rompemos la respuesta
                 pass
 
         await interaction.response.send_message(
@@ -229,25 +229,22 @@ class CartasAuto(commands.Cog):
         )
 
     # ================================================================
-    # BUCLE DE TAREA POR SERVIDOR (spawn_for_guild)
+    # Bucle de spawn por servidor
     # ================================================================
     async def spawn_for_guild(self, gid: int):
         """
         Bucle principal por servidor:
         - Resetea contador diario si cambia el día.
-        - Programa la siguiente aparición con espera aleatoria dentro del intervalo.
+        - Programa la siguiente aparición con espera aleatoria.
         - Envía la carta al canal configurado y actualiza el contador.
-        - Todos los cambios se marcan para autosave en vez de guardarse inmediatamente.
         """
         while True:
-            # Leer configuración actual del servidor
             config = self.settings["guilds"].get(str(gid))
             if not config or not config.get("enabled"):
-                # Si no está habilitado, dormir un poco y volver a comprobar
                 await asyncio.sleep(60)
                 continue
 
-            # Reset diario: al cambiar la fecha, reiniciamos contador
+            # Reset diario si cambia el día
             hoy = datetime.date.today().isoformat()
             if config.get("last_reset") != hoy:
                 config["count"] = 0
@@ -259,29 +256,28 @@ class CartasAuto(commands.Cog):
                 await asyncio.sleep(60)
                 continue
 
-            # Programar próxima aparición: intervalo aleatorio 0..max_horas
+            # Programar próxima aparición con espera aleatoria dentro del intervalo
             wait = random.randint(0, config["interval"][1] * 3600)
             next_spawn = (datetime.datetime.now() + datetime.timedelta(seconds=wait)).isoformat()
             config["next_spawn"] = next_spawn
             self.marcar_cambios()
 
-            # Dormimos hasta el próximo spawn
+            # Dormir hasta el próximo spawn
             await asyncio.sleep(wait)
 
             # Comprobar si sigue habilitado
             if not config.get("enabled"):
                 continue
 
-            # Obtener guild y canal desde el bot (ambos pueden ser None si no están en caché)
+            # Obtener guild y canal
             guild = self.bot.get_guild(gid)
             if not guild:
-                # Si no encontramos la guild, esperar y seguir
                 await asyncio.sleep(10)
                 continue
 
             channel = guild.get_channel(config["channel_id"])
             if not channel:
-                # Si el canal fue borrado o no accesible, desactivar para evitar bucles vacíos
+                # Si el canal no existe/acceso denegado, desactivar para evitar bucles vacíos
                 config["enabled"] = False
                 self.marcar_cambios()
                 continue
@@ -289,7 +285,6 @@ class CartasAuto(commands.Cog):
             # Cargar base de cartas y elegir una aleatoria
             cartas = cargar_cartas()
             if not cartas:
-                # Si no hay cartas, esperar un poco y reintentar
                 await asyncio.sleep(30)
                 continue
 
@@ -349,7 +344,6 @@ class CartasAuto(commands.Cog):
             # Imagen: remota o adjunta si es local; si no existe, avisar en la descripción
             ruta_img = carta.get("imagen")
             archivo = None
-
             if ruta_img and isinstance(ruta_img, str) and ruta_img.startswith("http"):
                 embed.set_image(url=ruta_img)
             elif ruta_img and isinstance(ruta_img, str) and os.path.exists(ruta_img):
@@ -374,11 +368,11 @@ class CartasAuto(commands.Cog):
 
             # Incrementar contador de cartas diarias
             config["count"] += 1
-
             # Marcar cambios para que autosave suba el nuevo estado
             self.marcar_cambios()
 
 
 # Setup para registrar el cog en el bot
 async def setup(bot: commands.Bot):
+    # Registrar el cog en el bot al cargar la extensión
     await bot.add_cog(CartasAuto(bot))

@@ -28,12 +28,9 @@ def cargar_settings():
         print("[ERROR] cargar_settings:", e)
         return {}
 
-# Guardar settings en el Gist remoto
-async def guardar_settings(datos, bot=None, guild_id=None, channel_id=None):
-    """
-    Sube los cambios al Gist, actualizando settings.json.
-    Si se excede el límite de la API, se avisa en el canal configurado del servidor.
-    """
+# Guardar settings en el Gist remoto (función síncrona)
+def guardar_settings(datos):
+    """Sube los cambios al Gist, actualizando settings.json."""
     try:
         print("[INFO] Iniciando guardado de settings en Gist...")
         gist = get_gist()
@@ -41,21 +38,8 @@ async def guardar_settings(datos, bot=None, guild_id=None, channel_id=None):
         gist.edit(files={"settings.json": InputFileContent(nuevo_contenido)})
         print("[OK] Settings actualizados correctamente en el Gist.")
     except RateLimitExceededException as e:
-        print("[ERROR] Rate limit excedido:", e)
-
-        # Avisar en el servidor si tenemos contexto
-        if bot and guild_id and channel_id:
-            guild = bot.get_guild(int(guild_id))
-            if guild:
-                channel = guild.get_channel(int(channel_id))
-                if channel:
-                    try:
-                        await channel.send(
-                            "⚠️ Se ha alcanzado el límite de peticiones a GitHub. "
-                            "Los cambios no se guardarán hasta que se libere el límite."
-                        )
-                    except Exception as send_error:
-                        print(f"[ERROR] No se pudo enviar aviso en guild {guild_id}: {send_error}")
+        # Lanzamos la excepción para que el cog la capture y avise en el servidor
+        raise e
     except Exception as e:
         import traceback
         print("[ERROR] guardar_settings:", e)
