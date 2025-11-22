@@ -4,7 +4,7 @@ from config import TOKEN, INTENTS
 from keep_alive import iniciar_servidor
 import asyncio
 
-bot = commands.Bot(command_prefix='y!', intents=INTENTS, help_command=None)
+bot = commands.Bot(command_prefix='y!', intents=INTENTS)
 
 iniciar_servidor()
 
