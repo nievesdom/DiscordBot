@@ -68,38 +68,44 @@ class Generales(commands.Cog):
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
-    @app_commands.command(name="help", description="Shows all available slash commands.")
-    async def help(self, interaction: discord.Interaction):
-        # Hacemos defer para evitar que la interacción caduque mientras construimos la lista
+    @app_commands.command(name="help", description="Shows all available commands.")
+    async def help_slash(self, interaction: discord.Interaction):
+        """
+        Comando de ayuda global:
+        - Recorre todos los comandos registrados en el árbol de slash commands.
+        - Agrupa por cog si el comando pertenece a uno.
+        - Muestra nombre y descripción de cada comando.
+        """
         await interaction.response.defer(ephemeral=True)
 
-        # Obtenemos todos los comandos registrados en el árbol de slash commands
-        comandos = self.bot.tree.get_commands(guild=interaction.guild)
+        # Obtenemos todos los comandos registrados (globales y de guild)
+        comandos = self.bot.tree.get_commands()
 
-        # Creamos el embed que contendrá la lista
+        # Diccionario para agrupar por cog
+        comandos_por_cog = {}
+
+        for comando in sorted(comandos, key=lambda c: c.name):
+            # Cog asociado (si existe)
+            cog_name = getattr(comando.callback.__self__, "__cog_name__", "Sin categoría")
+            if cog_name not in comandos_por_cog:
+                comandos_por_cog[cog_name] = []
+            comandos_por_cog[cog_name].append(comando)
+
+        # Creamos el embed
         embed = discord.Embed(
             title="📖 Available commands",
             color=discord.Color.blurple(),
-            description="Use the / prefix and let Discord guide you with parameters."
+            description="List of all the available commands."
         )
 
-        # 🔎 Recorremos los comandos y añadimos cada uno con su descripción
-        for comando in sorted(comandos, key=lambda c: c.name):
-            # Si es un grupo de comandos (ej. /cards add, /cards remove)
-            if isinstance(comando, app_commands.Group):
-                texto = ""
-                for sub in comando.commands:
-                    texto += f"**/{comando.name} {sub.name}** — {sub.description or 'No description'}\n"
-                embed.add_field(name=f"/{comando.name}", value=texto, inline=False)
-            else:
-                # Comando normal
-                embed.add_field(
-                    name=f"/{comando.name}",
-                    value=comando.description or "No description",
-                    inline=False
-                )
+        # Añadimos cada grupo al embed
+        for cog_name, lista in comandos_por_cog.items():
+            texto = "\n".join(
+                f"**/{c.name}** — {c.description or 'Sin descripción'}"
+                for c in lista
+            )
+            embed.add_field(name=cog_name, value=texto, inline=False)
 
-        # Enviamos el embed como respuesta
         await interaction.followup.send(embed=embed, ephemeral=True)
 
 

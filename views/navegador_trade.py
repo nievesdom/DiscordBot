@@ -49,11 +49,11 @@ class TradeView(View):
         coleccion2 = propiedades.get(servidor_id, {}).get(str(self.user2.id), [])
 
         if self.carta1_obj["id"] not in coleccion1:
-            await interaction.followup.send(f"❌ You don't own {self.carta1_obj['nombre']}.", ephemeral=True)
+            await interaction.followup.send(f"❌ You don't own {self.carta1_obj['nombre']}.")
             self.stop()
             return
         if carta2_obj["id"] not in coleccion2:
-            await interaction.followup.send(f"❌ {self.user2.display_name} doesn't own {carta2_obj['nombre']}.", ephemeral=True)
+            await interaction.followup.send(f"❌ {self.user2.display_name} doesn't own {carta2_obj['nombre']}.")
             self.stop()
             return
 

@@ -96,7 +96,7 @@ class CartasAuto(commands.Cog):
                                     try:
                                         await channel.send(
                                             "⚠️ The request limit has been reached."
-                                            "Changes won't be saved until the limit is released, please wait."
+                                            "Changes won't be saved until the limit is released, please wait about an hour before using this bot."
                                         )
                                     except Exception as send_error:
                                         print(f"[ERROR] No se pudo enviar aviso en guild {gid}: {send_error}")

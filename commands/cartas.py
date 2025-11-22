@@ -123,7 +123,7 @@ class Cartas(commands.Cog):
         propiedades = cargar_propiedades()
         cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
         if not cartas_ids:
-            await interaction.followup.send(f"{objetivo.display_name} has no cards yet.", ephemeral=True)
+            await interaction.followup.send(f"{objetivo.display_name} has no cards yet.")
             return
 
         cartas_info = cartas_por_id()
@@ -150,7 +150,7 @@ class Cartas(commands.Cog):
         propiedades = cargar_propiedades()
         cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
         if not cartas_ids:
-            await interaction.followup.send(f"{objetivo.display_name} has no cards yet.", ephemeral=True)
+            await interaction.followup.send(f"{objetivo.display_name} has no cards yet.")
             return
 
         cartas_info = cartas_por_id()
@@ -184,7 +184,7 @@ class Cartas(commands.Cog):
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
 
         if not coincidencias:
-            await interaction.followup.send(f"No cards found containing '{term}'.", ephemeral=True)
+            await interaction.followup.send(f"No cards found containing '{term}'.")
             return
 
         propiedades = cargar_propiedades()
@@ -284,7 +284,7 @@ class Cartas(commands.Cog):
         cartas = cargar_cartas()
         carta = next((c for c in cartas if name.lower() in c["nombre"].lower()), None)
         if not carta:
-            await interaction.followup.send(f"❌ No card found containing '{name}'.", ephemeral=True)
+            await interaction.followup.send(f"❌ No card found containing '{name}'.")
             return
 
         colores = {"UR": 0x8841f2, "KSR": 0xabfbff, "SSR": 0x57ffae, "SR": 0xfcb63d, "R": 0xfc3d3d, "N": 0x8c8c8c}
@@ -347,12 +347,12 @@ class Cartas(commands.Cog):
         cartas = cargar_cartas()
         carta1_obj = next((c for c in cartas if card.lower() in c["nombre"].lower()), None)
         if not carta1_obj:
-            await interaction.followup.send(f"❌ The card '{card}' hasn't been found.", ephemeral=True)
+            await interaction.followup.send(f"❌ The card '{card}' hasn't been found.")
             return
 
         carta1_id = carta1_obj["id"]
         if carta1_id not in coleccion1:
-            await interaction.followup.send(f"❌ You don't own a card named {card}.", ephemeral=True)
+            await interaction.followup.send(f"❌ You don't own a card named {card}.")
             return
 
         # Enviar propuesta al usuario destino con vista interactiva
