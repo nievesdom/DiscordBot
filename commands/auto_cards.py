@@ -111,9 +111,11 @@ class CartasAuto(commands.Cog):
     # ================================================================
     # SLASH COMMAND: auto_cards
     # ================================================================
+    @app_commands.default_permissions(administrator=True)  # Solo visible para administradores
+    @app_commands.checks.has_permissions(administrator=True)  # Solo ejecutable por administradores
     @app_commands.command(
         name="auto_cards",
-        description="Activates or deactivates automatic card spawning."
+        description="**[Administrator only]** Activates or deactivates automatic card spawning."
     )
     @app_commands.describe(
         canal="Channel where cards will spawn",
@@ -152,7 +154,7 @@ class CartasAuto(commands.Cog):
                 await interaction.followup.send("❌ Automatic card spawning deactivated.")
             else:
                 await interaction.followup.send(
-                    "⚠️ Automatic card spawning is already deactivated. Use `/auto_cards` with a channel."
+                    "⚠️ Automatic card spawning is already deactivated. Use `/auto_cards` with a channel to activate it."
                 )
             return
 
@@ -188,9 +190,11 @@ class CartasAuto(commands.Cog):
     # ================================================================
     # SLASH COMMAND: estado_cartas
     # ================================================================
+    @app_commands.default_permissions(administrator=True)  # Solo visible para administradores
+    @app_commands.checks.has_permissions(administrator=True)  # Solo ejecutable por administradores
     @app_commands.command(
-        name="estado_cartas",
-        description="Shows the status of automatic card spawning."
+        name="spawning_status",
+        description="**[Administrator only]** Shows the status of automatic card spawning."
     )
     async def estado_cartas_slash(self, interaction: discord.Interaction):
         """

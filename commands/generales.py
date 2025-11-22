@@ -63,7 +63,7 @@ class Generales(commands.Cog):
     @app_commands.command(name="feedback", description="Send the feedback form link.")
     async def feedback(self, interaction: discord.Interaction):
         await interaction.response.send_message("Here is the feedback form. I appreciate your input! https://forms.gle/Y4e2TpHRgpfZ18Hj6")
-
+    
     @app_commands.command(name="ping", description="Responde con Pong!")
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
@@ -80,10 +80,10 @@ class Generales(commands.Cog):
 
         # Diccionario manual de categorías y comandos (igual que tu ejemplo)
         categorias = {
-            "👤 General": ["count", "feedback", "help", "hola", "say", "updates"],
-            "🃏 Cards": ["auto_cards", "album", "collection", "search", "pack", "show"],
+            "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
+            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
             "🌐 Wiki": ["wiki", "character"],
-            "🔨 Moderation": ["migrate", "tags1", "tags2"]
+            "🔨 Moderation": ["auto_cards", "spawning_status"]
         }
 
         # Obtenemos todos los slash commands registrados

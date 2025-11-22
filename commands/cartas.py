@@ -41,6 +41,65 @@ class Cartas(commands.Cog):
             await interaction.response.defer(ephemeral=ephemeral)
         except discord.InteractionResponded:
             pass
+        
+        
+    # -----------------------------
+    # /avisar_update (solo OWNER)
+    # -----------------------------
+    @app_commands.default_permissions()  # Comando no visible por permisos por defecto
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)  # Solo el dueño lo puede ejecutar
+    @app_commands.command(
+        name="avisar_update",
+        description="(Owner only) Send update notice to all servers with auto_cards enabled."
+    )
+    async def avisar_update(self, interaction: discord.Interaction):
+        """
+        Envía un mensaje de aviso en inglés a todos los servidores donde
+        las cartas automáticas estén activadas en su canal configurado.
+        Restringido al OWNER_ID, igual que el comando /carta.
+        """
+        # Hacemos defer para evitar timeout en la interacción
+        await interaction.response.defer(ephemeral=True)
+    
+        # Mensaje que se enviará a los servidores (en inglés)
+        message = (
+            "🚀 **The bot has been updated and now supports slash commands!**\n"
+            "Use `/help` to see the full list of available commands."
+        )
+    
+        sent = 0   # Contador de envíos correctos
+        failed = 0 # Contador de fallos
+    
+        # Obtenemos el cog CartasAuto para acceder a sus settings
+        cartas_cog = self.bot.get_cog("CartasAuto")
+        if not cartas_cog:
+            await interaction.followup.send("❌ CartasAuto cog not found.", ephemeral=True)
+            return
+    
+        # Recorremos todos los servidores configurados en CartasAuto
+        for gid, config in cartas_cog.settings.get("guilds", {}).items():
+            if config.get("enabled"):
+                guild = self.bot.get_guild(int(gid))
+                if not guild:
+                    continue
+                channel = guild.get_channel(config["channel_id"])
+                if not channel:
+                    continue
+                try:
+                    # Enviamos el mensaje al canal configurado
+                    await channel.send(message)
+                    sent += 1
+                except Exception as e:
+                    # Si falla, lo registramos en consola y sumamos al contador de fallos
+                    print(f"[ERROR] No se pudo enviar aviso en guild {gid}: {e}")
+                    failed += 1
+    
+        # Resumen para el dueño (respuesta ephemeral)
+        await interaction.followup.send(
+            f"✅ Aviso enviado a {sent} servidores. ❌ Fallos: {failed}.",
+            ephemeral=True
+        )
+
 
     # -----------------------------
     # /carta (solo OWNER)
