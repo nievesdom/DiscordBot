@@ -72,6 +72,7 @@ class Generales(commands.Cog):
         await interaction.response.send_message(
             "**Version:** 1.1\n**Patch notes:**\n- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
             "- Fixed a bug that would cause the bot to quickly reach the request limit while trying to save the automatic cards information from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now.\n"
+            "- Other minor quality of life changes."
             "**Newly added cards:**\n- UR Kaoru Sayama (Palace)\n- UR Homare Nishitani (Festival)\n- UR Yoshitaka Mine (Festival)\n"
             "**Coming up:** card combat!"
         )
