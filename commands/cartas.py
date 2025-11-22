@@ -50,7 +50,7 @@ class Cartas(commands.Cog):
     @app_commands.check(lambda i: i.user.id == OWNER_ID)  # Solo el dueño lo puede ejecutar
     @app_commands.command(
         name="avisar_update",
-        description="(Owner only) Send update notice to all servers with auto_cards enabled."
+        description="**[Bot owner only]** Send update notice to all servers with auto_cards enabled."
     )
     async def avisar_update(self, interaction: discord.Interaction):
         """
@@ -60,22 +60,23 @@ class Cartas(commands.Cog):
         """
         # Hacemos defer para evitar timeout en la interacción
         await interaction.response.defer(ephemeral=True)
-    
+
         # Mensaje que se enviará a los servidores (en inglés)
         message = (
-            "🚀 **The bot has been updated and now supports slash commands!**\n"
-            "Use `/help` to see the full list of available commands."
+            "🚀 **The bot has been updated to the version 1.1 and now supports slash commands!**\n"
+            "Use `/help` to see the full list of available commands or `/update` in order to see a more detailed description of all the changes.\n"
+            "Sorry for the downtime and if you experienced any issues before."
         )
-    
+
         sent = 0   # Contador de envíos correctos
         failed = 0 # Contador de fallos
-    
+
         # Obtenemos el cog CartasAuto para acceder a sus settings
         cartas_cog = self.bot.get_cog("CartasAuto")
         if not cartas_cog:
             await interaction.followup.send("❌ CartasAuto cog not found.", ephemeral=True)
             return
-    
+
         # Recorremos todos los servidores configurados en CartasAuto
         for gid, config in cartas_cog.settings.get("guilds", {}).items():
             if config.get("enabled"):
@@ -93,7 +94,7 @@ class Cartas(commands.Cog):
                     # Si falla, lo registramos en consola y sumamos al contador de fallos
                     print(f"[ERROR] No se pudo enviar aviso en guild {gid}: {e}")
                     failed += 1
-    
+
         # Resumen para el dueño (respuesta ephemeral)
         await interaction.followup.send(
             f"✅ Aviso enviado a {sent} servidores. ❌ Fallos: {failed}.",
@@ -166,7 +167,7 @@ class Cartas(commands.Cog):
     # -----------------------------
     # /album
     # -----------------------------
-    @app_commands.command(name="album", description="Shows a user's card collection")
+    @app_commands.command(name="album", description="Shows a user's card collection in a visual format")
     @app_commands.describe(user="Mention a user to see their album")
     async def album(self, interaction: discord.Interaction, user: discord.Member = None):
         """
