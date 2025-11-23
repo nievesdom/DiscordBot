@@ -8,7 +8,7 @@ import datetime
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
 from core.firebase_storage import cargar_settings, guardar_settings
-from core.firebase_storage import cargar_propiedades, guardar_propiedades
+from core.firebase_storage import cargar_packs, guardar_packs, cargar_propiedades, guardar_propiedades
 
 from core.cartas import cargar_cartas, cartas_por_id
 
@@ -66,6 +66,38 @@ class Cartas(commands.Cog):
     
         # Mensaje visible para todos en el canal
         await interaction.followup.send(embed=embed)
+        
+    # Decorador para restringir el comando solo a ti
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(
+        name="migrar_packs",
+        description="(Owner only) Migra los datos de packs desde settings a la nueva colección packs."
+    )
+    async def migrar_packs(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        settings = cargar_settings()
+        packs = {}
+
+        # Recorremos todos los servidores en settings
+        for servidor_id, servidor_data in settings.items():
+            if servidor_id == "guilds":  # saltar config de auto_cards
+                continue
+
+            packs[servidor_id] = {}
+            for usuario_id, usuario_data in servidor_data.items():
+                ultimo = usuario_data.get("ultimo_paquete")
+                if ultimo:
+                    packs[servidor_id][usuario_id] = {"ultimo_paquete": ultimo}
+
+        # Guardar en la nueva colección
+        guardar_packs(packs)
+
+        await interaction.followup.send(
+            f"✅ Migración completada. Se movieron los registros de packs a la nueva colección.",
+            ephemeral=True
+        )
 
 
     @app_commands.default_permissions()
