@@ -130,12 +130,12 @@ class Generales(commands.Cog):
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
             "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them."
             "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
-            "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
+            "- Other minor quality of life changes, such as increasing the time to claim a spawned card to 10 minutes.\n"
             "**Newly added cards:**\n"
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
             "- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:**\n- Card combat!\n- Gift and discard card commands.\n- New alphabetical order, different from rarity order."
+            "**Coming up:**\n- Gift and discard card commands.\n- New alphabetical order, different from rarity order.\n- Card combat!"
         )
 
     @commands.command(name="updates")
@@ -145,12 +145,12 @@ class Generales(commands.Cog):
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
             "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them."
             "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
-            "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
+            "- Other minor quality of life changes, such as increasing the time to claim a spawned card to 10 minutes.\n"
             "**Newly added cards:**\n"
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
             "- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:**\n- Card combat!\n- Gift and discard card commands.\n- New alphabetical order, different from rarity order."
+            "**Coming up:**\n- Gift and discard card commands.\n- New alphabetical order, different from rarity order.\n- Card combat!"
         )
 
     # ---------------------------
