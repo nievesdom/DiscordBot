@@ -128,7 +128,7 @@ class Generales(commands.Cog):
         await interaction.response.send_message(
             "**Version:** 1.1.1\n**Patch notes:**\n"
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
-            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them."
+            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them.\n"
             "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
             "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
             "**Newly added cards:**\n"
@@ -143,7 +143,7 @@ class Generales(commands.Cog):
         await ctx.send(
             "**Version:** 1.1.1\n**Patch notes:**\n"
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
-            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them."
+            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them.\n"
             "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
             "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
             "**Newly added cards:**\n"
@@ -182,21 +182,21 @@ class Generales(commands.Cog):
     async def help_slash(self, interaction: discord.Interaction):
         # Ya no usamos ephemeral=True
         await interaction.response.defer(ephemeral=False)
-    
+
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
             "🃏 Cards": ["album", "collection", "search", "pack", "show"],
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["auto_cards", "spawning_status"]
         }
-    
+
         comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
-    
+
         embed = discord.Embed(
             title="📖 Available slash commands:",
             color=discord.Color.blurple()
         )
-    
+
         for nombre_cat, lista_comandos in categorias.items():
             texto = ""
             for nombre in lista_comandos:
@@ -205,7 +205,7 @@ class Generales(commands.Cog):
                     texto += f"**/{comando.name}** → {comando.description or 'Sin descripción'}\n"
             if texto:
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
-    
+
         # Este mensaje ya no es ephemeral, será visible para todos en el canal
         await interaction.followup.send(embed=embed)
 

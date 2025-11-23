@@ -41,20 +41,32 @@ class Cartas(commands.Cog):
     # -----------------------------
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
-    @app_commands.command(name="servers_info", description="(Owner only) Shows the servers where the bot is and their member counts.")
+    @app_commands.command(
+        name="servers_info",
+        description="(Owner only) Shows the servers where the bot is and their member counts."
+    )
     async def servers_info(self, interaction: discord.Interaction):
         """Muestra información de todos los servidores donde está el bot."""
-        await interaction.response.defer(ephemeral=True)
+        # Ya no es ephemeral
+        await interaction.response.defer(ephemeral=False)
+    
         guilds = self.bot.guilds
         total_servers = len(guilds)
-        info_lines = [f"• **{g.name}** (ID: {g.id}) → 👥 {g.member_count} members" for g in guilds]
+        info_lines = [
+            f"• **{g.name}** (ID: {g.id}) → 👥 {g.member_count} members"
+            for g in guilds
+        ]
         listado = "\n".join(info_lines)
+    
         embed = discord.Embed(
             title="🌐 Servers where the bot is present",
             description=f"Currently in **{total_servers} servers**:\n\n{listado}",
             color=discord.Color.green()
         )
+    
+        # Mensaje visible para todos en el canal
         await interaction.followup.send(embed=embed)
+
 
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
