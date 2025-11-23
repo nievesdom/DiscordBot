@@ -130,6 +130,22 @@ class ReclamarCarta(discord.ui.View):
                 ephemeral=False
             )
 
+            # 🔥 Enviar log al servidor/canal de logs
+            log_guild_id = 286617766516228096
+            log_channel_id = 1441990735883800607
+
+            log_guild = interaction.client.get_guild(log_guild_id)
+            if log_guild:
+                log_channel = log_guild.get_channel(log_channel_id)
+                if log_channel:
+                    try:
+                        await log_channel.send(
+                            f"📝 **Card claimed:** {user.display_name} ({user.id}) "
+                            f"in server '{guild.name}' ({guild.id})."
+                        )
+                    except Exception as e:
+                        print(f"[ERROR] Could not send log: {e}")
+
             print(f"[CLAIM] {interaction.user.display_name} reclamó '{nombre_carta}' en {interaction.guild.name}.")
 
         except Exception as e:
