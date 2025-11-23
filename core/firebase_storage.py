@@ -16,7 +16,7 @@ def cargar_settings() -> Dict:
     return doc.to_dict() if doc.exists else {}
 
 def guardar_settings(settings: Dict) -> None:
-    # merge=True para no borrar otras claves
+    # ✅ merge=True para no borrar otras claves
     db.collection(SETTINGS_COLLECTION).document(SETTINGS_DOC).set(settings, merge=True)
 
 def cargar_propiedades() -> Dict:
@@ -24,6 +24,7 @@ def cargar_propiedades() -> Dict:
     return doc.to_dict() if doc.exists else {}
 
 def guardar_propiedades(propiedades: Dict) -> None:
+    # ✅ merge=True para no borrar otras claves
     db.collection(PROPIEDADES_COLLECTION).document(PROPIEDADES_DOC).set(propiedades, merge=True)
 
 # 🔥 Nuevo: packs
@@ -32,5 +33,6 @@ def cargar_packs() -> Dict:
     return doc.to_dict() if doc.exists else {}
 
 def guardar_packs(packs: Dict) -> None:
+    # ✅ merge=True para no borrar otras claves
     db.collection(PACKS_COLLECTION).document(PACKS_DOC).set(packs, merge=True)
 

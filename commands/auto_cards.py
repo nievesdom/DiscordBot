@@ -11,7 +11,6 @@ import discord, random, asyncio, datetime, os
 from discord.ext import commands
 from discord import app_commands
 from core.firebase_storage import cargar_settings, guardar_settings
-from core.firebase_storage import cargar_packs, guardar_packs, cargar_propiedades, guardar_propiedades
 
 from core.cartas import cargar_cartas
 from views.reclamar import ReclamarCarta
@@ -89,147 +88,84 @@ class CartasAuto(commands.Cog):
                     self._pending_save = True
 
 
-    # -----------------------------
-    # /pack (diario)
-    # -----------------------------
-    @app_commands.command(name="pack", description="Opens a daily pack of 5 cards")
-    async def pack(self, interaction: discord.Interaction):
-        """Permite abrir un paquete diario de 5 cartas (slash)."""
+        # ================================================================
+    # SLASH COMMAND: auto_cards
+    # ================================================================
+    @app_commands.default_permissions(administrator=True)  # Solo visible para administradores
+    @app_commands.checks.has_permissions(administrator=True)  # Solo ejecutable por administradores
+    @app_commands.command(
+        name="auto_cards",
+        description="**[Administrator only]** Activates or deactivates automatic card spawning."
+    )
+    @app_commands.describe(
+        canal="Channel where cards will spawn",
+        max_horas="Maximum wait time in hours",
+        max_diarias="Maximum cards per day (100 max)"
+    )
+    async def auto_cards_slash(
+        self,
+        interaction: discord.Interaction,
+        canal: discord.TextChannel | None = None,
+        max_horas: int | None = None,
+        max_diarias: int | None = None
+    ):
         await interaction.response.defer(ephemeral=False)
+        gid = str(interaction.guild_id)
+        config = self.settings["guilds"].get(gid)
 
-        servidor_id = str(interaction.guild.id)
-        usuario_id = str(interaction.user.id)
+        # Caso: desactivar
+        if canal is None and max_horas is None and max_diarias is None:
+            if config and config.get("enabled"):
+                config["enabled"] = False
+                if gid in self.tasks:
+                    try:
+                        self.tasks[gid].cancel()
+                    except Exception:
+                        pass
+                    self.tasks.pop(gid, None)
+                config["count"] = 0
+                config.pop("next_spawn", None)
+                self.marcar_cambios()
+                await interaction.followup.send("❌ Automatic card spawning deactivated.")
+            else:
+                await interaction.followup.send(
+                    "⚠️ Automatic card spawning is already deactivated. Use `/auto_cards` with a channel to activate it."
+                )
+            return
 
-        packs = cargar_packs()
-        servidor_packs = packs.setdefault(servidor_id, {})
-        usuario_packs = servidor_packs.setdefault(usuario_id, {})
-
-        hoy = datetime.date.today().isoformat()
-        ahora = datetime.datetime.now()
-
-        # Cooldown: ya abrió hoy
-        if usuario_packs.get("ultimo_paquete") == hoy:
-            mañana = ahora + datetime.timedelta(days=1)
-            medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
-            restante = medianoche - ahora
-            horas, resto = divmod(restante.seconds, 3600)
-            minutos = resto // 60
+        # Caso: activar/reconfigurar
+        if canal is None:
             await interaction.followup.send(
-                f"🚫 {interaction.user.mention}, you already opened today's pack, come back in {horas}h {minutos}m."
+                "⚠️ You must specify the channel: `/auto_cards #channel (max_hour_wait) (max_daily_number)`"
             )
             return
 
-        cartas = cargar_cartas()
-        if not cartas:
-            await interaction.followup.send("❌ No cards available.")
-            return
-
-        # Seleccionar 5 cartas aleatorias
-        nuevas_cartas = random.sample(cartas, 5)
-        usuario_packs["ultimo_paquete"] = hoy
-        guardar_packs(packs)
-
-        # Guardar en propiedades (colección del usuario)
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        usuario_cartas = servidor_props.setdefault(usuario_id, [])
-        usuario_cartas.extend([c["id"] for c in nuevas_cartas])
-        guardar_propiedades(propiedades)
-
-        # Mostrar pack
-        cartas_info = cartas_por_id()
-        cartas_ids = [c["id"] for c in nuevas_cartas]
-        vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
-        embed, archivo = vista.mostrar()
-
-        # 🔥 Enviar log al servidor/canal de logs con nombres e IDs
-        log_guild_id = 286617766516228096
-        log_channel_id = 1441990735883800607
-        log_guild = interaction.client.get_guild(log_guild_id)
-        if log_guild:
-            log_channel = log_guild.get_channel(log_channel_id)
-            if log_channel:
-                try:
-                    nombres_cartas = ", ".join([f"{c['nombre']} [ID: {c['id']}]" for c in nuevas_cartas])
-                    await log_channel.send(
-                        f"[PACK] {interaction.user.display_name} ({interaction.user.id}) abrió un paquete en "
-                        f"{interaction.guild.name} ({interaction.guild.id}) con las cartas: {nombres_cartas}"
-                    )
-                except Exception as e:
-                    print(f"[ERROR] Could not send log: {e}")
-
-        if archivo:
-            await interaction.followup.send(file=archivo, embed=embed, view=vista)
+        if max_horas is None:
+            max_horas = 5
+        if max_diarias is None:
+            max_diarias = 5
         else:
-            await interaction.followup.send(embed=embed, view=vista)
+            max_diarias = min(max_diarias, 100)  # Limitar a 100 máximo
 
-    # -----------------------------
-    # y!pack (diario)
-    # -----------------------------
-    @commands.command(name="pack")
-    async def pack_prefix(self, ctx: commands.Context):
-        """Permite abrir un paquete diario de 5 cartas (prefijo)."""
-        servidor_id = str(ctx.guild.id)
-        usuario_id = str(ctx.author.id)
+        # ✅ Usamos update() para no borrar otras claves del servidor
+        self.settings["guilds"].setdefault(gid, {})
+        self.settings["guilds"][gid].update({
+            "enabled": True,
+            "channel_id": canal.id,
+            "interval": [0, max_horas],
+            "max_daily": max_diarias,
+            "count": 0,
+            "last_reset": datetime.date.today().isoformat()
+        })
 
-        packs = cargar_packs()
-        servidor_packs = packs.setdefault(servidor_id, {})
-        usuario_packs = servidor_packs.setdefault(usuario_id, {})
+        self.marcar_cambios()
+        self.tasks[gid] = asyncio.create_task(self.spawn_for_guild(interaction.guild_id))
 
-        hoy = datetime.date.today().isoformat()
-        ahora = datetime.datetime.now()
+        await interaction.followup.send(
+            f"✅ Automatic card spawning enabled in {canal.mention}, "
+            f"every 0–{max_horas}h, max {max_diarias} cards/day."
+        )
 
-        if usuario_packs.get("ultimo_paquete") == hoy:
-            mañana = ahora + datetime.timedelta(days=1)
-            medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
-            restante = medianoche - ahora
-            horas, resto = divmod(restante.seconds, 3600)
-            minutos = resto // 60
-            await ctx.send(
-                f"🚫 {ctx.author.mention}, you already opened today's pack, come back in {horas}h {minutos}m."
-            )
-            return
-
-        cartas = cargar_cartas()
-        if not cartas:
-            await ctx.send("❌ No cards available.")
-            return
-
-        nuevas_cartas = random.sample(cartas, 5)
-        usuario_packs["ultimo_paquete"] = hoy
-        guardar_packs(packs)
-
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        usuario_cartas = servidor_props.setdefault(usuario_id, [])
-        usuario_cartas.extend([c["id"] for c in nuevas_cartas])
-        guardar_propiedades(propiedades)
-
-        cartas_info = cartas_por_id()
-        cartas_ids = [c["id"] for c in nuevas_cartas]
-        vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
-        embed, archivo = vista.mostrar()
-
-        # 🔥 Enviar log al servidor/canal de logs con nombres e IDs
-        log_guild_id = 286617766516228096
-        log_channel_id = 1441990735883800607
-        log_guild = ctx.bot.get_guild(log_guild_id)
-        if log_guild:
-            log_channel = log_guild.get_channel(log_channel_id)
-            if log_channel:
-                try:
-                    nombres_cartas = ", ".join([f"{c['nombre']} [ID: {c['id']}]" for c in nuevas_cartas])
-                    await log_channel.send(
-                        f"[PACK] {ctx.author.display_name} ({ctx.author.id}) abrió un paquete en "
-                        f"{ctx.guild.name} ({ctx.guild.id}) con las cartas: {nombres_cartas}"
-                    )
-                except Exception as e:
-                    print(f"[ERROR] Could not send log: {e}")
-
-        if archivo:
-            await ctx.send(file=archivo, embed=embed, view=vista)
-        else:
-            await ctx.send(embed=embed, view=vista)
 
     # ================================================================
     # SLASH COMMAND: estado_cartas

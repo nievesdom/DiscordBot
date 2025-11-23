@@ -94,8 +94,44 @@ class Cartas(commands.Cog):
         # Guardar en la nueva colección
         guardar_packs(packs)
 
+        # Resumen de migración
+        servidores = len(packs)
+        usuarios = sum(len(u) for u in packs.values())
+
         await interaction.followup.send(
-            f"✅ Migración completada. Se movieron los registros de packs a la nueva colección.",
+            f"✅ Migración completada.\n"
+            f"- Servidores migrados: {servidores}\n"
+            f"- Usuarios migrados: {usuarios}",
+            ephemeral=True
+        )
+        
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(
+        name="borrar_packs_settings",
+        description="(Owner only) Borra la información de paquetes desde settings."
+    )
+    async def borrar_packs_settings(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        settings = cargar_settings()
+        borrados = 0
+
+        # Recorremos todos los servidores en settings
+        for servidor_id, servidor_data in settings.items():
+            if servidor_id == "guilds":  # saltar config de auto_cards
+                continue
+
+            for usuario_id in list(servidor_data.keys()):
+                if "ultimo_paquete" in servidor_data[usuario_id]:
+                    servidor_data[usuario_id].pop("ultimo_paquete", None)
+                    borrados += 1
+
+        # Guardar cambios en settings
+        guardar_settings(settings)
+
+        await interaction.followup.send(
+            f"🗑️ Se han borrado {borrados} registros de 'ultimo_paquete' en settings.",
             ephemeral=True
         )
 
@@ -330,19 +366,20 @@ class Cartas(commands.Cog):
     @app_commands.command(name="pack", description="Opens a daily pack of 5 cards")
     async def pack(self, interaction: discord.Interaction):
         """Permite abrir un paquete diario de 5 cartas (slash)."""
-        await self._safe_defer(interaction)
+        await interaction.response.defer(ephemeral=False)
 
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
 
-        settings = cargar_settings()
-        servidor_settings = settings.setdefault(servidor_id, {})
-        usuario_settings = servidor_settings.setdefault(usuario_id, {})
+        # ✅ Usamos packs en lugar de settings
+        packs = cargar_packs()
+        servidor_packs = packs.setdefault(servidor_id, {})
+        usuario_packs = servidor_packs.setdefault(usuario_id, {})
 
         hoy = datetime.date.today().isoformat()
         ahora = datetime.datetime.now()
 
-        if usuario_settings.get("ultimo_paquete") == hoy:
+        if usuario_packs.get("ultimo_paquete") == hoy:
             mañana = ahora + datetime.timedelta(days=1)
             medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
             restante = medianoche - ahora
@@ -359,8 +396,8 @@ class Cartas(commands.Cog):
             return
 
         nuevas_cartas = random.sample(cartas, 5)
-        usuario_settings["ultimo_paquete"] = hoy
-        guardar_settings(settings)
+        usuario_packs["ultimo_paquete"] = hoy
+        guardar_packs(packs)  # ✅ Guardamos en packs
 
         propiedades = cargar_propiedades()
         servidor_props = propiedades.setdefault(servidor_id, {})
@@ -372,7 +409,7 @@ class Cartas(commands.Cog):
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
-        
+
         # 🔥 Enviar log al servidor/canal de logs
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
@@ -386,8 +423,6 @@ class Cartas(commands.Cog):
                         f"[PACK] {interaction.user.display_name} abrió un paquete en {interaction.guild.name} "
                         f"con las cartas: {nombres_cartas}"
                     )
-
-                    
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
 
@@ -396,20 +431,25 @@ class Cartas(commands.Cog):
         else:
             await interaction.followup.send(embed=embed, view=vista)
 
+
+    # -----------------------------
+    # y!pack (diario)
+    # -----------------------------
     @commands.command(name="pack")
     async def pack_prefix(self, ctx: commands.Context):
         """Permite abrir un paquete diario de 5 cartas (prefijo)."""
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
 
-        settings = cargar_settings()
-        servidor_settings = settings.setdefault(servidor_id, {})
-        usuario_settings = servidor_settings.setdefault(usuario_id, {})
+        # ✅ Usamos packs en lugar de settings
+        packs = cargar_packs()
+        servidor_packs = packs.setdefault(servidor_id, {})
+        usuario_packs = servidor_packs.setdefault(usuario_id, {})
 
         hoy = datetime.date.today().isoformat()
         ahora = datetime.datetime.now()
 
-        if usuario_settings.get("ultimo_paquete") == hoy:
+        if usuario_packs.get("ultimo_paquete") == hoy:
             mañana = ahora + datetime.timedelta(days=1)
             medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
             restante = medianoche - ahora
@@ -426,8 +466,8 @@ class Cartas(commands.Cog):
             return
 
         nuevas_cartas = random.sample(cartas, 5)
-        usuario_settings["ultimo_paquete"] = hoy
-        guardar_settings(settings)
+        usuario_packs["ultimo_paquete"] = hoy
+        guardar_packs(packs)  # ✅ Guardamos en packs
 
         propiedades = cargar_propiedades()
         servidor_props = propiedades.setdefault(servidor_id, {})
@@ -439,11 +479,11 @@ class Cartas(commands.Cog):
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
         embed, archivo = vista.mostrar()
-        
+
         # 🔥 Enviar log al servidor/canal de logs
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
-        log_guild = ctx.client.get_guild(log_guild_id)
+        log_guild = ctx.bot.get_guild(log_guild_id)  # ✅ corregido: ctx.bot
         if log_guild:
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
@@ -453,8 +493,6 @@ class Cartas(commands.Cog):
                         f"[PACK] {ctx.author.display_name} abrió un paquete en {ctx.guild.name} "
                         f"con las cartas: {nombres_cartas}"
                     )
-
-                    
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
 
@@ -462,6 +500,7 @@ class Cartas(commands.Cog):
             await ctx.send(file=archivo, embed=embed, view=vista)
         else:
             await ctx.send(embed=embed, view=vista)
+
 
     # -----------------------------
     # /show (detalles de una carta)
