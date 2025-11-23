@@ -7,9 +7,40 @@ from collections import Counter
 # Regex para detectar links de obras en AO3
 AO3_REGEX = re.compile(r"https?://archiveofourown\.org/works/\d+", re.IGNORECASE)
 
+LOG_GUILD_ID = 286617766516228096
+LOG_CHANNEL_ID = 1441990735883800607
+
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        
+        
+    async def send_log(self, message: str):
+        """Envía un mensaje al canal de logs."""
+        log_guild = self.bot.get_guild(LOG_GUILD_ID)
+        if log_guild:
+            log_channel = log_guild.get_channel(LOG_CHANNEL_ID)
+            if log_channel:
+                try:
+                    await log_channel.send(message)
+                except Exception as e:
+                    print(f"[ERROR] No se pudo enviar log: {e}")
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild: discord.Guild):
+        """Se ejecuta cuando el bot entra en un servidor nuevo."""
+        await self.send_log(
+            f"✅ El bot ha sido **añadido** al servidor: **{guild.name}** (ID: {guild.id}). "
+            f"Miembros: {guild.member_count}"
+        )
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: discord.Guild):
+        """Se ejecuta cuando el bot se elimina de un servidor."""
+        await self.send_log(
+            f"❌ El bot ha sido **eliminado** del servidor: **{guild.name}** (ID: {guild.id})."
+        )
+        
         
     # -------------------- RESTRICCIÓN GLOBAL DEL COG --------------------
     async def cog_check(self, ctx: commands.Context):

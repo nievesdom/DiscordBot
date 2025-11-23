@@ -126,7 +126,7 @@ class Generales(commands.Cog):
     @app_commands.command(name="updates", description="Shows the latest updates and what's coming up.")
     async def updates_slash(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "**Version:** 1.1.1\n**Patch notes:**\n"
+            "**Version:** 1.1.2\n**Patch notes:**\n"
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
             "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them.\n"
             "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
@@ -136,7 +136,11 @@ class Generales(commands.Cog):
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
             "- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:**\n- Gift and discard card commands\n- New alphabetical order, different from rarity order\n- Card combat!"
+            "**Coming up:**\n"
+            "- Gift and discard card commands\n"
+            "- New alphabetical order, different from rarity order\n"
+            "- A choice for admins to choose how many packs everyone can open every day, for those of you who love opening many packs. I just ask that you don't do this in unintended ways because there's a chance you could break the bot for everyone (it happened, but shouldn't happen anymore now that the database has been migrated)."
+            "- Card combat!"
         )
 
     @commands.command(name="updates")
@@ -152,7 +156,11 @@ class Generales(commands.Cog):
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
             "- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:**\n- Card combat!\n- Gift and discard card commands\n- New alphabetical order, different from rarity order\n- Card combat!"
+            "**Coming up:**\n"
+            "- Gift and discard card commands\n"
+            "- New alphabetical order, different from rarity order\n"
+            "- A choice for admins to choose how many packs everyone can open every day, for those of you who love opening many packs. I just ask that you don't do this in unintended ways because there's a chance you could break the bot for everyone (it happened, but shouldn't happen anymore now that the database has been migrated)."
+            "- Card combat!"
         )
 
     # ---------------------------

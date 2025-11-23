@@ -115,6 +115,20 @@ class ConfirmTradeView(View):
         
         print(f"[TRADE] {self.user1.display_name} intercambió '{self.carta1_obj['nombre']}' con {self.user2.display_name} por {self.carta2_obj['nombre']} en {interaction.guild.name}.")
 
+        # 🔥 Enviar log al servidor/canal de logs
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+        log_guild = ctx.bot.get_guild(log_guild_id)  # ✅ corregido: ctx.bot
+        if log_guild:
+            log_channel = log_guild.get_channel(log_channel_id)
+            if log_channel:
+                try:
+                    await log_channel.send(
+                        f"[TRADE] {self.user1.display_name} intercambió '{self.carta1_obj['nombre']}' con {self.user2.display_name} por {self.carta2_obj['nombre']} en {interaction.guild.name}"
+                    )
+                except Exception as e:
+                    print(f"[ERROR] Could not send log: {e}")
+        
         await interaction.response.edit_message(
             content=(
                 f"✅ Trade successful:\n- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "

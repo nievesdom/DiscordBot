@@ -127,6 +127,21 @@ class CartasAuto(commands.Cog):
                 config.pop("next_spawn", None)
                 self.marcar_cambios()
                 await interaction.followup.send("❌ Automatic card spawning deactivated.")
+                
+                # 🔥 Enviar log al servidor/canal de logs
+                log_guild_id = 286617766516228096
+                log_channel_id = 1441990735883800607
+                log_guild = interaction.client.get_guild(log_guild_id)
+                if log_guild:
+                    log_channel = log_guild.get_channel(log_channel_id)
+                    if log_channel:
+                        try:
+                            await log_channel.send(
+                                f"[SPAWN] Spawns desactivados para el servidor {interaction.guild_name}"
+                            )
+                        except Exception as e:
+                            print(f"[ERROR] Could not send log: {e}")
+                
             else:
                 await interaction.followup.send(
                     "⚠️ Automatic card spawning is already deactivated. Use `/auto_cards` with a channel to activate it."
@@ -164,7 +179,21 @@ class CartasAuto(commands.Cog):
     
         self.marcar_cambios()
         self.tasks[gid] = asyncio.create_task(self.spawn_for_guild(interaction.guild_id))
-    
+        
+        # 🔥 Enviar log al servidor/canal de logs
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+        log_guild = interaction.client.get_guild(log_guild_id)
+        if log_guild:
+            log_channel = log_guild.get_channel(log_channel_id)
+            if log_channel:
+                try:
+                    await log_channel.send(
+                        f"[SPAWN] Spawns activados para el servidor {interaction.guild_name} cada 0–{max_horas}h, max {max_diarias} cartas"
+                    )
+                except Exception as e:
+                    print(f"[ERROR] Could not send log: {e}")
+        
         await interaction.followup.send(
             f"✅ Automatic card spawning enabled in {canal.mention}, "
             f"every 0–{max_horas}h, max {max_diarias} cards/day."
