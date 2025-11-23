@@ -482,60 +482,51 @@ class Cartas(commands.Cog):
     @app_commands.command(name="trade", description="Starts a card trade with another user")
     @app_commands.describe(user="User to trade with", card="Card to trade")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
-        """Inicia un intercambio de cartas con otro usuario (slash)."""
-        await self._safe_defer(interaction)
-
         servidor_id = str(interaction.guild.id)
         usuario1_id = str(interaction.user.id)
         usuario2_id = str(user.id)
 
         propiedades = cargar_propiedades()
         coleccion1 = propiedades.get(servidor_id, {}).get(usuario1_id, [])
-        coleccion2 = propiedades.get(servidor_id, {}).get(usuario2_id, [])
 
         cartas = cargar_cartas()
         carta1_obj = next((c for c in cartas if card.lower() in c["nombre"].lower()), None)
         if not carta1_obj:
-            await interaction.followup.send(f"❌ The card '{card}' hasn't been found.")
+            await interaction.response.send_message(f"❌ The card '{card}' hasn't been found.", ephemeral=True)
             return
 
-        carta1_id = carta1_obj["id"]
-        if carta1_id not in coleccion1:
-            await interaction.followup.send(f"❌ You don't own a card named {card}.")
+        if carta1_obj["id"] not in coleccion1:
+            await interaction.response.send_message(f"❌ You don't own a card named {card}.", ephemeral=True)
             return
 
-        await interaction.followup.send(
+        await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
             f"Please choose whether to accept or reject.",
-            view=TradeView(interaction.user, user, carta1_obj, interaction),
+            view=TradeView(interaction.user, user, carta1_obj)
         )
 
     @commands.command(name="trade")
     async def trade_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
-        """Inicia un intercambio de cartas con otro usuario (prefijo)."""
         servidor_id = str(ctx.guild.id)
         usuario1_id = str(ctx.author.id)
-        usuario2_id = str(user.id)
-
+    
         propiedades = cargar_propiedades()
         coleccion1 = propiedades.get(servidor_id, {}).get(usuario1_id, [])
-        coleccion2 = propiedades.get(servidor_id, {}).get(usuario2_id, [])
-
+    
         cartas = cargar_cartas()
         carta1_obj = next((c for c in cartas if card.lower() in c["nombre"].lower()), None)
         if not carta1_obj:
             await ctx.send(f"❌ The card '{card}' hasn't been found.")
             return
-
-        carta1_id = carta1_obj["id"]
-        if carta1_id not in coleccion1:
+    
+        if carta1_obj["id"] not in coleccion1:
             await ctx.send(f"❌ You don't own a card named {card}.")
             return
-
+    
         await ctx.send(
             f"{user.mention}, {ctx.author.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
             f"Please choose whether to accept or reject.",
-            view=TradeView(ctx.author, user, carta1_obj, ctx),
+            view=TradeView(ctx.author, user, carta1_obj)
         )
 
 
