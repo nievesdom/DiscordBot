@@ -1,6 +1,7 @@
 import discord
 import os
-from core.gist_propiedades import cargar_propiedades, guardar_propiedades
+from core.firebase_storage import cargar_propiedades, guardar_propiedades
+
 from core.cartas import cargar_cartas
 
 # Reclamar una carta

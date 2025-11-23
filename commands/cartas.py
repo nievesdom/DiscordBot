@@ -7,8 +7,9 @@ import random
 import datetime
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
-from core.gist_settings import cargar_settings, guardar_settings
-from core.gist_propiedades import cargar_propiedades, guardar_propiedades
+from core.firebase_storage import cargar_settings, guardar_settings
+from core.firebase_storage import cargar_propiedades, guardar_propiedades
+
 from core.cartas import cargar_cartas, cartas_por_id
 
 # Views: componentes interactivos

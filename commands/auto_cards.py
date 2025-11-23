@@ -10,7 +10,8 @@ Características principales:
 import discord, random, asyncio, datetime, os
 from discord.ext import commands
 from discord import app_commands
-from core.gist_settings import cargar_settings, guardar_settings
+from core.firebase_storage import cargar_settings, guardar_settings
+
 from core.cartas import cargar_cartas
 from views.reclamar import ReclamarCarta
 from github.GithubException import RateLimitExceededException
