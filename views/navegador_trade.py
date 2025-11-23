@@ -112,6 +112,8 @@ class ConfirmTradeView(View):
         col1.append(self.carta2_obj["id"])
         col2.append(self.carta1_obj["id"])
         guardar_propiedades(propiedades)
+        
+        print(f"[TRADE] {self.user1.display_name} intercambió '{self.carta1_obj['nombre']}' con {self.user2.display_name} por {self.carta2_obj['nombre']} en {interaction.guild.name}.")
 
         await interaction.response.edit_message(
             content=(

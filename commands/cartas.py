@@ -37,7 +37,7 @@ class Cartas(commands.Cog):
             pass
 
     # -----------------------------
-    # SOLO OWNER (no se tocan)
+    # SOLO OWNER
     # -----------------------------
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
@@ -54,7 +54,7 @@ class Cartas(commands.Cog):
             description=f"Currently in **{total_servers} servers**:\n\n{listado}",
             color=discord.Color.green()
         )
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
 
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
@@ -126,6 +126,7 @@ class Cartas(commands.Cog):
             archivo = discord.File(ruta, filename="carta.png")
             embed.set_image(url="attachment://carta.png")
         vista = ReclamarCarta(elegida["id"], embed, ruta)
+        
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
         else:
@@ -509,20 +510,20 @@ class Cartas(commands.Cog):
     async def trade_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
         servidor_id = str(ctx.guild.id)
         usuario1_id = str(ctx.author.id)
-    
+
         propiedades = cargar_propiedades()
         coleccion1 = propiedades.get(servidor_id, {}).get(usuario1_id, [])
-    
+
         cartas = cargar_cartas()
         carta1_obj = next((c for c in cartas if card.lower() in c["nombre"].lower()), None)
         if not carta1_obj:
             await ctx.send(f"❌ The card '{card}' hasn't been found.")
             return
-    
+
         if carta1_obj["id"] not in coleccion1:
             await ctx.send(f"❌ You don't own a card named {card}.")
             return
-    
+
         await ctx.send(
             f"{user.mention}, {ctx.author.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
             f"Please choose whether to accept or reject.",

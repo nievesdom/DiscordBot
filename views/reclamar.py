@@ -130,7 +130,7 @@ class ReclamarCarta(discord.ui.View):
                 ephemeral=False
             )
 
-            print(f"[OK] {interaction.user.display_name} reclamó '{nombre_carta}' en {interaction.guild.name}.")
+            print(f"[CLAIM] {interaction.user.display_name} reclamó '{nombre_carta}' en {interaction.guild.name}.")
 
         except Exception as e:
             print(f"[ERROR] en ReclamarCarta: {type(e).__name__} - {e}")
