@@ -74,40 +74,19 @@ class CartasAuto(commands.Cog):
         self._pending_save = True
 
     async def _autosave_loop(self):
-        """
-        Bucle de autosave:
-        - Cada 60 segundos, si hay cambios pendientes, intenta guardarlos en el Gist.
-        - Si se excede el límite de GitHub, avisa en los canales configurados.
-        """
+        """Bucle de autosave: guarda en Firestore cada 60s si hay cambios."""
         while True:
             await asyncio.sleep(60)
             if self._pending_save:
                 try:
                     guardar_settings(self.settings)
-                    print("[OK] Autosave ejecutado en Gist.")
-                except RateLimitExceededException as e:
-                    print("[ERROR] Rate limit excedido:", e)
-                    # Avisamos en todos los servidores activos
-                    for gid, config in self.settings["guilds"].items():
-                        if config.get("enabled"):
-                            guild = self.bot.get_guild(int(gid))
-                            if guild:
-                                channel = guild.get_channel(config["channel_id"])
-                                if channel:
-                                    try:
-                                        await channel.send(
-                                            "⚠️ The request limit has been reached."
-                                            "Changes won't be saved until the limit is released, please wait about an hour before using this bot."
-                                        )
-                                    except Exception as send_error:
-                                        print(f"[ERROR] No se pudo enviar aviso en guild {gid}: {send_error}")
-                    # Mantenemos la bandera para reintentar en el siguiente ciclo
-                    self._pending_save = True
+                    print("[OK] Autosave ejecutado en Firestore.")
+                    self._pending_save = False
                 except Exception as e:
                     print("[ERROR] autosave:", e)
-                else:
-                    # Si guardó correctamente, limpiamos la bandera
-                    self._pending_save = False
+                    # Mantenemos la bandera para reintentar
+                    self._pending_save = True
+
 
     # ================================================================
     # SLASH COMMAND: auto_cards
@@ -121,7 +100,7 @@ class CartasAuto(commands.Cog):
     @app_commands.describe(
         canal="Channel where cards will spawn",
         max_horas="Maximum wait time in hours",
-        max_diarias="Maximum cards per day"
+        max_diarias="Maximum cards per day (100 max)"
     )
     async def auto_cards_slash(
         self,
@@ -170,6 +149,9 @@ class CartasAuto(commands.Cog):
             max_horas = 5
         if max_diarias is None:
             max_diarias = 5
+        else:
+            max_diarias = min(max_diarias, 100)  # Limitar a 100 máximo
+
 
         self.settings["guilds"][gid] = {
             "enabled": True,
