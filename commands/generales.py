@@ -207,8 +207,31 @@ class Generales(commands.Cog):
 
     @commands.command(name="help")
     async def help_prefix(self, ctx: commands.Context):
-        embed = discord.Embed(title="📖 Available prefix commands:", color=discord.Color.blurple())
-        embed.add_field(name="👤 General", value="y!hola, y!say, y!count, y!updates, y!feedback, y!ping", inline=False)
+        categorias = {
+            "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
+            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
+            "🌐 Wiki": ["wiki", "character"],
+            "🔨 Moderation": ["auto_cards", "spawning_status"]
+        }
+    
+        comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
+    
+        embed = discord.Embed(
+            title="📖 Available commands:",
+            color=discord.Color.blurple()
+        )
+    
+        for nombre_cat, lista_comandos in categorias.items():
+            texto = ""
+            for nombre in lista_comandos:
+                comando = comandos_dict.get(nombre)
+                if comando:
+                    # Mostrar tanto el prefijo como el slash
+                    texto += f"**/{comando.name}** → {comando.description or 'Sin descripción'}\n"
+                    texto += f"**y!{comando.name}** → same as /{comando.name}\n"
+            if texto:
+                embed.add_field(name=nombre_cat, value=texto, inline=False)
+    
         await ctx.send(embed=embed)
 
 
