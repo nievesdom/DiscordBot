@@ -349,8 +349,12 @@ class Cartas(commands.Cog):
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
                 try:
+                    nombres_cartas = ", ".join([f"{c['nombre']} [ID: {c['id']}]" for c in nuevas_cartas])
                     await log_channel.send(
-                        f"[PACK] {interaction.user.display_name} abrió un paquete de cartas en {interaction.guild.name}.")
+                        f"[PACK] {interaction.user.display_name} abrió un paquete en {interaction.guild.name} "
+                        f"con las cartas: {nombres_cartas}"
+                    )
+
                     
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
@@ -412,8 +416,12 @@ class Cartas(commands.Cog):
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
                 try:
+                    nombres_cartas = ", ".join([f"{c['nombre']} [ID: {c['id']}]" for c in nuevas_cartas])
                     await log_channel.send(
-                        f"[PACK] {ctx.author.display_name} abrió un paquete de cartas en {ctx.guild.name}.")
+                        f"[PACK] {ctx.author.display_name} abrió un paquete en {ctx.guild.name} "
+                        f"con las cartas: {nombres_cartas}"
+                    )
+
                     
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
