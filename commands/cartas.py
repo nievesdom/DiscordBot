@@ -328,6 +328,20 @@ class Cartas(commands.Cog):
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
+        
+        # 🔥 Enviar log al servidor/canal de logs
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+        log_guild = interaction.client.get_guild(log_guild_id)
+        if log_guild:
+            log_channel = log_guild.get_channel(log_channel_id)
+            if log_channel:
+                try:
+                    await log_channel.send(
+                        f"[PACK] {interaction.user.display_name} abrió un paquete de cartas en {interaction.guild.name}.")
+                    
+                except Exception as e:
+                    print(f"[ERROR] Could not send log: {e}")
 
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
@@ -377,6 +391,20 @@ class Cartas(commands.Cog):
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
         embed, archivo = vista.mostrar()
+        
+        # 🔥 Enviar log al servidor/canal de logs
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+        log_guild = ctx.client.get_guild(log_guild_id)
+        if log_guild:
+            log_channel = log_guild.get_channel(log_channel_id)
+            if log_channel:
+                try:
+                    await log_channel.send(
+                        f"[PACK] {ctx.author.display_name} abrió un paquete de cartas en {ctx.guild.name}.")
+                    
+                except Exception as e:
+                    print(f"[ERROR] Could not send log: {e}")
 
         if archivo:
             await ctx.send(file=archivo, embed=embed, view=vista)

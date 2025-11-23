@@ -125,16 +125,17 @@ class Generales(commands.Cog):
     # ---------------------------
     @app_commands.command(name="updates", description="Shows the latest updates and what's coming up.")
     async def updates_slash(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
+        await ctx.send(
             "**Version:** 1.1.1\n**Patch notes:**\n"
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
-            "- Moved the database to a new service so it wouldn't reach the request limit while trying to save the automatic cards information from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real (I hope)).\n"
-            "- Other minor quality of life changes, such as making the margin to claim spawned cards last longer.\n"
+            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them."
+            "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
+            "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
             "**Newly added cards:**\n"
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
             "- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:** card combat!"
+            "**Coming up:**\n- Card combat!\n- Gift and discard card commands.\n- New alphabetical order, different from rarity order."
         )
 
     @commands.command(name="updates")
@@ -149,7 +150,7 @@ class Generales(commands.Cog):
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
             "- UR Yoshitaka Mine (Festival)\n"
-            "**Coming up:** card combat!"
+            "**Coming up:**\n- Card combat!\n- Gift and discard card commands.\n- New alphabetical order, different from rarity order."
         )
 
     # ---------------------------

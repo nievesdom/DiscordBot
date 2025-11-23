@@ -140,9 +140,8 @@ class ReclamarCarta(discord.ui.View):
                 if log_channel:
                     try:
                         await log_channel.send(
-                            f"📝 **Card claimed:** {user.display_name} ({user.id}) "
-                            f"in server '{guild.name}' ({guild.id})."
-                        )
+                            f"[CLAIM] {interaction.user.display_name} reclamó '{nombre_carta}' en {interaction.guild.name}.")
+                        
                     except Exception as e:
                         print(f"[ERROR] Could not send log: {e}")
 
