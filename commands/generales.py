@@ -180,22 +180,23 @@ class Generales(commands.Cog):
     # ---------------------------
     @app_commands.command(name="help", description="Shows all available commands.")
     async def help_slash(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-
+        # Ya no usamos ephemeral=True
+        await interaction.response.defer(ephemeral=False)
+    
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
             "🃏 Cards": ["album", "collection", "search", "pack", "show"],
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["auto_cards", "spawning_status"]
         }
-
+    
         comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
-
+    
         embed = discord.Embed(
             title="📖 Available slash commands:",
             color=discord.Color.blurple()
         )
-
+    
         for nombre_cat, lista_comandos in categorias.items():
             texto = ""
             for nombre in lista_comandos:
@@ -204,8 +205,10 @@ class Generales(commands.Cog):
                     texto += f"**/{comando.name}** → {comando.description or 'Sin descripción'}\n"
             if texto:
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
-
+    
+        # Este mensaje ya no es ephemeral, será visible para todos en el canal
         await interaction.followup.send(embed=embed)
+
 
     @commands.command(name="help")
     async def help_prefix(self, ctx: commands.Context):
