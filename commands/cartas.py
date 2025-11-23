@@ -5,6 +5,7 @@ from discord import app_commands
 import os
 import random
 import datetime
+from core.firebase_client import db
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
 from core.firebase_storage import cargar_settings, guardar_settings
@@ -21,7 +22,11 @@ from views.navegador_trade import TradeView
 # ID del dueño (ocultamos /carta solo para él)
 OWNER_ID = 182920174276575232
 
-
+def backup_settings(settings: dict) -> None:
+    """Guarda una copia completa de settings en la colección settings_backup."""
+    timestamp = datetime.datetime.now().isoformat()
+    db.collection("settings_backup").document(timestamp).set(settings)
+    
 class Cartas(commands.Cog):
     """Cog principal para gestionar cartas y comandos del sistema RGGO."""
 
@@ -35,6 +40,8 @@ class Cartas(commands.Cog):
             await interaction.response.defer(ephemeral=ephemeral)
         except discord.InteractionResponded:
             pass
+        
+        
 
     # -----------------------------
     # SOLO OWNER
@@ -115,9 +122,11 @@ class Cartas(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         settings = cargar_settings()
-        borrados = 0
 
-        # Recorremos todos los servidores en settings
+        # ✅ Guardar copia de seguridad antes de borrar
+        backup_settings(settings)
+
+        borrados = 0
         for servidor_id, servidor_data in settings.items():
             if servidor_id == "guilds":  # saltar config de auto_cards
                 continue
@@ -127,14 +136,14 @@ class Cartas(commands.Cog):
                     servidor_data[usuario_id].pop("ultimo_paquete", None)
                     borrados += 1
 
-        # Guardar cambios en settings
+        # Guardar cambios en settings (merge=True ya aplicado en guardar_settings)
         guardar_settings(settings)
 
         await interaction.followup.send(
-            f"🗑️ Se han borrado {borrados} registros de 'ultimo_paquete' en settings.",
+            f"🗑️ Se han borrado {borrados} registros de 'ultimo_paquete' en settings.\n"
+            f"📦 Copia de seguridad guardada en 'settings_backup'.",
             ephemeral=True
         )
-
 
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)

@@ -36,3 +36,10 @@ def guardar_packs(packs: Dict) -> None:
     # ✅ merge=True para no borrar otras claves
     db.collection(PACKS_COLLECTION).document(PACKS_DOC).set(packs, merge=True)
 
+def backup_settings(settings: Dict) -> None:
+    import datetime
+    timestamp = datetime.datetime.now().isoformat()
+
+    # Guardamos en una colección "settings_backup" con documento único por fecha/hora
+    db.collection("settings_backup").document(timestamp).set(settings)
+

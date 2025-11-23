@@ -131,6 +131,7 @@ class Generales(commands.Cog):
             "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them.\n"
             "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
             "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
+            "- [New!] Removed a bug that would cause people to be able to open more than one pack a day and removed the extra cards that I detected that were obtained using this method. Please, don't abuse bugs or I'll be forced to take more drastic actions in the future, that just spoils the fun. If you find a bug you can report it using the feedback form instead.\n"
             "**Newly added cards:**\n"
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
@@ -141,11 +142,12 @@ class Generales(commands.Cog):
     @commands.command(name="updates")
     async def updates_prefix(self, ctx: commands.Context):
         await ctx.send(
-            "**Version:** 1.1.1\n**Patch notes:**\n"
+            "**Version:** 1.1.2\n**Patch notes:**\n"
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
             "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them.\n"
             "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
             "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
+            "- [New!] Removed a bug that would cause people to be able to open more than one pack a day and removed the extra cards that I detected that were obtained using this method. Please, don't abuse bugs or I'll be forced to take more drastic actions in the future, that just spoils the fun. If you find a bug you can report it using the feedback form instead.\n"
             "**Newly added cards:**\n"
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"

@@ -88,7 +88,7 @@ class CartasAuto(commands.Cog):
                     self._pending_save = True
 
 
-        # ================================================================
+    # ================================================================
     # SLASH COMMAND: auto_cards
     # ================================================================
     @app_commands.default_permissions(administrator=True)  # Solo visible para administradores
@@ -99,7 +99,7 @@ class CartasAuto(commands.Cog):
     )
     @app_commands.describe(
         canal="Channel where cards will spawn",
-        max_horas="Maximum wait time in hours",
+        max_horas="Maximum wait time in hours (minimum 1)",
         max_diarias="Maximum cards per day (100 max)"
     )
     async def auto_cards_slash(
@@ -112,7 +112,7 @@ class CartasAuto(commands.Cog):
         await interaction.response.defer(ephemeral=False)
         gid = str(interaction.guild_id)
         config = self.settings["guilds"].get(gid)
-
+    
         # Caso: desactivar
         if canal is None and max_horas is None and max_diarias is None:
             if config and config.get("enabled"):
@@ -132,21 +132,25 @@ class CartasAuto(commands.Cog):
                     "⚠️ Automatic card spawning is already deactivated. Use `/auto_cards` with a channel to activate it."
                 )
             return
-
+    
         # Caso: activar/reconfigurar
         if canal is None:
             await interaction.followup.send(
                 "⚠️ You must specify the channel: `/auto_cards #channel (max_hour_wait) (max_daily_number)`"
             )
             return
-
+    
+        # ✅ Validación de parámetros
         if max_horas is None:
             max_horas = 5
+        else:
+            max_horas = max(1, max_horas)  # Forzar mínimo de 1 hora
+    
         if max_diarias is None:
             max_diarias = 5
         else:
             max_diarias = min(max_diarias, 100)  # Limitar a 100 máximo
-
+    
         # ✅ Usamos update() para no borrar otras claves del servidor
         self.settings["guilds"].setdefault(gid, {})
         self.settings["guilds"][gid].update({
@@ -157,14 +161,15 @@ class CartasAuto(commands.Cog):
             "count": 0,
             "last_reset": datetime.date.today().isoformat()
         })
-
+    
         self.marcar_cambios()
         self.tasks[gid] = asyncio.create_task(self.spawn_for_guild(interaction.guild_id))
-
+    
         await interaction.followup.send(
             f"✅ Automatic card spawning enabled in {canal.mention}, "
             f"every 0–{max_horas}h, max {max_diarias} cards/day."
         )
+
 
 
     # ================================================================
