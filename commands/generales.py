@@ -140,10 +140,11 @@ class Generales(commands.Cog):
     @commands.command(name="updates")
     async def updates_prefix(self, ctx: commands.Context):
         await ctx.send(
-            "**Version:** 1.1\n**Patch notes:**\n"
+            "**Version:** 1.1.1\n**Patch notes:**\n"
             "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
-            "- Fixed a bug that would cause the bot to quickly reach the request limit while trying to save the automatic cards information from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now.\n"
-            "- Other minor quality of life changes.\n"
+            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them."
+            "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
+            "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
             "**Newly added cards:**\n"
             "- UR Kaoru Sayama (Palace)\n"
             "- UR Homare Nishitani (Festival)\n"
@@ -203,7 +204,7 @@ class Generales(commands.Cog):
             if texto:
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
 
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
 
     @commands.command(name="help")
     async def help_prefix(self, ctx: commands.Context):
@@ -213,25 +214,24 @@ class Generales(commands.Cog):
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["auto_cards", "spawning_status"]
         }
-    
+
         comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
-    
+
         embed = discord.Embed(
             title="📖 Available commands:",
             color=discord.Color.blurple()
         )
-    
+
         for nombre_cat, lista_comandos in categorias.items():
             texto = ""
             for nombre in lista_comandos:
                 comando = comandos_dict.get(nombre)
                 if comando:
                     # Mostrar tanto el prefijo como el slash
-                    texto += f"**/{comando.name}** → {comando.description or 'Sin descripción'}\n"
-                    texto += f"**y!{comando.name}** → same as /{comando.name}\n"
+                    texto += f"**y!{comando.name}** → {comando.description or 'Sin descripción'}\n"
             if texto:
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
-    
+
         await ctx.send(embed=embed)
 
 
