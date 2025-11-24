@@ -64,6 +64,41 @@ class Debug(commands.Cog):
             
             
     @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(
+        name="backup_settings",
+        description="(Owner only) Create a backup of settings in Firebase."
+    )
+    async def backup_settings(self, interaction: discord.Interaction):
+        # Verificar que el usuario es el dueño
+        if interaction.user.id != OWNER_ID:
+            await interaction.response.send_message(
+                "🚫 Only the bot owner can run this command.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            # 1. Cargar settings actuales
+            settings = cargar_settings()
+
+            # 2. Crear ID de backup con timestamp
+            timestamp = datetime.datetime.now().isoformat()
+            backup_id = f"settings_backup_{timestamp}"
+
+            # 3. Guardar en Firebase en colección 'settings_backup'
+            db.collection("settings_backup").document(backup_id).set(settings)
+
+            await interaction.followup.send(
+                f"✅ Settings backup created as `{backup_id}` in Firebase.", ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.followup.send(f"❌ Settings backup failed: {e}", ephemeral=True)
+            
+            
+    @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)        
     @app_commands.command(
         name="normalize_packs",
@@ -120,6 +155,44 @@ class Debug(commands.Cog):
 
             await interaction.followup.send(
                 f"✅ Normalized {cambios} entries. Saved as `{new_backup_id}`.", ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.followup.send(f"❌ Unexpected error: {e}", ephemeral=True)
+          
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(
+        name="add_pack_limit",
+        description="(Owner only) Add pack_limit=1 to settings for all guilds."
+    )
+    async def add_pack_limit(self, interaction: discord.Interaction):
+        # Verificar que el usuario es el dueño
+        if interaction.user.id != OWNER_ID:
+            await interaction.response.send_message(
+                "🚫 Only the bot owner can run this command.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            # 1. Cargar settings actuales
+            settings = cargar_settings()
+
+            # 2. Asegurar que cada guild tenga pack_limit
+            cambios = 0
+            guilds = settings.setdefault("guilds", {})
+            for guild_id, config in guilds.items():
+                if "pack_limit" not in config:
+                    config["pack_limit"] = 1
+                    cambios += 1
+
+            # 3. Guardar settings actualizados
+            guardar_settings(settings)
+
+            await interaction.followup.send(
+                f"✅ Added pack_limit=1 to {cambios} guilds in settings.", ephemeral=True
             )
 
         except Exception as e:

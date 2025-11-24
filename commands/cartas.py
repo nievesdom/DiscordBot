@@ -554,40 +554,59 @@ class Cartas(commands.Cog):
             await ctx.send(embed=embed, view=vista)
             
     
-    @app_commands.default_permissions(administrator=True)  # Solo visible para administradores
     @app_commands.command(
         name="pack_limit",
-        description="(Admin) Set how many packs per day can be opened in this server (1-6)."
+        description="(Admin only) Define the daily pack_limit for this server in the latest settings backup."
     )
-    @app_commands.describe(packs="Number of packs per day allowed (1 to 6)")
-    async def pack_limit(self, interaction: discord.Interaction, packs: int):
-        # ID del servidor
-        gid = str(interaction.guild_id)
+    @app_commands.default_permissions(administrator=True)
+    async def pack_limit(self, interaction: discord.Interaction, value: int):
+        """
+        Permite al admin del servidor definir cuántos packs diarios se pueden abrir,
+        pero modificando el último backup de settings en lugar de la colección principal.
+        """
 
-        # Limitar el valor entre 1 y 6
-        packs = max(1, min(packs, 6))
+        if interaction.guild is None:
+            await interaction.response.send_message(
+                "🚫 This command can only be used in servers.", ephemeral=True
+            )
+            return
 
-        # Tabla de cooldown en horas según packs diarios
-        cooldown_map = {
-            6: 4,       # 6 packs → cada 4h
-            5: 4.8,     # 5 packs → cada 4h48m
-            4: 6,       # 4 packs → cada 6h
-            3: 8,       # 3 packs → cada 8h
-            2: 12,      # 2 packs → cada 12h
-            1: 24       # 1 pack → cada 24h
-        }
-        cooldown_horas = cooldown_map[packs]
+        if value < 1 or value > 6:
+            await interaction.response.send_message(
+                "🚫 pack_limit must be between 1 and 6.", ephemeral=True
+            )
+            return
 
-        # Guardar configuración en settings del servidor
-        self.settings["guilds"].setdefault(gid, {})
-        self.settings["guilds"][gid]["pack_limit"] = packs
-        self.settings["guilds"][gid]["pack_cooldown_hours"] = cooldown_horas
-        self.marcar_cambios()
+        await interaction.response.defer(ephemeral=True)
 
-        # Respuesta al administrador
-        await interaction.response.send_message(
-            f"✅ Pack limit set to {packs} per day, cooldown {cooldown_horas}h between packs."
-        )
+        try:
+            # 1. Obtener el último backup de settings
+            backups = db.collection("settings_backup").get()
+            if not backups:
+                await interaction.followup.send("❌ No settings backups found.", ephemeral=True)
+                return
+
+            # Ordenar por ID (timestamp) y coger el último
+            backups_sorted = sorted(backups, key=lambda b: b.id, reverse=True)
+            latest_backup = backups_sorted[0]
+            settings = latest_backup.to_dict()
+
+            # 2. Actualizar pack_limit solo para este servidor
+            guilds = settings.setdefault("guilds", {})
+            guild_config = guilds.setdefault(str(interaction.guild.id), {})
+            guild_config["pack_limit"] = value
+
+            # 3. Guardar los cambios en un nuevo documento de backup
+            new_backup_id = f"{latest_backup.id}_packlimit"
+            db.collection("settings_backup").document(new_backup_id).set(settings)
+
+            await interaction.followup.send(
+                f"✅ pack_limit set to {value} for **{interaction.guild.name}** in backup `{new_backup_id}`.",
+                ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.followup.send(f"❌ Could not update pack_limit in backup: {e}", ephemeral=True)
 
 
 
