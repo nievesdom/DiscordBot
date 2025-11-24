@@ -28,39 +28,7 @@ class Debug(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         
-    @app_commands.default_permissions()
-    @app_commands.check(lambda i: i.user.id == OWNER_ID)
-    @app_commands.command(
-        name="backup_packs",
-        description="(Owner only) Create a backup of packs in Firebase."
-    )
-    async def backup_packs(self, interaction: discord.Interaction):
-        # Verificar que el usuario es el dueño
-        if interaction.user.id != OWNER_ID:
-            await interaction.response.send_message(
-                "🚫 Only the bot owner can run this command.", ephemeral=True
-            )
-            return
-
-        await interaction.response.defer(ephemeral=True)
-
-        try:
-            # 1. Cargar packs actuales
-            packs = cargar_packs()
-
-            # 2. Crear ID de backup con timestamp
-            timestamp = datetime.datetime.now().isoformat()
-            backup_id = f"backup_{timestamp}"
-
-            # 3. Guardar en Firebase en colección 'packs_backup'
-            db.collection("packs_backup").document(backup_id).set(packs)
-
-            await interaction.followup.send(
-                f"✅ Backup created as `{backup_id}` in Firebase.", ephemeral=True
-            )
-
-        except Exception as e:
-            await interaction.followup.send(f"❌ Backup failed: {e}", ephemeral=True)
+    
             
             
     @app_commands.default_permissions()
