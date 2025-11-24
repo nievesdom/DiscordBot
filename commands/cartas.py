@@ -612,6 +612,85 @@ class Cartas(commands.Cog):
             f"Please choose whether to accept or reject.",
             view=TradeView(ctx.author, user, carta1_obj)
         )
+        
+    
+    # -----------------------------
+    # Slash command: /discard
+    # -----------------------------
+    @app_commands.command(
+        name="discard",
+        description="Discard one card from your inventory by name."
+    )
+    async def discard_slash(self, interaction: discord.Interaction, nombre_carta: str):
+        await interaction.response.defer(ephemeral=True)
+        servidor_id = str(interaction.guild.id)
+        usuario_id = str(interaction.user.id)
+
+        # Inventario
+        propiedades = cargar_propiedades()
+        servidor_props = propiedades.setdefault(servidor_id, {})
+        usuario_cartas = servidor_props.setdefault(usuario_id, [])
+
+        # Diccionario de cartas
+        cartas_info = cartas_por_id()
+
+        # Buscar carta por nombre (case-insensitive)
+        carta_id = None
+        for cid, info in cartas_info.items():
+            if info["nombre"].lower() == nombre_carta.lower():
+                carta_id = cid
+                break
+
+        if not carta_id:
+            await interaction.followup.send(f"❌ No existe ninguna carta llamada **{nombre_carta}**.", ephemeral=True)
+            return
+
+        if carta_id not in usuario_cartas:
+            await interaction.followup.send(f"🚫 No tienes la carta **{nombre_carta}** en tu inventario.", ephemeral=True)
+            return
+
+        # Quitar solo la primera coincidencia
+        usuario_cartas.remove(carta_id)
+        guardar_propiedades(propiedades)
+
+        await interaction.followup.send(f"✅ Has descartado la carta **{nombre_carta}**.", ephemeral=True)
+
+    # -----------------------------
+    # Prefijo: y!discard
+    # -----------------------------
+    @commands.command(name="discard")
+    async def discard_prefix(self, ctx: commands.Context, *, nombre_carta: str):
+        servidor_id = str(ctx.guild.id)
+        usuario_id = str(ctx.author.id)
+
+        # Inventario
+        propiedades = cargar_propiedades()
+        servidor_props = propiedades.setdefault(servidor_id, {})
+        usuario_cartas = servidor_props.setdefault(usuario_id, [])
+
+        # Diccionario de cartas
+        cartas_info = cartas_por_id()
+
+        # Buscar carta por nombre (case-insensitive)
+        carta_id = None
+        for cid, info in cartas_info.items():
+            if info["nombre"].lower() == nombre_carta.lower():
+                carta_id = cid
+                break
+
+        if not carta_id:
+            await ctx.send(f"❌ No existe ninguna carta llamada **{nombre_carta}**.")
+            return
+
+        if carta_id not in usuario_cartas:
+            await ctx.send(f"🚫 {ctx.author.mention}, no tienes la carta **{nombre_carta}** en tu inventario.")
+            return
+
+        # Quitar solo la primera coincidencia
+        usuario_cartas.remove(carta_id)
+        guardar_propiedades(propiedades)
+
+        await ctx.send(f"✅ {ctx.author.mention}, has descartado la carta **{nombre_carta}**.")
 
 
 # -----------------------------

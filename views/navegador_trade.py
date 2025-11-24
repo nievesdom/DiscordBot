@@ -3,7 +3,6 @@ from discord.ui import View, button
 from core.firebase_storage import cargar_propiedades, guardar_propiedades
 from core.cartas import cargar_cartas
 
-
 class TradeView(View):
     """
     Primera fase del intercambio:
@@ -76,7 +75,8 @@ class TradeView(View):
         if interaction.user.id != self.user2.id:
             await interaction.response.send_message("🚫 This button is not for you.", ephemeral=True)
             return
-        await interaction.response.edit_message(content=f"❌ {self.user2.display_name} has rejected the trade.", view=None)
+        # ✅ Usar message.edit en lugar de response.edit_message
+        await interaction.message.edit(content=f"❌ {self.user2.display_name} has rejected the trade.", view=None)
         self.stop()
 
 
@@ -118,7 +118,7 @@ class ConfirmTradeView(View):
         # 🔥 Enviar log al servidor/canal de logs
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
-        log_guild = ctx.bot.get_guild(log_guild_id)  # ✅ corregido: ctx.bot
+        log_guild = interaction.client.get_guild(log_guild_id)  # ✅ usa interaction.client
         if log_guild:
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
@@ -129,7 +129,8 @@ class ConfirmTradeView(View):
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
         
-        await interaction.response.edit_message(
+        # ✅ Usar message.edit en lugar de response.edit_message
+        await interaction.message.edit(
             content=(
                 f"✅ Trade successful:\n- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "
                 f"and received **{self.carta2_obj['nombre']}**\n"
@@ -145,5 +146,7 @@ class ConfirmTradeView(View):
         if interaction.user.id != self.user1.id:
             await interaction.response.send_message("🚫 Only the initiator can reject.", ephemeral=True)
             return
-        await interaction.response.edit_message(content=f"❌ {self.user1.display_name} has rejected the trade.", view=None)
+        # ✅ Usar message.edit en lugar de response.edit_message
+        await interaction.message.edit(content=f"❌ {self.user1.display_name} has rejected the trade.", view=None)
         self.stop()
+
