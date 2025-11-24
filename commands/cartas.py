@@ -27,6 +27,29 @@ def backup_settings(settings: dict) -> None:
     timestamp = datetime.datetime.now().isoformat()
     db.collection("settings_backup").document(timestamp).set(settings)
     
+def _find_card_by_name_fragment(name_fragment: str):
+    """
+    Busca una carta como hace 'show': primer elemento cuyo nombre contiene el fragmento (case-insensitive).
+    Devuelve el objeto carta o None.
+    """
+    cartas = cargar_cartas()
+    fragment = name_fragment.strip().lower()
+    return next((c for c in cartas if fragment in str(c.get("nombre", "")).lower()), None)
+
+def _remove_one_copy(user_cards: list, card_id) -> bool:
+    """
+    Quita solo la primera coincidencia de card_id en user_cards.
+    Normaliza a str para evitar mismatches (int vs str).
+    Devuelve True si se eliminó, False si no estaba.
+    """
+    target = str(card_id)
+    # Si los IDs en user_cards no son str, normalizamos una copia para encontrar índice correcto
+    for idx, uid in enumerate(user_cards):
+        if str(uid) == target:
+            del user_cards[idx]
+            return True
+    return False
+    
 class Cartas(commands.Cog):
     """Cog principal para gestionar cartas y comandos del sistema RGGO."""
 
@@ -515,6 +538,7 @@ class Cartas(commands.Cog):
             embed.description += "\n⚠️ Image not found. Please, contact my creator."
 
         await interaction.followup.send(embed=embed)
+        
 
     @commands.command(name="show")
     async def show_prefix(self, ctx: commands.Context, *, name: str):
@@ -621,8 +645,10 @@ class Cartas(commands.Cog):
         name="discard",
         description="Discard one card from your inventory by name."
     )
+    @app_commands.describe(nombre_carta="Name fragment of the card to discard")
     async def discard_slash(self, interaction: discord.Interaction, nombre_carta: str):
         await interaction.response.defer(ephemeral=True)
+
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
 
@@ -631,29 +657,26 @@ class Cartas(commands.Cog):
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
 
-        # Diccionario de cartas
-        cartas_info = cartas_por_id()
-
-        # Buscar carta por nombre (case-insensitive)
-        carta_id = None
-        for cid, info in cartas_info.items():
-            if info["nombre"].lower() == nombre_carta.lower():
-                carta_id = cid
-                break
-
-        if not carta_id:
-            await interaction.followup.send(f"❌ No existe ninguna carta llamada **{nombre_carta}**.", ephemeral=True)
+        # Buscar carta como en 'show'
+        carta = _find_card_by_name_fragment(nombre_carta)
+        if not carta:
+            await interaction.followup.send(f"❌ No card found containing '{nombre_carta}'.", ephemeral=True)
             return
 
-        if carta_id not in usuario_cartas:
-            await interaction.followup.send(f"🚫 No tienes la carta **{nombre_carta}** en tu inventario.", ephemeral=True)
+        carta_id = carta.get("id")
+        carta_nombre = carta.get("nombre", "Unknown")
+
+        # Comprobar posesión y quitar solo una copia
+        if not _remove_one_copy(usuario_cartas, carta_id):
+            await interaction.followup.send(
+                f"🚫 You don't have **{carta_nombre}** in your inventory.", ephemeral=True
+            )
             return
 
-        # Quitar solo la primera coincidencia
-        usuario_cartas.remove(carta_id)
         guardar_propiedades(propiedades)
-
-        await interaction.followup.send(f"✅ Has descartado la carta **{nombre_carta}**.", ephemeral=True)
+        await interaction.followup.send(
+            f"✅ Discarded one copy of **{carta_nombre}**.", ephemeral=True
+        )
 
     # -----------------------------
     # Prefijo: y!discard
@@ -668,30 +691,22 @@ class Cartas(commands.Cog):
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
 
-        # Diccionario de cartas
-        cartas_info = cartas_por_id()
-
-        # Buscar carta por nombre (case-insensitive)
-        carta_id = None
-        for cid, info in cartas_info.items():
-            if info["nombre"].lower() == nombre_carta.lower():
-                carta_id = cid
-                break
-
-        if not carta_id:
-            await ctx.send(f"❌ No existe ninguna carta llamada **{nombre_carta}**.")
+        # Buscar carta como en 'show'
+        carta = _find_card_by_name_fragment(nombre_carta)
+        if not carta:
+            await ctx.send(f"❌ No card found containing '{nombre_carta}'.")
             return
 
-        if carta_id not in usuario_cartas:
-            await ctx.send(f"🚫 {ctx.author.mention}, no tienes la carta **{nombre_carta}** en tu inventario.")
+        carta_id = carta.get("id")
+        carta_nombre = carta.get("nombre", "Unknown")
+
+        # Comprobar posesión y quitar solo una copia
+        if not _remove_one_copy(usuario_cartas, carta_id):
+            await ctx.send(f"🚫 {ctx.author.mention}, no tienes **{carta_nombre}** en tu inventario.")
             return
 
-        # Quitar solo la primera coincidencia
-        usuario_cartas.remove(carta_id)
         guardar_propiedades(propiedades)
-
-        await ctx.send(f"✅ {ctx.author.mention}, has descartado la carta **{nombre_carta}**.")
-
+        await ctx.send(f"✅ {ctx.author.mention}, has descartado una copia de **{carta_nombre}**.")
 
 # -----------------------------
 # Registro del cog en el bot
