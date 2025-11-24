@@ -27,13 +27,6 @@ class Debug(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    # Este método asegura que los comandos de este cog solo se registren para el dueño
-    async def cog_load(self):
-        # Sincronizar comandos solo en el usuario dueño
-        # Esto hace que los slash commands no aparezcan para otros
-        self.bot.tree.copy_global_to(guild=discord.Object(id=OWNER_ID))
-        await self.bot.tree.sync(guild=discord.Object(id=OWNER_ID))
         
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
