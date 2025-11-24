@@ -372,38 +372,39 @@ class Cartas(commands.Cog):
     # -----------------------------
     # /pack (diario)
     # -----------------------------
-    @app_commands.command(name="pack", description="Opens a pack of 5 cards")
+    @app_commands.command(name="pack", description="Opens a daily pack of 5 cards")
     async def pack(self, interaction: discord.Interaction):
-        """Allows opening a pack of 5 cards (slash)."""
-        await interaction.response.defer(ephemeral=False)
-
+        """Allows opening a daily pack of 5 cards (slash)."""
+        await interaction.response.defer(ephemeral=False)  
+        # Diferimos la respuesta para poder hacer cálculos y enviar después con followup
+    
         # Identificadores del servidor y del usuario
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
-
+    
         # Cargar la estructura de packs desde Firestore
         packs = cargar_packs()
-        servidor_packs = packs.setdefault(servidor_id, {})
-        usuario_packs = servidor_packs.setdefault(usuario_id, {})
-
+        servidor_packs = packs.setdefault(servidor_id, {})   # Diccionario de packs por servidor
+        usuario_packs = servidor_packs.setdefault(usuario_id, {})  # Diccionario de packs por usuario
+    
         # Obtener configuración del servidor desde settings
-        # pack_limit = número de packs diarios permitidos (1 a 6)
+        # Si no existe pack_limit, se asume 1 pack/día por defecto
         servidor_settings = self.settings["guilds"].setdefault(servidor_id, {})
-        packs_diarios = servidor_settings.get("pack_limit", 1)  # por defecto 1 pack/día
-
+        packs_diarios = servidor_settings.get("pack_limit", 1)
+    
         # Cada día tiene 24h → se divide en intervalos según packs_diarios
         intervalo_segundos = int(24 * 3600 / packs_diarios)
-
+    
         # Hora actual y comienzo del día (medianoche)
         ahora = datetime.datetime.now()
         inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
-
+    
         # Segundos transcurridos desde medianoche
         segundos_actual = (ahora - inicio_dia).total_seconds()
-
+    
         # Franja actual en la que estamos (ej: 0=00:00–11:59 si son 2 packs/día)
         franja_actual = int(segundos_actual // intervalo_segundos)
-
+    
         # Recuperar la última vez que el usuario abrió un pack
         ultimo_str = usuario_packs.get("ultimo_paquete")
         if ultimo_str:
@@ -411,16 +412,19 @@ class Cartas(commands.Cog):
                 # Intentar parsear con fecha y hora exacta
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
             except ValueError:
-                # Si solo se guardó la fecha, asumir medianoche
+                # Si solo se guardó la fecha (YYYY-MM-DD), asumir medianoche
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
-
+                # Actualizar packs para que quede en formato completo
+                usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
+                guardar_packs(packs)
+    
             # Comprobar si el último pack fue en el mismo día
             if ultimo_dt.date() == ahora.date():
                 # Calcular en qué franja cayó el último pack
                 segundos_ultimo = (ultimo_dt - inicio_dia).total_seconds()
                 franja_ultimo = int(segundos_ultimo // intervalo_segundos)
-
-                # Si ya abrió en la misma franja, bloquear
+    
+                # Si ya abrió en la misma franja, bloquear y calcular tiempo restante
                 if franja_actual == franja_ultimo:
                     restante = intervalo_segundos - (segundos_actual - segundos_ultimo)
                     horas, resto = divmod(int(restante), 3600)
@@ -429,33 +433,33 @@ class Cartas(commands.Cog):
                         f"🚫 {interaction.user.mention}, you must wait {horas}h {minutos}m before opening another pack."
                     )
                     return
-
+    
         # Cargar cartas disponibles
         cartas = cargar_cartas()
         if not cartas:
             await interaction.followup.send("❌ No cards available.", ephemeral=True)
             return
-
+    
         # Seleccionar 5 cartas aleatorias
         nuevas_cartas = random.sample(cartas, 5)
-
+    
         # Guardar fecha y hora exacta del pack abierto
         usuario_packs["ultimo_paquete"] = ahora.isoformat()
         guardar_packs(packs)
-
+    
         # Guardar las cartas obtenidas en propiedades del usuario
         propiedades = cargar_propiedades()
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
         usuario_cartas.extend([c["id"] for c in nuevas_cartas])
         guardar_propiedades(propiedades)
-
+    
         # Preparar la vista del paquete con las cartas
         cartas_info = cartas_por_id()
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
-
+    
         # Enviar log al canal de logs central
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
@@ -471,7 +475,7 @@ class Cartas(commands.Cog):
                     )
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
-
+    
         # Enviar el resultado al usuario
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
@@ -559,10 +563,10 @@ class Cartas(commands.Cog):
     async def pack_limit(self, interaction: discord.Interaction, packs: int):
         # ID del servidor
         gid = str(interaction.guild_id)
-    
+
         # Limitar el valor entre 1 y 6
         packs = max(1, min(packs, 6))
-    
+
         # Tabla de cooldown en horas según packs diarios
         cooldown_map = {
             6: 4,       # 6 packs → cada 4h
@@ -573,13 +577,13 @@ class Cartas(commands.Cog):
             1: 24       # 1 pack → cada 24h
         }
         cooldown_horas = cooldown_map[packs]
-    
+
         # Guardar configuración en settings del servidor
         self.settings["guilds"].setdefault(gid, {})
         self.settings["guilds"][gid]["pack_limit"] = packs
         self.settings["guilds"][gid]["pack_cooldown_hours"] = cooldown_horas
         self.marcar_cambios()
-    
+
         # Respuesta al administrador
         await interaction.response.send_message(
             f"✅ Pack limit set to {packs} per day, cooldown {cooldown_horas}h between packs."
