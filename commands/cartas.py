@@ -197,27 +197,27 @@ class Cartas(commands.Cog):
     async def pack(self, interaction: discord.Interaction):
         """Permite abrir un paquete diario de 5 cartas (slash)."""
         await interaction.response.defer(ephemeral=False)
-    
+
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
-    
+
         # ✅ Leer pack_limit desde settings
         settings = cargar_settings()
         servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
         pack_limit = servidor_settings.get("pack_limit", 1)
-    
+
         # ✅ Usar colección principal packs
         packs = cargar_packs()
         servidor_packs = packs.setdefault(servidor_id, {})
         usuario_packs = servidor_packs.setdefault(usuario_id, {})
-    
+
         ahora = datetime.datetime.now()
         inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
-    
+
         # Cada franja dura (24 / pack_limit) horas
         intervalo_horas = 24 / pack_limit
         franja_actual = int(ahora.hour // intervalo_horas)
-    
+
         # Comprobar último pack
         ultimo_str = usuario_packs.get("ultimo_paquete")
         if ultimo_str:
@@ -228,10 +228,10 @@ class Cartas(commands.Cog):
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
                 usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
                 guardar_packs(packs)
-    
+
             if ultimo_dt.date() == ahora.date():
                 franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
-    
+
                 if franja_actual == franja_ultimo:
                     # Calcular cuánto falta hasta la siguiente franja
                     siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
@@ -242,32 +242,32 @@ class Cartas(commands.Cog):
                         f"🚫 {interaction.user.mention}, you must wait {horas}h {minutos}m before opening another pack."
                     )
                     return
-    
+
         # ✅ Cargar cartas
         cartas = cargar_cartas()
         if not cartas:
             await interaction.followup.send("❌ No cards available.", ephemeral=True)
             return
-    
+
         nuevas_cartas = random.sample(cartas, 5)
-    
+
         # ✅ Guardar fecha/hora exacta en packs
         usuario_packs["ultimo_paquete"] = ahora.isoformat()
         guardar_packs(packs)
-    
+
         # Guardar cartas obtenidas
         propiedades = cargar_propiedades()
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
         usuario_cartas.extend([c["id"] for c in nuevas_cartas])
         guardar_propiedades(propiedades)
-    
+
         # Preparar vista
         cartas_info = cartas_por_id()
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
-    
+
         # 🔥 Enviar log
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
@@ -283,7 +283,7 @@ class Cartas(commands.Cog):
                     )
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
-    
+
         # ✅ Enviar resultado al usuario
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
@@ -301,40 +301,68 @@ class Cartas(commands.Cog):
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
 
-        # ✅ Usamos packs en lugar de settings
+        # ✅ Leer pack_limit desde settings
+        settings = cargar_settings()
+        servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
+        pack_limit = servidor_settings.get("pack_limit", 1)
+
+        # ✅ Usar colección principal packs
         packs = cargar_packs()
         servidor_packs = packs.setdefault(servidor_id, {})
         usuario_packs = servidor_packs.setdefault(usuario_id, {})
 
-        hoy = datetime.date.today().isoformat()
         ahora = datetime.datetime.now()
+        inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
 
-        if usuario_packs.get("ultimo_paquete") == hoy:
-            mañana = ahora + datetime.timedelta(days=1)
-            medianoche = datetime.datetime.combine(mañana.date(), datetime.time.min)
-            restante = medianoche - ahora
-            horas, resto = divmod(restante.seconds, 3600)
-            minutos = resto // 60
-            await ctx.send(
-                f"🚫 {ctx.author.mention}, you already opened today's pack, come back in {horas}h {minutos}m."
-            )
-            return
+        # Cada franja dura (24 / pack_limit) horas
+        intervalo_horas = 24 / pack_limit
+        franja_actual = int(ahora.hour // intervalo_horas)
 
+        # Comprobar último pack
+        ultimo_str = usuario_packs.get("ultimo_paquete")
+        if ultimo_str:
+            try:
+                ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
+            except ValueError:
+                # Caso especial: solo fecha YYYY-MM-DD → asumir medianoche
+                ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
+                usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
+                guardar_packs(packs)
+
+            if ultimo_dt.date() == ahora.date():
+                franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
+
+                if franja_actual == franja_ultimo:
+                    # Calcular cuánto falta hasta la siguiente franja
+                    siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
+                    restante = siguiente_inicio - ahora
+                    horas, resto = divmod(int(restante.total_seconds()), 3600)
+                    minutos = resto // 60
+                    await ctx.send(
+                        f"🚫 {ctx.author.mention}, you must wait {horas}h {minutos}m before opening another pack."
+                    )
+                    return
+
+        # ✅ Cargar cartas
         cartas = cargar_cartas()
         if not cartas:
             await ctx.send("❌ No cards available.")
             return
 
         nuevas_cartas = random.sample(cartas, 5)
-        usuario_packs["ultimo_paquete"] = hoy
-        guardar_packs(packs)  # ✅ Guardamos en packs
 
+        # ✅ Guardar fecha/hora exacta en packs
+        usuario_packs["ultimo_paquete"] = ahora.isoformat()
+        guardar_packs(packs)
+
+        # Guardar cartas obtenidas
         propiedades = cargar_propiedades()
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
         usuario_cartas.extend([c["id"] for c in nuevas_cartas])
         guardar_propiedades(propiedades)
 
+        # Preparar vista
         cartas_info = cartas_por_id()
         cartas_ids = [c["id"] for c in nuevas_cartas]
         vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
@@ -343,7 +371,7 @@ class Cartas(commands.Cog):
         # 🔥 Enviar log al servidor/canal de logs
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
-        log_guild = ctx.bot.get_guild(log_guild_id)  # ✅ corregido: ctx.bot
+        log_guild = ctx.bot.get_guild(log_guild_id)
         if log_guild:
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
@@ -356,6 +384,7 @@ class Cartas(commands.Cog):
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
 
+        # ✅ Enviar resultado al usuario
         if archivo:
             await ctx.send(file=archivo, embed=embed, view=vista)
         else:
@@ -385,7 +414,7 @@ class Cartas(commands.Cog):
             )
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
 
         try:
             # 1. Cargar settings actuales
@@ -400,16 +429,39 @@ class Cartas(commands.Cog):
             guardar_settings(settings)
 
             await interaction.followup.send(
-                f"✅ pack_limit set to {value} for **{interaction.guild.name}** in settings.",
-                ephemeral=True
+                f"✅ Daily pack limit set to {value} for **{interaction.guild.name}**.",
+                
             )
 
         except Exception as e:
             await interaction.followup.send(
-                f"❌ Could not update pack_limit in settings: {e}", ephemeral=True
+                f"❌ Could not update the pack limit", ephemeral=True
             )
+            
+            
+    # -----------------------------
+    # Prefijo: y!pack_limit
+    # -----------------------------
+    @commands.command(name="pack_limit")
+    @commands.has_permissions(administrator=True)
+    async def pack_limit_prefix(self, ctx: commands.Context, value: int):
+        """Comando de prefijo para definir el pack_limit."""
+        if value < 1 or value > 6:
+            await ctx.send("🚫 pack_limit must be between 1 and 6.")
+            return
 
+        try:
+            settings = cargar_settings()
+            guilds = settings.setdefault("guilds", {})
+            guild_config = guilds.setdefault(str(ctx.guild.id), {})
+            guild_config["pack_limit"] = value
+            guardar_settings(settings)
 
+            await ctx.send(
+                f"✅ Daily pack limit set to {value} for **{ctx.guild.name}**."
+            )
+        except Exception:
+            await ctx.send("❌ Could not update the pack limit.")
 
 
 
