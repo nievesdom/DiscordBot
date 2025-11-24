@@ -36,14 +36,10 @@ def _find_card_by_name_fragment(name_fragment: str):
     fragment = name_fragment.strip().lower()
     return next((c for c in cartas if fragment in str(c.get("nombre", "")).lower()), None)
 
+
 def _remove_one_copy(user_cards: list, card_id) -> bool:
-    """
-    Quita solo la primera coincidencia de card_id en user_cards.
-    Normaliza a str para evitar mismatches (int vs str).
-    Devuelve True si se eliminó, False si no estaba.
-    """
+    """Quita solo la primera coincidencia de card_id en user_cards (normalizando a str)."""
     target = str(card_id)
-    # Si los IDs en user_cards no son str, normalizamos una copia para encontrar índice correcto
     for idx, uid in enumerate(user_cards):
         if str(uid) == target:
             del user_cards[idx]
@@ -594,22 +590,35 @@ class Cartas(commands.Cog):
     # /trade (intercambio de cartas entre jugadores)
     # -----------------------------
     @app_commands.command(name="trade", description="Starts a card trade with another user")
-    @app_commands.describe(user="User to trade with", card="Card to trade")
+    @app_commands.describe(user="User to trade with", card="Exact name of the card to trade")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
         servidor_id = str(interaction.guild.id)
         usuario1_id = str(interaction.user.id)
-        usuario2_id = str(user.id)
 
+        # Inventario del iniciador
         propiedades = cargar_propiedades()
-        coleccion1 = propiedades.get(servidor_id, {}).get(usuario1_id, [])
+        servidor_props = propiedades.setdefault(servidor_id, {})
+        coleccion1 = servidor_props.setdefault(usuario1_id, [])
 
-        cartas = cargar_cartas()
-        carta1_obj = next((c for c in cartas if card.lower() in c["nombre"].lower()), None)
+        # Definición local: buscar carta por nombre exacto (case-insensitive)
+        def find_card_by_exact_name(name: str):
+            cartas = cargar_cartas()
+            name_lower = name.strip().lower()
+            return next((c for c in cartas if str(c.get("nombre", "")).lower() == name_lower), None)
+
+        # Definición local: comprobar posesión normalizando IDs
+        def owns_card(user_cards: list, card_id) -> bool:
+            target = str(card_id)
+            return any(str(cid) == target for cid in user_cards)
+
+        # Buscar carta exacta
+        carta1_obj = find_card_by_exact_name(card)
         if not carta1_obj:
-            await interaction.response.send_message(f"❌ The card '{card}' hasn't been found.", ephemeral=True)
+            await interaction.response.send_message(f"❌ No card found with exact name '{card}'.", ephemeral=True)
             return
 
-        if carta1_obj["id"] not in coleccion1:
+        # Comprobar posesión
+        if not owns_card(coleccion1, carta1_obj.get("id")):
             await interaction.response.send_message(f"❌ You don't own a card named {card}.", ephemeral=True)
             return
 
@@ -619,21 +628,38 @@ class Cartas(commands.Cog):
             view=TradeView(interaction.user, user, carta1_obj)
         )
 
+    # -----------------------------
+    # Prefijo: y!trade
+    # -----------------------------
     @commands.command(name="trade")
     async def trade_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
         servidor_id = str(ctx.guild.id)
         usuario1_id = str(ctx.author.id)
 
+        # Inventario del iniciador
         propiedades = cargar_propiedades()
-        coleccion1 = propiedades.get(servidor_id, {}).get(usuario1_id, [])
+        servidor_props = propiedades.setdefault(servidor_id, {})
+        coleccion1 = servidor_props.setdefault(usuario1_id, [])
 
-        cartas = cargar_cartas()
-        carta1_obj = next((c for c in cartas if card.lower() in c["nombre"].lower()), None)
+        # Definición local: buscar carta por nombre exacto (case-insensitive)
+        def find_card_by_exact_name(name: str):
+            cartas = cargar_cartas()
+            name_lower = name.strip().lower()
+            return next((c for c in cartas if str(c.get("nombre", "")).lower() == name_lower), None)
+
+        # Definición local: comprobar posesión normalizando IDs
+        def owns_card(user_cards: list, card_id) -> bool:
+            target = str(card_id)
+            return any(str(cid) == target for cid in user_cards)
+
+        # Buscar carta exacta
+        carta1_obj = find_card_by_exact_name(card)
         if not carta1_obj:
-            await ctx.send(f"❌ The card '{card}' hasn't been found.")
+            await ctx.send(f"❌ No card found with exact name '{card}'.")
             return
 
-        if carta1_obj["id"] not in coleccion1:
+        # Comprobar posesión
+        if not owns_card(coleccion1, carta1_obj.get("id")):
             await ctx.send(f"❌ You don't own a card named {card}.")
             return
 
@@ -642,6 +668,7 @@ class Cartas(commands.Cog):
             f"Please choose whether to accept or reject.",
             view=TradeView(ctx.author, user, carta1_obj)
         )
+
         
     
     # -----------------------------
@@ -649,9 +676,9 @@ class Cartas(commands.Cog):
     # -----------------------------
     @app_commands.command(
         name="discard",
-        description="Discard one card from your inventory by name."
+        description="Discard one card from your inventory by exact name."
     )
-    @app_commands.describe(nombre_carta="Name fragment of the card to discard")
+    @app_commands.describe(nombre_carta="Exact name of the card to discard")
     async def discard_slash(self, interaction: discord.Interaction, nombre_carta: str):
         await interaction.response.defer(ephemeral=True)
 
@@ -663,10 +690,13 @@ class Cartas(commands.Cog):
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
 
-        # Buscar carta como en 'show'
-        carta = _find_card_by_name_fragment(nombre_carta)
+        # ✅ Buscar coincidencia exacta (case-insensitive)
+        cartas = cargar_cartas()
+        name_lower = nombre_carta.strip().lower()
+        carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
+
         if not carta:
-            await interaction.followup.send(f"❌ No card found containing '{nombre_carta}'.", ephemeral=True)
+            await interaction.followup.send(f"❌ No card found with exact name '{nombre_carta}'.", ephemeral=True)
             return
 
         carta_id = carta.get("id")
@@ -697,10 +727,13 @@ class Cartas(commands.Cog):
         servidor_props = propiedades.setdefault(servidor_id, {})
         usuario_cartas = servidor_props.setdefault(usuario_id, [])
 
-        # Buscar carta como en 'show'
-        carta = _find_card_by_name_fragment(nombre_carta)
+        # ✅ Buscar coincidencia exacta (case-insensitive)
+        cartas = cargar_cartas()
+        name_lower = nombre_carta.strip().lower()
+        carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
+
         if not carta:
-            await ctx.send(f"❌ No card found containing '{nombre_carta}'.")
+            await ctx.send(f"❌ No card found with exact name '{nombre_carta}'.")
             return
 
         carta_id = carta.get("id")
