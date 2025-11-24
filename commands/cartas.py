@@ -221,52 +221,7 @@ class Cartas(commands.Cog):
         else:
             await interaction.followup.send(embed=embed, view=vista)
             
-    @app_commands.command(
-        name="pack_limit",
-        description="[Admin only] Define the daily pack_limit for this server in settings."
-    )
-    @app_commands.default_permissions(administrator=True)
-    async def pack_limit(self, interaction: discord.Interaction, value: int):
-        """
-        Permite al admin del servidor definir cuántos packs diarios se pueden abrir.
-        Actualiza directamente la colección settings.
-        """
-
-        if interaction.guild is None:
-            await interaction.response.send_message(
-                "🚫 This command can only be used in servers.", ephemeral=True
-            )
-            return
-
-        if value < 1 or value > 6:
-            await interaction.response.send_message(
-                "🚫 pack_limit must be between 1 and 6.", ephemeral=True
-            )
-            return
-
-        await interaction.response.defer(ephemeral=True)
-
-        try:
-            # 1. Cargar settings actuales
-            settings = cargar_settings()
-
-            # 2. Actualizar pack_limit solo para este servidor
-            guilds = settings.setdefault("guilds", {})
-            guild_config = guilds.setdefault(str(interaction.guild.id), {})
-            guild_config["pack_limit"] = value
-
-            # 3. Guardar settings actualizados
-            guardar_settings(settings)
-
-            await interaction.followup.send(
-                f"✅ pack_limit set to {value} for **{interaction.guild.name}** in settings.",
-                ephemeral=True
-            )
-
-        except Exception as e:
-            await interaction.followup.send(
-                f"❌ Could not update pack_limit in settings: {e}", ephemeral=True
-            )
+    
 
     # -----------------------------
     # COMANDOS PÚBLICOS (slash + prefijo)
@@ -588,57 +543,51 @@ class Cartas(commands.Cog):
     
     @app_commands.command(
         name="pack_limit",
-        description="(Admin only) Define the daily pack_limit for this server in the latest settings backup."
+        description="[Admin only] Define the daily pack_limit for this server in settings."
     )
     @app_commands.default_permissions(administrator=True)
     async def pack_limit(self, interaction: discord.Interaction, value: int):
         """
-        Permite al admin del servidor definir cuántos packs diarios se pueden abrir,
-        pero modificando el último backup de settings en lugar de la colección principal.
+        Permite al admin del servidor definir cuántos packs diarios se pueden abrir.
+        Actualiza directamente la colección settings.
         """
-
+    
         if interaction.guild is None:
             await interaction.response.send_message(
                 "🚫 This command can only be used in servers.", ephemeral=True
             )
             return
-
+    
         if value < 1 or value > 6:
             await interaction.response.send_message(
                 "🚫 pack_limit must be between 1 and 6.", ephemeral=True
             )
             return
-
+    
         await interaction.response.defer(ephemeral=True)
-
+    
         try:
-            # 1. Obtener el último backup de settings
-            backups = db.collection("settings_backup").get()
-            if not backups:
-                await interaction.followup.send("❌ No settings backups found.", ephemeral=True)
-                return
-
-            # Ordenar por ID (timestamp) y coger el último
-            backups_sorted = sorted(backups, key=lambda b: b.id, reverse=True)
-            latest_backup = backups_sorted[0]
-            settings = latest_backup.to_dict()
-
+            # 1. Cargar settings actuales
+            settings = cargar_settings()
+    
             # 2. Actualizar pack_limit solo para este servidor
             guilds = settings.setdefault("guilds", {})
             guild_config = guilds.setdefault(str(interaction.guild.id), {})
             guild_config["pack_limit"] = value
-
-            # 3. Guardar los cambios en un nuevo documento de backup
-            new_backup_id = f"{latest_backup.id}_packlimit"
-            db.collection("settings_backup").document(new_backup_id).set(settings)
-
+    
+            # 3. Guardar settings actualizados en la colección principal
+            guardar_settings(settings)
+    
             await interaction.followup.send(
-                f"✅ pack_limit set to {value} for **{interaction.guild.name}** in backup `{new_backup_id}`.",
+                f"✅ pack_limit set to {value} for **{interaction.guild.name}** in settings.",
                 ephemeral=True
             )
-
+    
         except Exception as e:
-            await interaction.followup.send(f"❌ Could not update pack_limit in backup: {e}", ephemeral=True)
+            await interaction.followup.send(
+                f"❌ Could not update pack_limit in settings: {e}", ephemeral=True
+            )
+
 
 
 
