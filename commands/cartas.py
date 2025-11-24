@@ -489,105 +489,105 @@ class Cartas(commands.Cog):
 
 
 
-        @app_commands.command(name="show", description="Shows a card's image and data")
-        @app_commands.describe(name="Exact name of the card you want to see")
-        async def show(self, interaction: discord.Interaction, name: str):
-            """Muestra una carta concreta buscando por nombre exacto (slash)."""
-            await self._safe_defer(interaction)
+    @app_commands.command(name="show", description="Shows a card's image and data")
+    @app_commands.describe(name="Exact name of the card you want to see")
+    async def show(self, interaction: discord.Interaction, name: str):
+        """Muestra una carta concreta buscando por nombre exacto (slash)."""
+        await self._safe_defer(interaction)
 
-            if not name:
-                await interaction.followup.send("⚠️ You must provide a card's name.", ephemeral=True)
-                return
+        if not name:
+            await interaction.followup.send("⚠️ You must provide a card's name.", ephemeral=True)
+            return
 
-            cartas = cargar_cartas()
-            name_lower = name.strip().lower()
+        cartas = cargar_cartas()
+        name_lower = name.strip().lower()
 
-            # Buscar coincidencia exacta (case-insensitive)
-            carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
+        # ✅ Buscar coincidencia exacta (case-insensitive)
+        carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
 
-            if not carta:
-                await interaction.followup.send(f"❌ No card found with exact name '{name}'.", ephemeral=True)
-                return
+        if not carta:
+            await interaction.followup.send(f"❌ No card found with exact name '{name}'.", ephemeral=True)
+            return
 
-            # Diccionarios de formato visual
-            colores = {"UR": 0x8841f2, "KSR": 0xabfbff, "SSR": 0x57ffae, "SR": 0xfcb63d, "R": 0xfc3d3d, "N": 0x8c8c8c}
-            atributos = {"heart": "心", "technique": "技", "body": "体", "light": "陽", "shadow": "陰"}
-            tipos = {"attack": "⚔️ Attack", "defense": "🛡️ Defense", "recovery": "❤️ Recovery", "support": "✨ Support"}
+        # Diccionarios de formato visual
+        colores = {"UR": 0x8841f2, "KSR": 0xabfbff, "SSR": 0x57ffae, "SR": 0xfcb63d, "R": 0xfc3d3d, "N": 0x8c8c8c}
+        atributos = {"heart": "心", "technique": "技", "body": "体", "light": "陽", "shadow": "陰"}
+        tipos = {"attack": "⚔️ Attack", "defense": "🛡️ Defense", "recovery": "❤️ Recovery", "support": "✨ Support"}
 
-            rareza = carta.get("rareza", "N")
-            color = colores.get(rareza, 0x8c8c8c)
-            attr_raw = str(carta.get("atributo", "—")).lower()
-            tipo_raw = str(carta.get("tipo", "—")).lower()
-            attr_symbol = atributos.get(attr_raw, "")
-            attr_name = attr_raw.capitalize() if attr_raw != "—" else "—"
-            atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
-            tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
+        rareza = carta.get("rareza", "N")
+        color = colores.get(rareza, 0x8c8c8c)
+        attr_raw = str(carta.get("atributo", "—")).lower()
+        tipo_raw = str(carta.get("tipo", "—")).lower()
+        attr_symbol = atributos.get(attr_raw, "")
+        attr_name = attr_raw.capitalize() if attr_raw != "—" else "—"
+        atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
+        tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
 
-            embed = discord.Embed(
-                title=f"{carta.get('nombre', 'Carta')}",
-                color=color,
-                description=(f"**Attribute:** {atributo_fmt}\n"
-                             f"**Type:** {tipo_fmt}\n"
-                             f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
-                             f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}")
-            )
+        embed = discord.Embed(
+            title=f"{carta.get('nombre', 'Carta')}",
+            color=color,
+            description=(f"**Attribute:** {atributo_fmt}\n"
+                         f"**Type:** {tipo_fmt}\n"
+                         f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
+                         f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}")
+        )
 
-            ruta_img = carta.get("imagen")
-            if ruta_img and ruta_img.startswith("http"):
-                embed.set_image(url=ruta_img)
-            else:
-                embed.description += "\n⚠️ Image not found. Please, contact my creator."
+        ruta_img = carta.get("imagen")
+        if ruta_img and ruta_img.startswith("http"):
+            embed.set_image(url=ruta_img)
+        else:
+            embed.description += "\n⚠️ Image not found. Please, contact my creator."
 
-            await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=embed)
 
 
-        @commands.command(name="show")
-        async def show_prefix(self, ctx: commands.Context, *, name: str):
-            """Muestra una carta concreta buscando por nombre exacto (prefijo)."""
-            if not name:
-                await ctx.send("⚠️ You must provide a card's name.")
-                return
+    @commands.command(name="show")
+    async def show_prefix(self, ctx: commands.Context, *, name: str):
+        """Muestra una carta concreta buscando por nombre exacto (prefijo)."""
+        if not name:
+            await ctx.send("⚠️ You must provide a card's name.")
+            return
 
-            cartas = cargar_cartas()
-            name_lower = name.strip().lower()
+        cartas = cargar_cartas()
+        name_lower = name.strip().lower()
 
-            # Buscar coincidencia exacta (case-insensitive)
-            carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
+        # ✅ Buscar coincidencia exacta (case-insensitive)
+        carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
 
-            if not carta:
-                await ctx.send(f"❌ No card found with exact name '{name}'.")
-                return
+        if not carta:
+            await ctx.send(f"❌ No card found with exact name '{name}'.")
+            return
 
-            # Diccionarios de formato visual
-            colores = {"UR": 0x8841f2, "KSR": 0xabfbff, "SSR": 0x57ffae, "SR": 0xfcb63d, "R": 0xfc3d3d, "N": 0x8c8c8c}
-            atributos = {"heart": "心", "technique": "技", "body": "体", "light": "陽", "shadow": "陰"}
-            tipos = {"attack": "⚔️ Attack", "defense": "🛡️ Defense", "recovery": "❤️ Recovery", "support": "✨ Support"}
+        # Diccionarios de formato visual
+        colores = {"UR": 0x8841f2, "KSR": 0xabfbff, "SSR": 0x57ffae, "SR": 0xfcb63d, "R": 0xfc3d3d, "N": 0x8c8c8c}
+        atributos = {"heart": "心", "technique": "技", "body": "体", "light": "陽", "shadow": "陰"}
+        tipos = {"attack": "⚔️ Attack", "defense": "🛡️ Defense", "recovery": "❤️ Recovery", "support": "✨ Support"}
 
-            rareza = carta.get("rareza", "N")
-            color = colores.get(rareza, 0x8c8c8c)
-            attr_raw = str(carta.get("atributo", "—")).lower()
-            tipo_raw = str(carta.get("tipo", "—")).lower()
-            attr_symbol = atributos.get(attr_raw, "")
-            attr_name = attr_raw.capitalize() if attr_raw != "—" else "—"
-            atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
-            tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
+        rareza = carta.get("rareza", "N")
+        color = colores.get(rareza, 0x8c8c8c)
+        attr_raw = str(carta.get("atributo", "—")).lower()
+        tipo_raw = str(carta.get("tipo", "—")).lower()
+        attr_symbol = atributos.get(attr_raw, "")
+        attr_name = attr_raw.capitalize() if attr_raw != "—" else "—"
+        atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
+        tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
 
-            embed = discord.Embed(
-                title=f"{carta.get('nombre', 'Carta')}",
-                color=color,
-                description=(f"**Attribute:** {atributo_fmt}\n"
-                             f"**Type:** {tipo_fmt}\n"
-                             f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
-                             f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}")
-            )
+        embed = discord.Embed(
+            title=f"{carta.get('nombre', 'Carta')}",
+            color=color,
+            description=(f"**Attribute:** {atributo_fmt}\n"
+                         f"**Type:** {tipo_fmt}\n"
+                         f"❤️ {carta.get('health', '—')} | ⚔️ {carta.get('attack', '—')} | "
+                         f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}")
+        )
 
-            ruta_img = carta.get("imagen")
-            if ruta_img and ruta_img.startswith("http"):
-                embed.set_image(url=ruta_img)
-            else:
-                embed.description += "\n⚠️ Image not found. Please, contact my creator."
+        ruta_img = carta.get("imagen")
+        if ruta_img and ruta_img.startswith("http"):
+            embed.set_image(url=ruta_img)
+        else:
+            embed.description += "\n⚠️ Image not found. Please, contact my creator."
 
-            await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
 
     # -----------------------------
