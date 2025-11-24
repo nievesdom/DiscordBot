@@ -30,6 +30,7 @@ async def main():
     await bot.load_extension("commands.moderation")
     await bot.load_extension("commands.auto_cards")
     await bot.load_extension("commands.battle")
+    await bot.load_extension("commands.debug")
 
     # Inicia el bot SIN usar 'async with bot'
     await bot.start(TOKEN)

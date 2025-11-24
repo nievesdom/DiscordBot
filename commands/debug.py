@@ -35,7 +35,8 @@ class Debug(commands.Cog):
         self.bot.tree.copy_global_to(guild=discord.Object(id=OWNER_ID))
         await self.bot.tree.sync(guild=discord.Object(id=OWNER_ID))
         
-    
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
     @app_commands.command(
         name="backup_packs",
         description="(Owner only) Create a backup of packs in Firebase."
