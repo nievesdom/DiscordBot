@@ -372,41 +372,27 @@ class Cartas(commands.Cog):
     # -----------------------------
     # /pack (diario)
     # -----------------------------
-
     @app_commands.command(name="pack", description="Opens a daily pack of 5 cards")
     async def pack(self, interaction: discord.Interaction):
         """Allows opening a daily pack of 5 cards (slash)."""
-        await interaction.response.defer(ephemeral=False)
-        # Diferimos la respuesta para poder responder luego con followup
-    
-        # Validar que el comando se ejecuta en un servidor
-        if interaction.guild is None:
-            await interaction.followup.send("🚫 This command can only be used in servers.")
-            return
+        await interaction.response.defer(ephemeral=False)  
+        # Diferimos la respuesta para poder hacer cálculos y enviar después con followup
     
         # Identificadores del servidor y del usuario
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
     
-        # Cargar la estructura de packs
-        try:
-            packs = cargar_packs()
-        except Exception as e:
-            # Si fallan los datos, informar y salir
-            await interaction.followup.send("❌ Could not load packs data. Please try again later.")
-            print(f"[ERROR] cargar_packs failed: {e}")
-            return
-    
-        servidor_packs = packs.setdefault(servidor_id, {})  # Diccionario de packs por servidor
+        # Cargar la estructura de packs desde Firestore
+        packs = cargar_packs()
+        servidor_packs = packs.setdefault(servidor_id, {})   # Diccionario de packs por servidor
         usuario_packs = servidor_packs.setdefault(usuario_id, {})  # Diccionario de packs por usuario
     
         # Obtener configuración del servidor desde settings
-        # Si no existe pack_limit, se asume 1 pack/día por defecto (24h, único intervalo)
+        # Si no existe pack_limit, se asume 1 pack/día por defecto
         servidor_settings = self.settings["guilds"].setdefault(servidor_id, {})
         packs_diarios = servidor_settings.get("pack_limit", 1)
     
         # Cada día tiene 24h → se divide en intervalos según packs_diarios
-        # Para 5 packs: 24*3600/5 = 17280s (4h48m), etc.
         intervalo_segundos = int(24 * 3600 / packs_diarios)
     
         # Hora actual y comienzo del día (medianoche)
@@ -427,36 +413,20 @@ class Cartas(commands.Cog):
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
             except ValueError:
                 # Si solo se guardó la fecha (YYYY-MM-DD), asumir medianoche
-                try:
-                    ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
-                except Exception as e:
-                    # Si el valor es corrupto, limpiar para no bloquear al usuario
-                    print(f"[WARN] Invalid ultimo_paquete '{ultimo_str}': {e}. Resetting value.")
-                    ultimo_dt = None
+                ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
+                # Actualizar packs para que quede en formato completo
+                usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
+                guardar_packs(packs)
     
-                # Actualizar packs para que quede en formato completo si pudimos parsear
-                if ultimo_dt is not None:
-                    usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
-                    try:
-                        guardar_packs(packs)
-                    except Exception as e:
-                        # No impedir el flujo por fallo al guardar, pero reportar
-                        print(f"[ERROR] guardar_packs after normalization failed: {e}")
-    
-            # Validación de cooldown por franja si tenemos fecha válida
-            if ultimo_dt is not None and ultimo_dt.date() == ahora.date():
+            # Comprobar si el último pack fue en el mismo día
+            if ultimo_dt.date() == ahora.date():
                 # Calcular en qué franja cayó el último pack
                 segundos_ultimo = (ultimo_dt - inicio_dia).total_seconds()
-                # En casos raros podría ser negativo (si ultimo_dt es de otro día), controlar
-                if segundos_ultimo < 0:
-                    segundos_ultimo = 0
                 franja_ultimo = int(segundos_ultimo // intervalo_segundos)
     
                 # Si ya abrió en la misma franja, bloquear y calcular tiempo restante
                 if franja_actual == franja_ultimo:
                     restante = intervalo_segundos - (segundos_actual - segundos_ultimo)
-                    if restante < 0:
-                        restante = 0
                     horas, resto = divmod(int(restante), 3600)
                     minutos = resto // 60
                     await interaction.followup.send(
@@ -465,83 +435,52 @@ class Cartas(commands.Cog):
                     return
     
         # Cargar cartas disponibles
-        try:
-            cartas = cargar_cartas()
-        except Exception as e:
-            await interaction.followup.send("❌ Could not load cards. Please try again later.", ephemeral=True)
-            print(f"[ERROR] cargar_cartas failed: {e}")
-            return
-    
+        cartas = cargar_cartas()
         if not cartas:
             await interaction.followup.send("❌ No cards available.", ephemeral=True)
             return
     
-        # Validar que hay al menos 5 cartas para el sample
-        if len(cartas) < 5:
-            await interaction.followup.send("❌ Not enough cards to open a pack.", ephemeral=True)
-            return
-    
         # Seleccionar 5 cartas aleatorias
-        try:
-            nuevas_cartas = random.sample(cartas, 5)
-        except Exception as e:
-            await interaction.followup.send("❌ Could not select cards for the pack. Please try again.", ephemeral=True)
-            print(f"[ERROR] random.sample failed: {e}")
-            return
+        nuevas_cartas = random.sample(cartas, 5)
     
         # Guardar fecha y hora exacta del pack abierto
         usuario_packs["ultimo_paquete"] = ahora.isoformat()
-        try:
-            guardar_packs(packs)
-        except Exception as e:
-            # No bloquear la entrega del pack por fallo al guardar, pero informar internamente
-            print(f"[ERROR] guardar_packs failed: {e}")
+        guardar_packs(packs)
     
         # Guardar las cartas obtenidas en propiedades del usuario
-        try:
-            propiedades = cargar_propiedades()
-            servidor_props = propiedades.setdefault(servidor_id, {})
-            usuario_cartas = servidor_props.setdefault(usuario_id, [])
-            usuario_cartas.extend([c["id"] for c in nuevas_cartas])
-            guardar_propiedades(propiedades)
-        except Exception as e:
-            # Si falla persistencia de propiedades, enviar pack igualmente y reportar
-            print(f"[ERROR] propiedades persistence failed: {e}")
+        propiedades = cargar_propiedades()
+        servidor_props = propiedades.setdefault(servidor_id, {})
+        usuario_cartas = servidor_props.setdefault(usuario_id, [])
+        usuario_cartas.extend([c["id"] for c in nuevas_cartas])
+        guardar_propiedades(propiedades)
     
         # Preparar la vista del paquete con las cartas
-        try:
-            cartas_info = cartas_por_id()
-            cartas_ids = [c["id"] for c in nuevas_cartas]
-            vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
-            embed, archivo = vista.mostrar()
-        except Exception as e:
-            # Si falla la vista, enviar un mensaje simple igualmente
-            print(f"[ERROR] NavegadorPaquete failed: {e}")
-            embed, archivo = None, None
+        cartas_info = cartas_por_id()
+        cartas_ids = [c["id"] for c in nuevas_cartas]
+        vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
+        embed, archivo = vista.mostrar()
     
-        # Enviar log al canal de logs central (no bloquear si falla)
-        try:
-            log_guild_id = 286617766516228096
-            log_channel_id = 1441990735883800607
-            log_guild = interaction.client.get_guild(log_guild_id)
-            if log_guild:
-                log_channel = log_guild.get_channel(log_channel_id)
-                if log_channel:
+        # Enviar log al canal de logs central
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+        log_guild = interaction.client.get_guild(log_guild_id)
+        if log_guild:
+            log_channel = log_guild.get_channel(log_channel_id)
+            if log_channel:
+                try:
                     nombres_cartas = ", ".join([f"{c['nombre']} [ID: {c['id']}]" for c in nuevas_cartas])
                     await log_channel.send(
                         f"[PACK] {interaction.user.display_name} opened a pack in {interaction.guild.name} "
                         f"with the cards: {nombres_cartas}"
                     )
-        except Exception as e:
-            print(f"[ERROR] Could not send log: {e}")
+                except Exception as e:
+                    print(f"[ERROR] Could not send log: {e}")
     
         # Enviar el resultado al usuario
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
         else:
-            # Si no hay embed/archivo, enviar un mensaje de éxito mínimo
-            await interaction.followup.send("✅ Pack opened: 5 cards added to your collection.", embed=embed, view=vista)
-
+            await interaction.followup.send(embed=embed, view=vista)
 
 
 
