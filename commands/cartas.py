@@ -201,7 +201,7 @@ class Cartas(commands.Cog):
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
     
-        # ✅ Cargar settings para obtener pack_limit
+        # ✅ Leer pack_limit desde settings
         settings = cargar_settings()
         servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
         pack_limit = servidor_settings.get("pack_limit", 1)
@@ -214,31 +214,29 @@ class Cartas(commands.Cog):
         ahora = datetime.datetime.now()
         inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
     
-        # Cada día se divide en intervalos según pack_limit
-        intervalo_segundos = int(24 * 3600 / pack_limit)
-        segundos_actual = (ahora - inicio_dia).total_seconds()
-        franja_actual = int(segundos_actual // intervalo_segundos)
+        # Cada franja dura (24 / pack_limit) horas
+        intervalo_horas = 24 / pack_limit
+        franja_actual = int(ahora.hour // intervalo_horas)
     
         # Comprobar último pack
         ultimo_str = usuario_packs.get("ultimo_paquete")
         if ultimo_str:
             try:
-                # Caso normal: fecha con hora
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
             except ValueError:
                 # Caso especial: solo fecha YYYY-MM-DD → asumir medianoche
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
-                # Guardar conversión para no fallar en el futuro
                 usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
                 guardar_packs(packs)
     
             if ultimo_dt.date() == ahora.date():
-                segundos_ultimo = (ultimo_dt - inicio_dia).total_seconds()
-                franja_ultimo = int(segundos_ultimo // intervalo_segundos)
+                franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
     
                 if franja_actual == franja_ultimo:
-                    restante = intervalo_segundos - (segundos_actual - segundos_ultimo)
-                    horas, resto = divmod(int(restante), 3600)
+                    # Calcular cuánto falta hasta la siguiente franja
+                    siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
+                    restante = siguiente_inicio - ahora
+                    horas, resto = divmod(int(restante.total_seconds()), 3600)
                     minutos = resto // 60
                     await interaction.followup.send(
                         f"🚫 {interaction.user.mention}, you must wait {horas}h {minutos}m before opening another pack."
