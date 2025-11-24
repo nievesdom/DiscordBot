@@ -62,10 +62,74 @@ class Debug(commands.Cog):
         except Exception as e:
             await interaction.followup.send(f"❌ Backup failed: {e}", ephemeral=True)
             
-
-    # Comando exclusivo del dueño
+            
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)        
     @app_commands.command(
-        name="owner_fix_packs",
+        name="normalize_packs",
+        description="(Owner only) Normalize dates in the latest packs backup to include hours and minutes."
+    )
+    async def normalize_backup_packs(self, interaction: discord.Interaction):
+        # Verificar que el usuario es el dueño
+        if interaction.user.id != OWNER_ID:
+            await interaction.response.send_message(
+                "🚫 Only the bot owner can run this command.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            # 1. Obtener el último backup de la colección packs_backup
+            backups = db.collection("packs_backup").get()
+            if not backups:
+                await interaction.followup.send("❌ No backups found.", ephemeral=True)
+                return
+
+            # Ordenar por nombre (backup_<timestamp>) y coger el último
+            backups_sorted = sorted(backups, key=lambda b: b.id, reverse=True)
+            latest_backup = backups_sorted[0]
+            packs = latest_backup.to_dict()
+
+            # 2. Normalizar fechas
+            cambios = 0
+            for servidor_id, usuarios in packs.items():
+                for usuario_id, datos in usuarios.items():
+                    ultimo_str = datos.get("ultimo_paquete")
+                    if not ultimo_str:
+                        continue
+
+                    # Caso 1: solo fecha YYYY-MM-DD
+                    if len(ultimo_str) == 10 and "T" not in ultimo_str:
+                        ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
+                        datos["ultimo_paquete"] = ultimo_dt.strftime("%Y-%m-%dT%H:%M")
+                        cambios += 1
+
+                    # Caso 2: fecha con hora pero sin minutos/segundos → normalizar a HH:MM
+                    elif "T" in ultimo_str:
+                        try:
+                            ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
+                            datos["ultimo_paquete"] = ultimo_dt.strftime("%Y-%m-%dT%H:%M")
+                            cambios += 1
+                        except Exception as e:
+                            print(f"[WARN] Could not parse {ultimo_str}: {e}")
+
+            # 3. Guardar backup normalizado en Firebase con nuevo ID
+            new_backup_id = f"{latest_backup.id}_normalized"
+            db.collection("packs_backup").document(new_backup_id).set(packs)
+
+            await interaction.followup.send(
+                f"✅ Normalized {cambios} entries. Saved as `{new_backup_id}`.", ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.followup.send(f"❌ Unexpected error: {e}", ephemeral=True)
+            
+
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(
+        name="fix_packs",
         description="(Owner only) Backup packs and normalize last pack dates."
     )
     async def owner_fix_packs(self, interaction: discord.Interaction):
