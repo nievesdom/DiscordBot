@@ -241,7 +241,6 @@ class Cartas(commands.Cog):
 
         # Calcular ventanas de refresco en GMT
         interval_hours = 24 // pack_limit
-        ahora_utc = datetime.datetime.now(datetime.timezone.utc)
         ventanas = []
         for i in range(pack_limit):
             ventana_dt = ahora_utc.replace(hour=i * interval_hours, minute=0, second=0, microsecond=0)
@@ -252,14 +251,41 @@ class Cartas(commands.Cog):
         # Convertir a timestamps de Discord (hora corta)
         ventanas_str = ", ".join([f"<t:{int(v.timestamp())}:t>" for v in ventanas])
 
-        # Determinar próxima ventana
+        # Determinar franja actual
         ventanas.sort()
+        # Construimos intervalos [ventana[i], ventana[i+1])
+        franja_actual = None
+        for i in range(len(ventanas)):
+            inicio = ventanas[i] - datetime.timedelta(days=1) if ventanas[i] > ahora_utc else ventanas[i]
+            fin = ventanas[i]
+            if inicio <= ahora_utc < fin:
+                franja_actual = (inicio, fin)
+                break
+
+        # Comprobar si ya se abrió un pack en la franja actual
+        ya_abierto_en_franja = False
+        if last_open_str:
+            try:
+                if len(last_open_str) == 10:
+                    last_open = datetime.datetime.fromisoformat(last_open_str + "T00:00:00").replace(tzinfo=datetime.timezone.utc)
+                else:
+                    last_open = datetime.datetime.fromisoformat(last_open_str)
+                    if last_open.tzinfo is None:
+                        last_open = last_open.replace(tzinfo=datetime.timezone.utc)
+
+                if franja_actual and franja_actual[0] <= last_open < franja_actual[1]:
+                    ya_abierto_en_franja = True
+            except Exception:
+                pass
+
+        # Determinar próxima ventana
         siguiente = ventanas[0]
         delta = siguiente - ahora_utc
         horas = delta.seconds // 3600
         minutos = (delta.seconds % 3600) // 60
 
-        if abiertos < pack_limit:
+        # Estado del pack
+        if abiertos < pack_limit and not ya_abierto_en_franja:
             estado_pack = "✅ You can open a pack now!"
         else:
             estado_pack = f"⏳ Next pack available in {horas}h {minutos}m (<t:{int(siguiente.timestamp())}:t>)"
@@ -267,7 +293,7 @@ class Cartas(commands.Cog):
         # Información de spawn automático del servidor
         config = servidor_settings if servidor_settings else None
         spawn_info = ""
-        if config and config.get("enabled"==True):
+        if config and config.get("enabled"):
             intervalo = config.get("interval", [1, 3])
             canal = config.get("channel_id")
             spawn_info = (
@@ -277,15 +303,15 @@ class Cartas(commands.Cog):
                 f"- Cards spawned today: {config.get('count', 0)}"
             )
 
-
         await enviar(
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
             f"- Max packs per day: {pack_limit}\n"
             f"- Packs opened today: {abiertos}\n"
-            f"- Refresh times (GMT): {ventanas_str}\n"
+            f"- Refresh times: {ventanas_str}\n"
             f"- {estado_pack}"
             f"{spawn_info}"
         )
+
 
 
     # -----------------------------
