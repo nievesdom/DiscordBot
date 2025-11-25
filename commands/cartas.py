@@ -267,7 +267,7 @@ class Cartas(commands.Cog):
         # Información de spawn automático del servidor
         config = servidor_settings if servidor_settings else None
         spawn_info = ""
-        if config and config.get("enabled"):
+        if config and config.get("enabled"==True):
             intervalo = config.get("interval", [1, 3])
             canal = config.get("channel_id")
             spawn_info = (
