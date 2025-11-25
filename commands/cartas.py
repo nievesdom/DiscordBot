@@ -121,15 +121,25 @@ class Cartas(commands.Cog):
         nombres_final = []
         for nombre, cantidad in contador.items():
             if cantidad > 1:
-                nombres_final.append(f"{nombre} [{cantidad}]")
+                nombres_final.append(f"{nombre} **[{cantidad}]**")  # número resaltado
             else:
                 nombres_final.append(nombre)
 
         nombres_final = sorted(nombres_final, key=lambda s: s.lower())
 
-        texto = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n" + "\n".join(nombres_final)
-        # Fragmentar si excede el límite de Discord
-        bloques = [texto[i:i+1900] for i in range(0, len(texto), 1900)]
+        # Construir bloques sin cortar nombres
+        encabezado = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n"
+        bloques, bloque_actual = [], encabezado
+        for nombre in nombres_final:
+            linea = nombre + "\n"
+            if len(bloque_actual) + len(linea) > 1900:  # límite seguro
+                bloques.append(bloque_actual)
+                bloque_actual = linea
+            else:
+                bloque_actual += linea
+        if bloque_actual:
+            bloques.append(bloque_actual)
+
         for b in bloques:
             await interaction.followup.send(b)
 
@@ -152,19 +162,28 @@ class Cartas(commands.Cog):
         cartas_info = cartas_por_id()
         nombres = [cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}") for cid in cartas_ids]
 
-        # Contar duplicados
         contador = Counter(nombres)
         nombres_final = []
         for nombre, cantidad in contador.items():
             if cantidad > 1:
-                nombres_final.append(f"{nombre} [{cantidad}]")
+                nombres_final.append(f"{nombre} **[{cantidad}]**")
             else:
                 nombres_final.append(nombre)
 
         nombres_final = sorted(nombres_final, key=lambda s: s.lower())
 
-        texto = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n" + "\n".join(nombres_final)
-        bloques = [texto[i:i+1900] for i in range(0, len(texto), 1900)]
+        encabezado = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n"
+        bloques, bloque_actual = [], encabezado
+        for nombre in nombres_final:
+            linea = nombre + "\n"
+            if len(bloque_actual) + len(linea) > 1900:
+                bloques.append(bloque_actual)
+                bloque_actual = linea
+            else:
+                bloque_actual += linea
+        if bloque_actual:
+            bloques.append(bloque_actual)
+
         for b in bloques:
             await ctx.send(b)
 
