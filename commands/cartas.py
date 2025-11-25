@@ -302,6 +302,7 @@ class Cartas(commands.Cog):
             f"- Refresh times (GMT): {ventanas_str}\n"
             f"- {estado_pack}"
             f"{spawn_info}"
+        )
         
 
 
