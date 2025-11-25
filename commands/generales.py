@@ -77,6 +77,7 @@ class Generales(commands.Cog):
 
         asyncio.create_task(contar_mensaje())
 
+
     @commands.command(name="count")
     async def count_prefix(self, ctx: commands.Context, numero: int = 10):
         try:
@@ -106,41 +107,57 @@ class Generales(commands.Cog):
     @app_commands.command(name="updates", description="Shows the latest updates and what's coming up.")
     async def updates_slash(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "**Version:** 1.1.2\n**Patch notes:**\n"
-            "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
-            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them.\n"
-            "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
-            "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
-            "- [New!] Removed a bug that would cause people to be able to open more than one pack a day and wiped the cards from those that I detected were abusing this bugs. Please, if you find a bug, report it using the feedback form instead.\n"
-            "**Newly added cards:**\n"
-            "- UR Kaoru Sayama (Palace)\n"
-            "- UR Homare Nishitani (Festival)\n"
-            "- UR Yoshitaka Mine (Festival)\n"
+            "**Version 1.2 Patch notes**\n"
+            "Version 1.2 is now live with some new features, quality of life changes and bug fixes. Some of the new features were already planned, but others were requested by you using the feedback form. So thanks to everyone who gave some criticism or suggestions.\n\n" 
+
+            "**New features:**\n"
+            "- The bot is now fully compatible with both regular commands and slash commands. Use commands with either `/` or `y!` as a prefix.\n"
+            "- `y!gift` and `/gift`: allows one user to gift a card to another user.\n"
+            "- `y!discard` and `/discard`: lets users discard a card from their inventory, totally getting rid of it.\n"
+            "- `y!pack_limit` and `/pack_limit`: this command gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n\n"
+
+            "**Bug fixes:**\n"
+            "- Fixed a bug where the bot would sometimes select the wrong card if multiple cards had similar names.\n"
+            "- Fixed interaction errors where messages would fail to update after a trade was accepted or rejected, therefore not showing the result of the trade even if it was successful.\n\n"
+
+            "**Quality of life changes:**\n"
+            "- Expanded the window to claim a spawned card from 10 to 15 minutes. This change might have to be rolled back if it negatively impacts the bot's performance.\n"
+            "- Improved consistency in ephemeral (messages only one user can see) vs public responses, making sure relevant information is shown to everybody.\n"
+            "- The collection command will now show card quantity if a card is repeated.\n\n"
+
             "**Coming up:**\n"
-            "- Gift and discard card commands\n"
-            "- New alphabetical order, different from rarity order\n"
-            "- A choice for admins to choose how many packs everyone can open every day, for those of you who love opening many packs. I just ask that you don't do this in unintended ways because there's a chance you could break the bot for everyone (it happened, but shouldn't happen anymore now that the database has been migrated)."
-            "- Card combat!"
+            "- Alphabetical sorting mode for the album, independent from card rarity. This will group all the cards from the same character.\n"
+            "- The choice to show wiki search results in the server's chat rather than in DMs, for those who are not scared of spoilers.\n"
+            "- Documentation for the bot.\n"
+            "- Card combat (eventually)."
         )
 
     @commands.command(name="updates")
     async def updates_prefix(self, ctx: commands.Context):
         await ctx.send(
-            "**Version:** 1.1.2\n**Patch notes:**\n"
-            "- The bot is now compatible with slash commands. You can use the commands with `/` as a prefix instead of `y!` and discord will tell you when and how to introduce arguments to a command, making it easier to use commands such as `/trade`.\n"
-            "- Some regular commands also work, use the prefix `y!`. I'll keep working to update all of them.\n"
-            "- Migrated the database to a new service to prevent a bug that would cause the bot to reach the request limit while trying to save data from multiple servers at the same time. I never expected this bot to be in more than a couple of servers, but it should be fixed now (for real now (I hope)).\n"
-            "- Other minor quality of life changes, such as increasing the time to claim a spawned card.\n"
-            "- [New!] Removed a bug that would cause people to be able to open more than one pack a day and wiped the cards from those that I detected were abusing this bugs. Please, if you find a bug, report it using the feedback form instead.\n"
-            "**Newly added cards:**\n"
-            "- UR Kaoru Sayama (Palace)\n"
-            "- UR Homare Nishitani (Festival)\n"
-            "- UR Yoshitaka Mine (Festival)\n"
+            "**Version 1.2 Patch notes**\n"
+            "Version 1.2 is now live with some new features, quality of life changes and bug fixes. Some of the new features were already planned, but others were requested by you using the feedback form. So thanks to everyone who gave some criticism or suggestions.\n\n" 
+
+            "**New features:**\n"
+            "- The bot is now fully compatible with both regular commands and slash commands. Use commands with either `/` or `y!` as a prefix.\n"
+            "- `y!gift` and `/gift`: allows one user to gift a card to another user.\n"
+            "- `y!discard` and `/discard`: lets users discard a card from their inventory, totally getting rid of it.\n"
+            "- `y!pack_limit` and `/pack_limit`: this command gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n\n"
+
+            "**Bug fixes:**\n"
+            "- Fixed a bug where the bot would sometimes select the wrong card if multiple cards had similar names.\n"
+            "- Fixed interaction errors where messages would fail to update after a trade was accepted or rejected, therefore not showing the result of the trade even if it was successful.\n\n"
+
+            "**Quality of life changes:**\n"
+            "- Expanded the window to claim a spawned card from 10 to 15 minutes. This change might have to be rolled back if it negatively impacts the bot's performance.\n"
+            "- Improved consistency in ephemeral (messages only one user can see) vs public responses, making sure relevant information is shown to everybody.\n"
+            "- The collection command will now show card quantity if a card is repeated.\n\n"
+
             "**Coming up:**\n"
-            "- Gift and discard card commands\n"
-            "- New alphabetical order, different from rarity order\n"
-            "- A choice for admins to choose how many packs everyone can open every day, for those of you who love opening many packs. I just ask that you don't do this in unintended ways because there's a chance you could break the bot for everyone (it happened, but shouldn't happen anymore now that the database has been migrated)."
-            "- Card combat!"
+            "- Alphabetical sorting mode for the album, independent from card rarity. This will group all the cards from the same character.\n"
+            "- The choice to show wiki search results in the server's chat rather than in DMs, for those who are not scared of spoilers.\n"
+            "- Documentation for the bot.\n"
+            "- Card combat (eventually)."
         )
 
     # ---------------------------
@@ -175,9 +192,9 @@ class Generales(commands.Cog):
 
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
+            "🃏 Cards": ["album", "collection", "discard", "gift", "search", "pack", "show", "status"],
             "🌐 Wiki": ["wiki", "character"],
-            "🔨 Moderation": ["auto_cards", "spawning_status"]
+            "🔨 Moderation": ["auto_cards", "pack_limit"]
         }
 
         comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
@@ -204,9 +221,9 @@ class Generales(commands.Cog):
     async def help_prefix(self, ctx: commands.Context):
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "collection", "search", "pack", "show"],
+            "🃏 Cards": ["album", "collection", "discard", "gift", "search", "pack", "show"],
             "🌐 Wiki": ["wiki", "character"],
-            "🔨 Moderation": ["auto_cards", "spawning_status"]
+            "🔨 Moderation": ["auto_cards", "pack_limit", "status"]
         }
 
         comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}

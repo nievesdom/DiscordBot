@@ -186,6 +186,104 @@ class Cartas(commands.Cog):
 
         for b in bloques:
             await ctx.send(b)
+            
+            
+    # ================================================================
+    # SLASH COMMAND: status (público)
+    # ================================================================
+    @app_commands.command(
+        name="status",
+        description="Shows your pack opening status as well as the server's settings."
+    )
+    async def estado_slash(self, interaction: discord.Interaction):
+        await self._mostrar_estado(
+            servidor_id=str(interaction.guild_id),
+            usuario_id=str(interaction.user.id),
+            nombre_usuario=interaction.user.display_name,
+            enviar=lambda msg: interaction.response.send_message(msg)
+        )
+
+    # ================================================================
+    # PREFIX COMMAND: y!status (público)
+    # ================================================================
+    @commands.command(name="status")
+    async def estado_prefix(self, ctx: commands.Context):
+        await self._mostrar_estado(
+            servidor_id=str(ctx.guild.id),
+            usuario_id=str(ctx.author.id),
+            nombre_usuario=ctx.author.display_name,
+            enviar=lambda msg: ctx.send(msg)
+        )
+
+    # ================================================================
+    # Lógica compartida
+    # ================================================================
+    async def _mostrar_estado(self, servidor_id, usuario_id, nombre_usuario, enviar):
+        packs = cargar_packs()
+        servidor_packs = packs.get(servidor_id, {})
+        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "last_open": None})
+
+        abiertos = usuario_packs.get("packs_opened", 0)
+        max_diario = packs.get("card_limit", 1)
+
+        # Calcular ventanas de refresco según el límite diario
+        interval_hours = 24 // max_diario
+        ventanas = [datetime.time(hour=(i * interval_hours)) for i in range(max_diario)]
+
+        ahora = datetime.datetime.now()
+
+        # Validar fecha del último pack
+        last_open_str = usuario_packs.get("last_open")
+        if last_open_str:
+            try:
+                last_open = datetime.datetime.fromisoformat(last_open_str)
+                if last_open.date() != ahora.date():
+                    abiertos = 0
+            except Exception:
+                pass
+
+        # Determinar próxima ventana
+        proximas = []
+        for v in ventanas:
+            ventana_dt = ahora.replace(hour=v.hour, minute=0, second=0, microsecond=0)
+            if ventana_dt < ahora:
+                ventana_dt += datetime.timedelta(days=1)
+            proximas.append(ventana_dt)
+
+        proximas.sort()
+        siguiente = proximas[0]
+        delta = siguiente - ahora
+        horas = delta.seconds // 3600
+        minutos = (delta.seconds % 3600) // 60
+
+        ventanas_str = ", ".join([f"{v.hour:02d}:00" for v in ventanas])
+        if abiertos < max_diario:
+            estado_pack = "✅ You can open a pack now!"
+        else:
+            estado_pack = f"⏳ Next pack available in {horas}h {minutos}m"
+
+        # Información de spawn automático del servidor
+        config = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id) if hasattr(self, "settings") else None
+        spawn_info = ""
+        if config and config.get("enabled"):
+            intervalo = config.get("interval", [1, 3])
+            canal = config.get("channel_id")
+            spawn_info = (
+                f"\n\n📡 **Server spawn info:**\n"
+                f"- Channel: <#{canal}>\n"
+                f"- Spawn interval: {intervalo[0]}–{intervalo[1]} hours\n"
+                f"- Cards spawned today: {config.get('count', 0)}"
+            )
+
+        await enviar(
+            f"📊 **Pack opening status for {nombre_usuario}:**\n"
+            f"- Max packs per day: {max_diario}\n"
+            f"- Packs opened today: {abiertos}\n"
+            f"- Refresh times (local): {ventanas_str}\n"
+            f"- {estado_pack}"
+            f"{spawn_info}"
+        )
+
 
     # -----------------------------
     # /search
