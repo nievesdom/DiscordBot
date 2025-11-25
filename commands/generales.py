@@ -114,8 +114,8 @@ class Generales(commands.Cog):
             "- The bot is now fully compatible with both regular commands and slash commands. Use commands with either `/` or `y!` as a prefix.\n"
             "- `y!gift` and `/gift`: allows one user to gift a card to another user.\n"
             "- `y!discard` and `/discard`: lets users discard a card from their inventory, totally getting rid of it.\n"
-            "- `y!pack_limit` and `/pack_limit`: gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n\n"
-            "- `y!status` and `/status`: shows information about packs for each user and card spawning.\n"
+            "- `y!pack_limit` and `/pack_limit`: gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n"
+            "- `y!status` and `/status`: shows information about packs for each user and card spawning.\n\n"
 
             "**Bug fixes:**\n"
             "- Fixed a bug where the bot would sometimes select the wrong card if multiple cards had similar names.\n"
@@ -143,8 +143,9 @@ class Generales(commands.Cog):
             "- The bot is now fully compatible with both regular commands and slash commands. Use commands with either `/` or `y!` as a prefix.\n"
             "- `y!gift` and `/gift`: allows one user to gift a card to another user.\n"
             "- `y!discard` and `/discard`: lets users discard a card from their inventory, totally getting rid of it.\n"
-            "- `y!pack_limit` and `/pack_limit`: this command gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n\n"
-
+            "- `y!pack_limit` and `/pack_limit`: this command gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n"
+            "- `y!status` and `/status`: shows information about packs for each user and card spawning.\n\n"
+            
             "**Bug fixes:**\n"
             "- Fixed a bug where the bot would sometimes select the wrong card if multiple cards had similar names.\n"
             "- Fixed interaction errors where messages would fail to update after a trade was accepted or rejected, therefore not showing the result of the trade even if it was successful.\n\n"

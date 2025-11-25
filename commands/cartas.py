@@ -179,24 +179,24 @@ class Cartas(commands.Cog):
             await ctx.send(b)
             
             
-    # ================================================================
-    # SLASH COMMAND: status (público)
-    # ================================================================
+    # -----------------------------
+    # /status (público)
+    # -----------------------------
     @app_commands.command(
         name="status",
         description="Shows your pack opening status as well as the server's settings."
     )
     async def estado_slash(self, interaction: discord.Interaction):
         await self._mostrar_estado(
-            servidor_id=str(interaction.guild_id),
+            servidor_id=str(interaction.guild.id),
             usuario_id=str(interaction.user.id),
             nombre_usuario=interaction.user.display_name,
             enviar=lambda msg: interaction.response.send_message(msg)
         )
 
-    # ================================================================
-    # PREFIX COMMAND: y!status (público)
-    # ================================================================
+    # -----------------------------
+    # y!status (público)
+    # -----------------------------
     @commands.command(name="status")
     async def estado_prefix(self, ctx: commands.Context):
         await self._mostrar_estado(
@@ -206,95 +206,87 @@ class Cartas(commands.Cog):
             enviar=lambda msg: ctx.send(msg)
         )
 
-    # ================================================================
-    # Lógica compartida
-    # ================================================================
-    async def _mostrar_estado(self, servidor_id, usuario_id, nombre_usuario, enviar):
-        packs = cargar_packs()
-        servidor_packs = packs.get(servidor_id, {})
-        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "last_open": None})
-
-        abiertos = usuario_packs.get("packs_opened", 0)
-        last_open_str = usuario_packs.get("last_open")
-
-        ahora_utc = datetime.datetime.now(datetime.timezone.utc)
-
-        # Si packs_opened es 0, comprobar fecha de apertura
-        if abiertos == 0 and last_open_str:
-            try:
-                if len(last_open_str) == 10:  # formato YYYY-MM-DD
-                    last_open = datetime.datetime.fromisoformat(last_open_str + "T00:00:00").replace(tzinfo=datetime.timezone.utc)
-                else:
-                    last_open = datetime.datetime.fromisoformat(last_open_str)
-                    if last_open.tzinfo is None:
-                        last_open = last_open.replace(tzinfo=datetime.timezone.utc)
-
-                if last_open.date() == ahora_utc.date():
-                    abiertos = 1
-            except Exception:
-                pass
-
-        # Límite diario desde settings/guilds
+    # -----------------------------
+    # Lógica compartida (igual a /pack)
+    # -----------------------------
+    async def _mostrar_estado(self, servidor_id: str, usuario_id: str, nombre_usuario: str, enviar):
+        # Leer settings y pack_limit desde guilds
         settings = cargar_settings()
         servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
         pack_limit = servidor_settings.get("pack_limit", 1)
 
-        # Calcular ventanas de refresco en GMT
-        interval_hours = 24 // pack_limit
-        ventanas = []
+        # Leer colección principal packs
+        packs = cargar_packs()
+        servidor_packs = packs.get(servidor_id, {})
+        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "ultimo_paquete": None})
+
+        ahora = datetime.datetime.now()  # misma referencia temporal que /pack (naive local/server time)
+        inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
+        medianoche = inicio_dia + datetime.timedelta(days=1)
+
+        packs_opened = usuario_packs.get("packs_opened", 0)
+        ultimo_str = usuario_packs.get("ultimo_paquete")
+
+        # Normalizar ultimo_paquete si solo trae fecha (YYYY-MM-DD) → asumir 00:00
+        ultimo_dt = None
+        if ultimo_str:
+            try:
+                ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
+            except ValueError:
+                ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
+            # no persisto aquí para no escribir desde status; /pack sí persiste la normalización
+
+        # Si es otro día, el conteo diario se considera 0 desde la lógica de /pack al abrir.
+        # Aquí mostramos estado actual sin mutar datos, pero reflejamos correctamente el límite.
+        # Calcular franjas con la misma lógica que /pack
+        intervalo_horas = 24 / pack_limit
+        franja_actual = int(ahora.hour // intervalo_horas)
+
+        # Determinar si ya se abrió en la franja actual
+        ya_abierto_en_franja = False
+        if ultimo_dt and ultimo_dt.date() == ahora.date():
+            franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
+            if franja_actual == franja_ultimo:
+                ya_abierto_en_franja = True
+
+        # Calcular horas de refresco en GMT y mostrarlas como timestamps de Discord
+        ahora_utc = datetime.datetime.now(datetime.timezone.utc)
+        ventanas_utc = []
         for i in range(pack_limit):
-            ventana_dt = ahora_utc.replace(hour=i * interval_hours, minute=0, second=0, microsecond=0)
+            # ventanas en UTC: inicio del día UTC + i * intervalo
+            base_utc = datetime.datetime.combine(ahora_utc.date(), datetime.time.min, tzinfo=datetime.timezone.utc)
+            ventana_dt = base_utc + datetime.timedelta(hours=i * intervalo_horas)
+            # si la ventana ya pasó hoy en UTC, se empuja a mañana
             if ventana_dt < ahora_utc:
                 ventana_dt += datetime.timedelta(days=1)
-            ventanas.append(ventana_dt)
+            ventanas_utc.append(ventana_dt)
+        ventanas_utc.sort()
+        ventanas_str = ", ".join([f"<t:{int(v.timestamp())}:t>" for v in ventanas_utc])
 
-        # Convertir a timestamps de Discord (hora corta)
-        ventanas_str = ", ".join([f"<t:{int(v.timestamp())}:t>" for v in ventanas])
-
-        # Determinar franja actual
-        ventanas.sort()
-        # Construimos intervalos [ventana[i], ventana[i+1])
-        franja_actual = None
-        for i in range(len(ventanas)):
-            inicio = ventanas[i] - datetime.timedelta(days=1) if ventanas[i] > ahora_utc else ventanas[i]
-            fin = ventanas[i]
-            if inicio <= ahora_utc < fin:
-                franja_actual = (inicio, fin)
-                break
-
-        # Comprobar si ya se abrió un pack en la franja actual
-        ya_abierto_en_franja = False
-        if last_open_str:
-            try:
-                if len(last_open_str) == 10:
-                    last_open = datetime.datetime.fromisoformat(last_open_str + "T00:00:00").replace(tzinfo=datetime.timezone.utc)
-                else:
-                    last_open = datetime.datetime.fromisoformat(last_open_str)
-                    if last_open.tzinfo is None:
-                        last_open = last_open.replace(tzinfo=datetime.timezone.utc)
-
-                if franja_actual and franja_actual[0] <= last_open < franja_actual[1]:
-                    ya_abierto_en_franja = True
-            except Exception:
-                pass
-
-        # Determinar próxima ventana
-        siguiente = ventanas[0]
-        delta = siguiente - ahora_utc
-        horas = delta.seconds // 3600
-        minutos = (delta.seconds % 3600) // 60
-
-        # Estado del pack
-        if abiertos < pack_limit and not ya_abierto_en_franja:
-            estado_pack = "✅ You can open a pack now!"
+        # Calcular tiempo restante
+        # 1) Si alcanzó el máximo diario → hasta medianoche
+        if packs_opened >= pack_limit:
+            restante = medianoche - ahora
+            horas, resto = divmod(int(restante.total_seconds()), 3600)
+            minutos = resto // 60
+            estado_pack = f"⏳ Next daily reset in {horas}h {minutos}m (<t:{int(medianoche.replace(tzinfo=datetime.timezone.utc).timestamp())}:t>)"
         else:
-            estado_pack = f"⏳ Next pack available in {horas}h {minutos}m (<t:{int(siguiente.timestamp())}:t>)"
+            # 2) Si ya abrió en esta franja → hasta inicio siguiente franja
+            if ya_abierto_en_franja:
+                siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
+                restante = siguiente_inicio - ahora
+                horas, resto = divmod(int(restante.total_seconds()), 3600)
+                minutos = resto // 60
+                estado_pack = f"🚫 You must wait {horas}h {minutos}m (<t:{int(siguiente_inicio.replace(tzinfo=datetime.timezone.utc).timestamp())}:t>)"
+            else:
+                # 3) Si no ha abierto en esta franja y no superó el límite → puede abrir
+                estado_pack = "✅ You can open a pack now!"
 
-        # Información de spawn automático del servidor
+        # Server spawn info SOLO si enabled == True (misma lógica)
         config = servidor_settings if servidor_settings else None
         spawn_info = ""
         if config and config.get("enabled"):
-            intervalo = config.get("interval", [1, 3])
+            intervalo = config.get("interval", [1, 3])  # [min_horas, max_horas]
             canal = config.get("channel_id")
             spawn_info = (
                 f"\n\n📡 **Server spawn info:**\n"
@@ -306,11 +298,11 @@ class Cartas(commands.Cog):
         await enviar(
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
             f"- Max packs per day: {pack_limit}\n"
-            f"- Packs opened today: {abiertos}\n"
-            f"- Refresh times: {ventanas_str}\n"
+            f"- Packs opened today: {packs_opened}\n"
+            f"- Refresh times (GMT): {ventanas_str}\n"
             f"- {estado_pack}"
             f"{spawn_info}"
-        )
+        
 
 
 

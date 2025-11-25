@@ -376,7 +376,7 @@ class Debug(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         message = (
             "🚀 **The bot has been updated to version 1.2** and now fully supports both regular commands and slash commands. This version contains new commands (some suggested through the feedback form), quality of life changes and bug fixes. Commands such as gift, discard and status have been added, as well as a way for admins to control how many packs can be opened.\n"
-            "Use `/help` to see the full list of available commands or `/update` in order to see a more detailed description of all the changes.\n"
+            "Use `/help` to see the full list of available commands or `/updates` in order to see a more detailed description of all the changes.\n"
             "Updates may slow down in the near future, as this time of the year is busier for me, but the bot will continue to be worked on."
         )
         sent, failed = 0, 0
