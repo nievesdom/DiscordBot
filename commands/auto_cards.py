@@ -95,7 +95,7 @@ class CartasAuto(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)  # Solo ejecutable por administradores
     @app_commands.command(
         name="auto_cards",
-        description="**[Administrator only]** Activates or deactivates automatic card spawning."
+        description="Activates or deactivates automatic card spawning for this server."
     )
     @app_commands.describe(
         canal="Channel where cards will spawn",

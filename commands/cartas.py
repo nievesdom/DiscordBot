@@ -602,7 +602,7 @@ class Cartas(commands.Cog):
     
     @app_commands.command(
         name="pack_limit",
-        description="[Admin only] Define the daily pack_limit for this server in settings."
+        description="Define the how many packs can be opened every day in this server."
     )
     @app_commands.default_permissions(administrator=True)
     async def pack_limit(self, interaction: discord.Interaction, value: int):
