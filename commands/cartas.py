@@ -221,46 +221,55 @@ class Cartas(commands.Cog):
     async def _mostrar_estado(self, servidor_id, usuario_id, nombre_usuario, enviar):
         packs = cargar_packs()
         servidor_packs = packs.get(servidor_id, {})
-        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "last_open": None})
+        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "ultimo_paquete": None})
 
         abiertos = usuario_packs.get("packs_opened", 0)
-        max_diario = packs.get("card_limit", 1)
-
-        # Calcular ventanas de refresco según el límite diario
-        interval_hours = 24 // max_diario
-        ventanas = [datetime.time(hour=(i * interval_hours)) for i in range(max_diario)]
-
-        ahora = datetime.datetime.now()
-
-        # Validar fecha del último pack
         last_open_str = usuario_packs.get("last_open")
-        if last_open_str:
+
+        ahora_utc = datetime.datetime.now(datetime.timezone.utc)
+
+        # Si packs_opened es 0, comprobar fecha de apertura
+        if abiertos == 0 and last_open_str:
             try:
-                last_open = datetime.datetime.fromisoformat(last_open_str)
-                if last_open.date() != ahora.date():
-                    abiertos = 0
+                if len(last_open_str) == 10:  # formato YYYY-MM-DD
+                    last_open = datetime.datetime.fromisoformat(last_open_str + "T00:00:00").replace(tzinfo=datetime.timezone.utc)
+                else:
+                    last_open = datetime.datetime.fromisoformat(last_open_str)
+                    if last_open.tzinfo is None:
+                        last_open = last_open.replace(tzinfo=datetime.timezone.utc)
+
+                if last_open.date() == ahora_utc.date():
+                    abiertos = 1
             except Exception:
                 pass
 
-        # Determinar próxima ventana
-        proximas = []
-        for v in ventanas:
-            ventana_dt = ahora.replace(hour=v.hour, minute=0, second=0, microsecond=0)
-            if ventana_dt < ahora:
-                ventana_dt += datetime.timedelta(days=1)
-            proximas.append(ventana_dt)
+        # Límite diario desde settings
+        settings = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id, {}) if hasattr(self, "settings") else {}
+        max_diario = settings.get("card_limit", 1)
 
-        proximas.sort()
-        siguiente = proximas[0]
-        delta = siguiente - ahora
+        # Calcular ventanas de refresco en GMT
+        interval_hours = 24 // max_diario
+        ventanas = []
+        for i in range(max_diario):
+            ventana_dt = ahora_utc.replace(hour=i * interval_hours, minute=0, second=0, microsecond=0)
+            if ventana_dt < ahora_utc:
+                ventana_dt += datetime.timedelta(days=1)
+            ventanas.append(ventana_dt)
+
+        # Convertir a timestamps de Discord (hora corta)
+        ventanas_str = ", ".join([f"<t:{int(v.timestamp())}:t>" for v in ventanas])
+
+        # Determinar próxima ventana
+        ventanas.sort()
+        siguiente = ventanas[0]
+        delta = siguiente - ahora_utc
         horas = delta.seconds // 3600
         minutos = (delta.seconds % 3600) // 60
 
-        ventanas_str = ", ".join([f"{v.hour:02d}:00" for v in ventanas])
         if abiertos < max_diario:
             estado_pack = "✅ You can open a pack now!"
         else:
-            estado_pack = f"⏳ Next pack available in {horas}h {minutos}m"
+            estado_pack = f"⏳ Next pack available in {horas}h {minutos}m (<t:{int(siguiente.timestamp())}:t>)"
 
         # Información de spawn automático del servidor
         config = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id) if hasattr(self, "settings") else None
@@ -279,7 +288,7 @@ class Cartas(commands.Cog):
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
             f"- Max packs per day: {max_diario}\n"
             f"- Packs opened today: {abiertos}\n"
-            f"- Refresh times (local): {ventanas_str}\n"
+            f"- Refresh time(s): {ventanas_str}\n"
             f"- {estado_pack}"
             f"{spawn_info}"
         )
