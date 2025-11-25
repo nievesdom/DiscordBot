@@ -6,6 +6,7 @@ import os
 import random
 import datetime
 from core.firebase_client import db
+from collections import Counter
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
 from core.firebase_storage import cargar_settings, guardar_settings
@@ -94,14 +95,14 @@ class Cartas(commands.Cog):
         vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
         await vista.enviar()
         
-        
+
     # -----------------------------
     # /collection (texto)
     # -----------------------------
     @app_commands.command(name="collection", description="Shows a user's card collection in text mode")
     async def collection(self, interaction: discord.Interaction, user: discord.Member = None):
         """Muestra la colección como lista de nombres en texto plano (slash)."""
-        await self._safe_defer(interaction, ephemeral=True)
+        await self._safe_defer(interaction, ephemeral=False)  # Público para todos
 
         objetivo = user or interaction.user
         servidor_id, usuario_id = str(interaction.guild.id), str(objetivo.id)
@@ -114,14 +115,28 @@ class Cartas(commands.Cog):
 
         cartas_info = cartas_por_id()
         nombres = [cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}") for cid in cartas_ids]
-        nombres = sorted(nombres, key=lambda s: s.lower())
 
-        texto = f"{objetivo.mention}, these are your cards ({len(nombres)}):\n" + "\n".join(nombres)
+        # Contar duplicados
+        contador = Counter(nombres)
+        nombres_final = []
+        for nombre, cantidad in contador.items():
+            if cantidad > 1:
+                nombres_final.append(f"{nombre} [{cantidad}]")
+            else:
+                nombres_final.append(nombre)
+
+        nombres_final = sorted(nombres_final, key=lambda s: s.lower())
+
+        texto = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n" + "\n".join(nombres_final)
         # Fragmentar si excede el límite de Discord
         bloques = [texto[i:i+1900] for i in range(0, len(texto), 1900)]
         for b in bloques:
             await interaction.followup.send(b)
 
+
+    # -----------------------------
+    # y!collection (texto)
+    # -----------------------------
     @commands.command(name="collection")
     async def collection_prefix(self, ctx: commands.Context, user: discord.Member = None):
         """Muestra la colección como lista de nombres en texto plano (prefijo)."""
@@ -136,9 +151,19 @@ class Cartas(commands.Cog):
 
         cartas_info = cartas_por_id()
         nombres = [cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}") for cid in cartas_ids]
-        nombres = sorted(nombres, key=lambda s: s.lower())
 
-        texto = f"{objetivo.mention}, these are your cards ({len(nombres)}):\n" + "\n".join(nombres)
+        # Contar duplicados
+        contador = Counter(nombres)
+        nombres_final = []
+        for nombre, cantidad in contador.items():
+            if cantidad > 1:
+                nombres_final.append(f"{nombre} [{cantidad}]")
+            else:
+                nombres_final.append(nombre)
+
+        nombres_final = sorted(nombres_final, key=lambda s: s.lower())
+
+        texto = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n" + "\n".join(nombres_final)
         bloques = [texto[i:i+1900] for i in range(0, len(texto), 1900)]
         for b in bloques:
             await ctx.send(b)
