@@ -235,9 +235,10 @@ class Cartas(commands.Cog):
                 pass
 
         # Límite diario desde settings/guilds
-        servidor_settings = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id, {})
+        settings = cargar_settings()
+        servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
         pack_limit = servidor_settings.get("pack_limit", 1)
-        
+
         # Calcular ventanas de refresco en GMT
         interval_hours = 24 // pack_limit
         ahora_utc = datetime.datetime.now(datetime.timezone.utc)
@@ -258,13 +259,13 @@ class Cartas(commands.Cog):
         horas = delta.seconds // 3600
         minutos = (delta.seconds % 3600) // 60
 
-        if abiertos < max_diario:
+        if abiertos < pack_limit:
             estado_pack = "✅ You can open a pack now!"
         else:
             estado_pack = f"⏳ Next pack available in {horas}h {minutos}m (<t:{int(siguiente.timestamp())}:t>)"
 
         # Información de spawn automático del servidor
-        config = settings_guild if settings_guild else None
+        config = servidor_settings if servidor_settings else None
         spawn_info = ""
         if config and config.get("enabled"):
             intervalo = config.get("interval", [1, 3])
@@ -278,7 +279,7 @@ class Cartas(commands.Cog):
 
         await enviar(
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
-            f"- Max packs per day: {max_diario}\n"
+            f"- Max packs per day: {pack_limit}\n"
             f"- Packs opened today: {abiertos}\n"
             f"- Refresh times (GMT): {ventanas_str}\n"
             f"- {estado_pack}"
