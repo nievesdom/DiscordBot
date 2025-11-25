@@ -10,7 +10,7 @@ class PacksReset(commands.Cog):
     def cog_unload(self):
         self.reset_packs_daily.cancel()
 
-    @tasks.loop(time=datetime.time(hour=0, minute=0, second=0))
+    @tasks.loop(time=datetime.time(hour=18, minute=0, second=0))
     async def reset_packs_daily(self):
         """
         Reset diario de packs_opened a las 00:00 y log en canal de administración.
