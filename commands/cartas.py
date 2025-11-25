@@ -277,6 +277,7 @@ class Cartas(commands.Cog):
                 f"- Cards spawned today: {config.get('count', 0)}"
             )
 
+
         await enviar(
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
             f"- Max packs per day: {pack_limit}\n"
