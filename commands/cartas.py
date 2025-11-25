@@ -234,14 +234,15 @@ class Cartas(commands.Cog):
             except Exception:
                 pass
 
-        # Límite diario desde settings["guilds"][servidor_id]
-        settings_guild = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id, {}) if hasattr(self, "settings") else {}
-        max_diario = settings_guild.get("card_limit", 1)
-
+        # Límite diario desde settings/guilds
+        servidor_settings = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id, {})
+        pack_limit = servidor_settings.get("pack_limit", 1)
+        
         # Calcular ventanas de refresco en GMT
-        interval_hours = 24 // max_diario
+        interval_hours = 24 // pack_limit
+        ahora_utc = datetime.datetime.now(datetime.timezone.utc)
         ventanas = []
-        for i in range(max_diario):
+        for i in range(pack_limit):
             ventana_dt = ahora_utc.replace(hour=i * interval_hours, minute=0, second=0, microsecond=0)
             if ventana_dt < ahora_utc:
                 ventana_dt += datetime.timedelta(days=1)
