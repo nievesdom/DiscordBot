@@ -27,7 +27,6 @@ class Debug(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        
     
             
             
@@ -66,7 +65,7 @@ class Debug(commands.Cog):
             await interaction.followup.send(f"❌ Settings backup failed: {e}", ephemeral=True)
             
             
-    @app_commands.default_permissions()
+    '''@app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)        
     @app_commands.command(
         name="normalize_packs",
@@ -126,10 +125,10 @@ class Debug(commands.Cog):
             )
 
         except Exception as e:
-            await interaction.followup.send(f"❌ Unexpected error: {e}", ephemeral=True)
+            await interaction.followup.send(f"❌ Unexpected error: {e}", ephemeral=True)'''
         
           
-    @app_commands.default_permissions()
+    '''@app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
     @app_commands.command(
         name="add_pack_limit",
@@ -165,10 +164,10 @@ class Debug(commands.Cog):
             )
 
         except Exception as e:
-            await interaction.followup.send(f"❌ Unexpected error: {e}", ephemeral=True)
+            await interaction.followup.send(f"❌ Unexpected error: {e}", ephemeral=True)'''
             
 
-    @app_commands.default_permissions()
+    '''@app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
     @app_commands.command(
         name="fix_packs",
@@ -211,7 +210,7 @@ class Debug(commands.Cog):
             )
 
         except Exception as e:
-            await interaction.followup.send(f"❌ Unexpected error: {e}")
+            await interaction.followup.send(f"❌ Unexpected error: {e}")'''
             
         
     @app_commands.default_permissions()
@@ -391,6 +390,32 @@ class Debug(commands.Cog):
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
         else:
             await interaction.followup.send(embed=embed, view=vista)
+            
+    
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(name="resetpacks", description="Owner only: reset packs_opened for all users")
+    async def resetpacks(self, interaction: discord.Interaction):
+        # Verificar que el usuario es el owner del bot
+        app_owner = (await self.bot.application_info()).owner
+        if interaction.user.id != app_owner.id:
+            await interaction.response.send_message("🚫 Only the bot owner can use this command.", ephemeral=True)
+            return
+
+        packs = cargar_packs()
+        total_reseteados = 0
+
+        for servidor_id, servidor_packs in packs.items():
+            for usuario_id, usuario_packs in servidor_packs.items():
+                usuario_packs["packs_opened"] = 0
+                total_reseteados += 1
+
+        guardar_packs(packs)
+
+        await interaction.response.send_message(
+            f"✅ Reset completed. packs_opened has been reset to 0 for {total_reseteados} users.",
+            ephemeral=True
+        )
             
 
 # Setup del cog
