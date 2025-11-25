@@ -313,23 +313,24 @@ class Cartas(commands.Cog):
     @app_commands.command(name="search", description="Searches RGGO cards containing a term")
     async def search(self, interaction: discord.Interaction, term: str):
         """Busca cartas que contengan el término en su nombre (slash)."""
-        await self._safe_defer(interaction, ephemeral=True)
-
+        # No ephemeral
+        await self._safe_defer(interaction, ephemeral=False)
+    
         if not term:
-            await interaction.followup.send("You must provide a search term. Example: /search Yamai", ephemeral=True)
+            await interaction.followup.send("You must provide a search term. Example: /search Yamai")
             return
-
+    
         cartas = cargar_cartas()
         coincidencias = [c for c in cartas if term.lower() in c["nombre"].lower()]
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
-
+    
         if not coincidencias:
             await interaction.followup.send(f"No cards found containing '{term}'.")
             return
-
+    
         propiedades = cargar_propiedades()
         cartas_usuario = propiedades.get(str(interaction.guild.id), {}).get(str(interaction.user.id), [])
-
+    
         mensaje = "```diff\n"
         for c in coincidencias:
             cid = str(c["id"])
@@ -339,40 +340,40 @@ class Cartas(commands.Cog):
             else:
                 mensaje += f"- {nombre}\n"
         mensaje += "```"
-
+    
         await interaction.followup.send(mensaje)
         await interaction.followup.send(f"{len(coincidencias)} cards found containing '{term}'.")
-
-    @commands.command(name="search")
-    async def search_prefix(self, ctx: commands.Context, *, term: str):
-        """Busca cartas que contengan el término en su nombre (prefijo)."""
-        if not term:
-            await ctx.send("You must provide a search term. Example: y!search Yamai")
-            return
-
-        cartas = cargar_cartas()
-        coincidencias = [c for c in cartas if term.lower() in c["nombre"].lower()]
-        coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
-
-        if not coincidencias:
-            await ctx.send(f"No cards found containing '{term}'.")
-            return
-
-        propiedades = cargar_propiedades()
-        cartas_usuario = propiedades.get(str(ctx.guild.id), {}).get(str(ctx.author.id), [])
-
-        mensaje = "```diff\n"
-        for c in coincidencias:
-            cid = str(c["id"])
-            nombre = c["nombre"]
-            if cid in map(str, cartas_usuario):
-                mensaje += f"+ {nombre}\n"
-            else:
-                mensaje += f"- {nombre}\n"
-        mensaje += "```"
-
-        await ctx.send(mensaje)
-        await ctx.send(f"{len(coincidencias)} cards found containing '{term}'.")
+    
+        @commands.command(name="search")
+        async def search_prefix(self, ctx: commands.Context, *, term: str):
+            """Busca cartas que contengan el término en su nombre (prefijo)."""
+            if not term:
+                await ctx.send("You must provide a search term. Example: y!search Yamai")
+                return
+    
+            cartas = cargar_cartas()
+            coincidencias = [c for c in cartas if term.lower() in c["nombre"].lower()]
+            coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
+    
+            if not coincidencias:
+                await ctx.send(f"No cards found containing '{term}'.")
+                return
+    
+            propiedades = cargar_propiedades()
+            cartas_usuario = propiedades.get(str(ctx.guild.id), {}).get(str(ctx.author.id), [])
+    
+            mensaje = "```diff\n"
+            for c in coincidencias:
+                cid = str(c["id"])
+                nombre = c["nombre"]
+                if cid in map(str, cartas_usuario):
+                    mensaje += f"+ {nombre}\n"
+                else:
+                    mensaje += f"- {nombre}\n"
+            mensaje += "```"
+    
+            await ctx.send(mensaje)
+            await ctx.send(f"{len(coincidencias)} cards found containing '{term}'.")
 
     # -----------------------------
     # /pack
