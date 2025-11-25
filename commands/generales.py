@@ -123,7 +123,7 @@ class Generales(commands.Cog):
 
             "**Quality of life changes:**\n"
             "- Expanded the window to claim a spawned card from 10 to 15 minutes. This change might have to be rolled back if it negatively impacts the bot's performance.\n"
-            "- Improved consistency in ephemeral (messages only one user can see) vs public responses, making sure relevant information is shown to everybody.\n"
+            "- Improved consistency in ephemeral vs public responses, making sure relevant information is shown to everybody.\n"
             "- The collection command will now show card quantity if a card is repeated.\n\n"
 
             "**Coming up:**\n"
@@ -152,7 +152,7 @@ class Generales(commands.Cog):
 
             "**Quality of life changes:**\n"
             "- Expanded the window to claim a spawned card from 10 to 15 minutes. This change might have to be rolled back if it negatively impacts the bot's performance.\n"
-            "- Improved consistency in ephemeral (messages only one user can see) vs public responses, making sure relevant information is shown to everybody.\n"
+            "- Improved consistency in ephemeral vs public responses, making sure relevant information is shown to everybody.\n"
             "- The collection command will now show card quantity if a card is repeated.\n\n"
 
             "**Coming up:**\n"
