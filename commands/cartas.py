@@ -210,9 +210,9 @@ class Cartas(commands.Cog):
         await ctx.send(f"{len(coincidencias)} cards found containing '{term}'.")
 
     # -----------------------------
-    # /pack (diario)
+    # /pack
     # -----------------------------
-    @app_commands.command(name="pack", description="Opens a daily pack of 5 cards")
+    @app_commands.command(name="pack", description="Opens a pack of 5 cards")
     async def pack(self, interaction: discord.Interaction):
         """Permite abrir un paquete diario de 5 cartas (slash)."""
         await interaction.response.defer(ephemeral=False)
@@ -220,18 +220,31 @@ class Cartas(commands.Cog):
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
 
-        # ✅ Leer pack_limit desde settings
+        # Leer pack_limit desde settings
         settings = cargar_settings()
         servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
         pack_limit = servidor_settings.get("pack_limit", 1)
 
-        # ✅ Usar colección principal packs
+        # Usar colección principal packs
         packs = cargar_packs()
         servidor_packs = packs.setdefault(servidor_id, {})
         usuario_packs = servidor_packs.setdefault(usuario_id, {})
 
         ahora = datetime.datetime.now()
         inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
+        medianoche = inicio_dia + datetime.timedelta(days=1)
+
+        # Comprobar packs_opened
+        packs_opened = usuario_packs.get("packs_opened", 0)
+        if packs_opened >= pack_limit:
+            restante = medianoche - ahora
+            horas, resto = divmod(int(restante.total_seconds()), 3600)
+            minutos = resto // 60
+            await interaction.followup.send(
+                f"🚫 {interaction.user.mention}, you have already opened the maximum of {pack_limit} packs today. "
+                f"You can open more in {horas}h {minutos}m (at midnight)."
+            )
+            return
 
         # Cada franja dura (24 / pack_limit) horas
         intervalo_horas = 24 / pack_limit
@@ -250,9 +263,7 @@ class Cartas(commands.Cog):
 
             if ultimo_dt.date() == ahora.date():
                 franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
-
                 if franja_actual == franja_ultimo:
-                    # Calcular cuánto falta hasta la siguiente franja
                     siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
                     restante = siguiente_inicio - ahora
                     horas, resto = divmod(int(restante.total_seconds()), 3600)
@@ -262,7 +273,7 @@ class Cartas(commands.Cog):
                     )
                     return
 
-        # ✅ Cargar cartas
+        # Cargar cartas
         cartas = cargar_cartas()
         if not cartas:
             await interaction.followup.send("❌ No cards available.", ephemeral=True)
@@ -270,8 +281,9 @@ class Cartas(commands.Cog):
 
         nuevas_cartas = random.sample(cartas, 5)
 
-        # ✅ Guardar fecha/hora exacta en packs
+        # Guardar fecha/hora exacta y actualizar packs_opened
         usuario_packs["ultimo_paquete"] = ahora.isoformat()
+        usuario_packs["packs_opened"] = packs_opened + 1
         guardar_packs(packs)
 
         # Guardar cartas obtenidas
@@ -287,7 +299,7 @@ class Cartas(commands.Cog):
         vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
 
-        # 🔥 Enviar log
+        # Enviar log
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
         log_guild = interaction.client.get_guild(log_guild_id)
@@ -303,7 +315,7 @@ class Cartas(commands.Cog):
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
 
-        # ✅ Enviar resultado al usuario
+        # Enviar resultado al usuario
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
         else:
