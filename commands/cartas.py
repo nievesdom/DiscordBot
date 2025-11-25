@@ -28,15 +28,6 @@ def backup_settings(settings: dict) -> None:
     """Guarda una copia completa de settings en la colección settings_backup."""
     timestamp = datetime.datetime.now().isoformat()
     db.collection("settings_backup").document(timestamp).set(settings)
-    
-def _find_card_by_name_fragment(name_fragment: str):
-    """
-    Busca una carta como hace 'show': primer elemento cuyo nombre contiene el fragmento (case-insensitive).
-    Devuelve el objeto carta o None.
-    """
-    cartas = cargar_cartas()
-    fragment = name_fragment.strip().lower()
-    return next((c for c in cartas if fragment in str(c.get("nombre", "")).lower()), None)
 
 
 def _remove_one_copy(user_cards: list, card_id) -> bool:
@@ -221,7 +212,7 @@ class Cartas(commands.Cog):
     async def _mostrar_estado(self, servidor_id, usuario_id, nombre_usuario, enviar):
         packs = cargar_packs()
         servidor_packs = packs.get(servidor_id, {})
-        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "ultimo_paquete": None})
+        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "last_open": None})
 
         abiertos = usuario_packs.get("packs_opened", 0)
         last_open_str = usuario_packs.get("last_open")
@@ -243,9 +234,9 @@ class Cartas(commands.Cog):
             except Exception:
                 pass
 
-        # Límite diario desde settings
-        settings = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id, {}) if hasattr(self, "settings") else {}
-        max_diario = settings.get("card_limit", 1)
+        # Límite diario desde settings["guilds"][servidor_id]
+        settings_guild = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id, {}) if hasattr(self, "settings") else {}
+        max_diario = settings_guild.get("card_limit", 1)
 
         # Calcular ventanas de refresco en GMT
         interval_hours = 24 // max_diario
@@ -272,7 +263,7 @@ class Cartas(commands.Cog):
             estado_pack = f"⏳ Next pack available in {horas}h {minutos}m (<t:{int(siguiente.timestamp())}:t>)"
 
         # Información de spawn automático del servidor
-        config = getattr(self, "settings", {}).get("guilds", {}).get(servidor_id) if hasattr(self, "settings") else None
+        config = settings_guild if settings_guild else None
         spawn_info = ""
         if config and config.get("enabled"):
             intervalo = config.get("interval", [1, 3])
@@ -288,7 +279,7 @@ class Cartas(commands.Cog):
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
             f"- Max packs per day: {max_diario}\n"
             f"- Packs opened today: {abiertos}\n"
-            f"- Refresh time(s): {ventanas_str}\n"
+            f"- Refresh times (GMT): {ventanas_str}\n"
             f"- {estado_pack}"
             f"{spawn_info}"
         )
