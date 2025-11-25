@@ -13,26 +13,6 @@ OWNER_ID = 182920174276575232
 class Generales(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
-    @app_commands.check(lambda i: i.user.id == OWNER_ID)
-    @app_commands.command(name="migrar_json", description="(Owner only) Migra los JSON locales a Firestore")
-    async def migrar_json(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-
-        try:
-            # Leer settings.json
-            with open("settings.json", "r", encoding="utf-8") as f:
-                settings = json.load(f)
-            db.collection("settings").document("global").set(settings)
-
-            # Leer propiedades.json
-            with open("propiedades.json", "r", encoding="utf-8") as f:
-                propiedades = json.load(f)
-            db.collection("propiedades").document("global").set(propiedades)
-
-            await interaction.followup.send("✅ Migración completada en Firestore.", ephemeral=True)
-        except Exception as e:
-            await interaction.followup.send(f"❌ Error en la migración: {e}", ephemeral=True)
 
     # ---------------------------
     # HOLA

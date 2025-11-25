@@ -241,6 +241,26 @@ class Debug(commands.Cog):
         # Mensaje visible para todos en el canal
         await interaction.followup.send(embed=embed)
         
+    '''@app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(name="migrar_json", description="(Owner only) Migra los JSON locales a Firestore")
+    async def migrar_json(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            # Leer settings.json
+            with open("settings.json", "r", encoding="utf-8") as f:
+                settings = json.load(f)
+            db.collection("settings").document("global").set(settings)
+
+            # Leer propiedades.json
+            with open("propiedades.json", "r", encoding="utf-8") as f:
+                propiedades = json.load(f)
+            db.collection("propiedades").document("global").set(propiedades)
+
+            await interaction.followup.send("✅ Migración completada en Firestore.", ephemeral=True)
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error en la migración: {e}", ephemeral=True)'''
         
     # Decorador para restringir el comando solo a ti
     '''@app_commands.default_permissions()
