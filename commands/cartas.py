@@ -269,7 +269,7 @@ class Cartas(commands.Cog):
             restante = medianoche - ahora
             horas, resto = divmod(int(restante.total_seconds()), 3600)
             minutos = resto // 60
-            estado_pack = f"⏳ Next daily reset in {horas}h {minutos}m (<t:{int(medianoche.replace(tzinfo=datetime.timezone.utc).timestamp())}:t>)"
+            estado_pack = f"⏳ Next reset in {horas}h {minutos}m (<t:{int(medianoche.replace(tzinfo=datetime.timezone.utc).timestamp())}:t>)"
         else:
             # 2) Si ya abrió en esta franja → hasta inicio siguiente franja
             if ya_abierto_en_franja:
@@ -277,12 +277,12 @@ class Cartas(commands.Cog):
                 restante = siguiente_inicio - ahora
                 horas, resto = divmod(int(restante.total_seconds()), 3600)
                 minutos = resto // 60
-                estado_pack = f"🚫 You must wait {horas}h {minutos}m (<t:{int(siguiente_inicio.replace(tzinfo=datetime.timezone.utc).timestamp())}:t>)"
+                estado_pack = f"🚫 You must wait {horas}h {minutos}m to open a new pack"
             else:
                 # 3) Si no ha abierto en esta franja y no superó el límite → puede abrir
                 estado_pack = "✅ You can open a pack now!"
 
-        # Server spawn info SOLO si enabled == True (misma lógica)
+        # Server spawn info SOLO si enabled == True
         config = servidor_settings if servidor_settings else None
         spawn_info = ""
         if config and config.get("enabled"):
@@ -299,7 +299,7 @@ class Cartas(commands.Cog):
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
             f"- Max packs per day: {pack_limit}\n"
             f"- Packs opened today: {packs_opened}\n"
-            f"- Refresh times (GMT): {ventanas_str}\n"
+            f"- Refresh times: {ventanas_str}\n"
             f"- {estado_pack}"
             f"{spawn_info}"
         )

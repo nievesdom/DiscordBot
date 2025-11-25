@@ -198,53 +198,68 @@ class CartasAuto(commands.Cog):
             f"✅ Automatic card spawning enabled in {canal.mention}, "
             f"every 0–{max_horas}h, max {max_diarias} cards/day."
         )
-
-
-
+        
+        
     # ================================================================
-    # SLASH COMMAND: estado_cartas
+    # Comando con prefijo: y!auto_cards
     # ================================================================
-    @app_commands.default_permissions(administrator=True)  # Solo visible para administradores
-    @app_commands.checks.has_permissions(administrator=True)  # Solo ejecutable por administradores
-    @app_commands.command(
-        name="spawning_status",
-        description="**[Administrator only]** Shows the status of automatic card spawning."
-    )
-    async def estado_cartas_slash(self, interaction: discord.Interaction):
-        """
-        Muestra el estado actual del sistema de cartas automáticas en el servidor:
-        - Canal configurado, intervalo, máximo diario, cartas lanzadas y tiempo hasta la próxima.
-        """
-        gid = str(interaction.guild_id)
+    @commands.command(name="auto_cards")
+    @commands.has_permissions(administrator=True)
+    async def auto_cards_prefix(self, ctx: commands.Context, canal: discord.TextChannel = None, max_horas: int = None, max_diarias: int = None):
+        """Activa o desactiva el spawn automático de cartas (prefijo)."""
+        gid = str(ctx.guild.id)
         config = self.settings["guilds"].get(gid)
 
-        if not config or not config.get("enabled"):
-            await interaction.response.send_message("❌ Automatic card spawning is deactivated.")
+        # Caso: desactivar
+        if canal is None and max_horas is None and max_diarias is None:
+            if config and config.get("enabled"):
+                config["enabled"] = False
+                if gid in self.tasks:
+                    try:
+                        self.tasks[gid].cancel()
+                    except Exception:
+                        pass
+                    self.tasks.pop(gid, None)
+                config["count"] = 0
+                config.pop("next_spawn", None)
+                self.marcar_cambios()
+                await ctx.send("❌ Automatic card spawning deactivated.")
+            else:
+                await ctx.send("⚠️ Automatic card spawning is already deactivated. Use `y!auto_cards #channel (max_hour_wait) (max_daily_number)` to activate it.")
             return
 
-        tiempo_str = "No more cards today."
-        if "next_spawn" in config:
-            try:
-                next_spawn = datetime.datetime.fromisoformat(config["next_spawn"])
-                delta = next_spawn - datetime.datetime.now()
-                if delta.total_seconds() > 0:
-                    minutos = int(delta.total_seconds() // 60)
-                    horas = minutos // 60
-                    minutos_restantes = minutos % 60
-                    tiempo_str = f"{horas}h {minutos_restantes}m"
-                else:
-                    tiempo_str = "Programmed, pending."
-            except Exception:
-                pass
+        # Caso: activar/reconfigurar
+        if canal is None:
+            await ctx.send("⚠️ You must specify the channel: `y!auto_cards #channel (max_hour_wait) (max_daily_number)`")
+            return
 
-        await interaction.response.send_message(
-            f"📊 **Automatic card spawning status:**\n"
-            f"- Channel: <#{config['channel_id']}>\n"
-            f"- Interval: 0–{config['interval'][1]} hours\n"
-            f"- Max daily cards: {config['max_daily']}\n"
-            f"- Cards spawned today: {config['count']}\n"
-            f"- Next card in: {tiempo_str}"
-        )
+        # Validación de parámetros
+        if max_horas is None:
+            max_horas = 5
+        else:
+            max_horas = max(1, max_horas)
+
+        if max_diarias is None:
+            max_diarias = 5
+        else:
+            max_diarias = min(max_diarias, 100)
+
+        # Actualizar settings
+        self.settings["guilds"].setdefault(gid, {})
+        self.settings["guilds"][gid].update({
+            "enabled": True,
+            "channel_id": canal.id,
+            "interval": [0, max_horas],
+            "max_daily": max_diarias,
+            "count": 0,
+            "last_reset": datetime.date.today().isoformat()
+        })
+
+        self.marcar_cambios()
+        self.tasks[gid] = asyncio.create_task(self.spawn_for_guild(ctx.guild.id))
+
+        await ctx.send(f"✅ Automatic card spawning enabled in {canal.mention}, every 0–{max_horas}h, max {max_diarias} cards/day.")
+
 
     # ================================================================
     # Bucle de spawn por servidor
