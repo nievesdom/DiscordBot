@@ -61,9 +61,7 @@ class GiftView(View):
         # Editar el mensaje del botón usando la respuesta de la interacción (más fiable)
         await interaction.response.edit_message(
             content=(
-                f"✅ {self.recipient.mention} accepted the gift!\n"
-                f"- {self.sender.mention} gave **{self.carta_obj['nombre']}**\n"
-                f"- {self.recipient.mention} received **{self.carta_obj['nombre']}**"
+                f"✅ {self.recipient.mention} accepted the gift and received **{self.carta_obj['nombre']}**"
             ),
             view=None
         )
