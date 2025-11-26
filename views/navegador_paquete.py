@@ -70,7 +70,7 @@ class NavegadorPaquete(discord.ui.View):
     async def enviar(self):
         embed, archivo = self.mostrar()
         if isinstance(self.context, discord.Interaction):
-            # Si vas a usar followup, asegúrate de que la interacción original ya fue respondida/deferida antes
+            # Asegúrate de que la interacción original ya fue respondida/deferida antes
             if archivo:
                 self.msg = await self.context.followup.send(file=archivo, embed=embed, view=self)
             else:
@@ -85,46 +85,27 @@ class NavegadorPaquete(discord.ui.View):
         """Actualiza el embed mostrado al cambiar de carta."""
         embed, archivo = self.mostrar()
 
-        # Si viene de un botón, edita el mensaje de esa interacción (más fiable)
         if interaction:
-            if archivo:
-                # Si alguna vez añades archivos, cambia a attachment handling apropiado
-                await interaction.response.edit_message(embed=embed, view=self)
-            else:
-                await interaction.response.edit_message(embed=embed, view=self)
+            await interaction.response.edit_message(embed=embed, view=self)
             return
 
-        # Fallback: edita el mensaje guardado
         if self.msg:
             await self.msg.edit(embed=embed, view=self)
 
-    async def _check_owner(self, interaction: discord.Interaction) -> bool:
-        """Solo el dueño del pack puede navegar."""
-        if interaction.user.id != self.dueño.id:
-            # Mensaje ephemeral para quien intenta usar la vista sin ser el dueño
-            await interaction.response.send_message(
-                "⚠️ Only the pack owner can navigate these cards.",
-                ephemeral=True
-            )
-            return False
-        return True
-
     @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
     async def atras(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not await self._check_owner(interaction):
-            return
+        # Cualquiera puede usar los botones
         if not self.cartas_ids:
-            await interaction.response.send_message("No cards to navigate.", ephemeral=True)
+            await interaction.response.send_message("No cards to navigate.")
             return
         self.i = (self.i - 1) % len(self.cartas_ids)
         await self.actualizar(interaction)
 
     @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
     async def siguiente(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not await self._check_owner(interaction):
-            return
+        # Cualquiera puede usar los botones
         if not self.cartas_ids:
-            await interaction.response.send_message("No cards to navigate.", ephemeral=True)
+            await interaction.response.send_message("No cards to navigate.")
             return
         self.i = (self.i + 1) % len(self.cartas_ids)
         await self.actualizar(interaction)
