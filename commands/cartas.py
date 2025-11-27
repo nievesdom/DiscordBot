@@ -412,9 +412,10 @@ class Cartas(commands.Cog):
             )
             return
 
-        # Cada franja dura (24 / pack_limit) horas
-        intervalo_horas = 24 / pack_limit
-        franja_actual = int(ahora.hour // intervalo_horas)
+        # Cada franja dura (24h / pack_limit)
+        interval_minutes = int(24 * 60 / pack_limit)
+        minutes_since_midnight = ahora.hour * 60 + ahora.minute
+        franja_actual = minutes_since_midnight // interval_minutes
 
         # Comprobar último pack
         ultimo_str = usuario_packs.get("ultimo_paquete")
@@ -422,15 +423,14 @@ class Cartas(commands.Cog):
             try:
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
             except ValueError:
-                # Caso especial: solo fecha YYYY-MM-DD → asumir medianoche
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
                 usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
                 guardar_packs(packs)
 
             if ultimo_dt.date() == ahora.date():
-                franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
+                franja_ultimo = (ultimo_dt.hour * 60 + ultimo_dt.minute) // interval_minutes
                 if franja_actual == franja_ultimo:
-                    siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
+                    siguiente_inicio = inicio_dia + datetime.timedelta(minutes=(franja_actual + 1) * interval_minutes)
                     restante = siguiente_inicio - ahora
                     horas, resto = divmod(int(restante.total_seconds()), 3600)
                     minutos = resto // 60
@@ -465,27 +465,12 @@ class Cartas(commands.Cog):
         vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
 
-        # Enviar log
-        log_guild_id = 286617766516228096
-        log_channel_id = 1441990735883800607
-        log_guild = interaction.client.get_guild(log_guild_id)
-        if log_guild:
-            log_channel = log_guild.get_channel(log_channel_id)
-            if log_channel:
-                try:
-                    nombres_cartas = ", ".join([f"{c['nombre']} [ID: {c['id']}]" for c in nuevas_cartas])
-                    await log_channel.send(
-                        f"[PACK] {interaction.user.display_name} abrió un paquete en {interaction.guild.name} "
-                        f"con las cartas: {nombres_cartas}"
-                    )
-                except Exception as e:
-                    print(f"[ERROR] Could not send log: {e}")
-
         # Enviar resultado al usuario
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
         else:
             await interaction.followup.send(embed=embed, view=vista)
+
 
 
 
@@ -524,9 +509,10 @@ class Cartas(commands.Cog):
             )
             return
 
-        # Cada franja dura (24 / pack_limit) horas
-        intervalo_horas = 24 / pack_limit
-        franja_actual = int(ahora.hour // intervalo_horas)
+        # Cada franja dura (24h / pack_limit)
+        interval_minutes = int(24 * 60 / pack_limit)
+        minutes_since_midnight = ahora.hour * 60 + ahora.minute
+        franja_actual = minutes_since_midnight // interval_minutes
 
         # Comprobar último pack
         ultimo_str = usuario_packs.get("ultimo_paquete")
@@ -534,15 +520,14 @@ class Cartas(commands.Cog):
             try:
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
             except ValueError:
-                # Caso especial: solo fecha YYYY-MM-DD → asumir medianoche
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
                 usuario_packs["ultimo_paquete"] = ultimo_dt.isoformat()
                 guardar_packs(packs)
 
             if ultimo_dt.date() == ahora.date():
-                franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
+                franja_ultimo = (ultimo_dt.hour * 60 + ultimo_dt.minute) // interval_minutes
                 if franja_actual == franja_ultimo:
-                    siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
+                    siguiente_inicio = inicio_dia + datetime.timedelta(minutes=(franja_actual + 1) * interval_minutes)
                     restante = siguiente_inicio - ahora
                     horas, resto = divmod(int(restante.total_seconds()), 3600)
                     minutos = resto // 60
@@ -598,6 +583,7 @@ class Cartas(commands.Cog):
             await ctx.send(file=archivo, embed=embed, view=vista)
         else:
             await ctx.send(embed=embed, view=vista)
+
             
     
     @app_commands.command(
