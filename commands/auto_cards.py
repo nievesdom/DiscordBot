@@ -79,7 +79,10 @@ class CartasAuto(commands.Cog):
             await asyncio.sleep(60)
             if self._pending_save:
                 try:
-                    guardar_settings(self.settings)
+                    current = cargar_settings()
+                    # Actualizar solo la rama de este cog
+                    current.setdefault("guilds", {}).update(self.settings.get("guilds", {}))
+                    guardar_settings(current)
                     print("[OK] Autosave ejecutado en Firestore.")
                     self._pending_save = False
                 except Exception as e:
