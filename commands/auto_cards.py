@@ -80,15 +80,22 @@ class CartasAuto(commands.Cog):
             if self._pending_save:
                 try:
                     current = cargar_settings()
-                    # Actualizar solo la rama de este cog
-                    current.setdefault("guilds", {}).update(self.settings.get("guilds", {}))
+                    guilds = current.setdefault("guilds", {})
+    
+                    # Actualizar solo las claves de auto_cards, sin tocar pack_limit
+                    for gid, config in self.settings.get("guilds", {}).items():
+                        guild_conf = guilds.setdefault(gid, {})
+                        for key in ["enabled", "channel_id", "interval", "max_daily", "count", "last_reset", "next_spawn"]:
+                            if key in config:
+                                guild_conf[key] = config[key]
+    
                     guardar_settings(current)
                     print("[OK] Autosave ejecutado en Firestore.")
                     self._pending_save = False
                 except Exception as e:
                     print("[ERROR] autosave:", e)
-                    # Mantenemos la bandera para reintentar
                     self._pending_save = True
+
 
 
     # ================================================================
