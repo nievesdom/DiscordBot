@@ -1,111 +1,113 @@
 import asyncio
 import discord
 from discord.ext import commands
-from core.firebase_storage import cargar_mazos, guardar_mazos, cargar_cartas, cargar_propiedades
+from core.firebase_storage import cargar_mazos, guardar_mazos, cargar_propiedades
+from core.cartas import cargar_cartas
 
 class Battle(commands.Cog):
-    def categoría(nombre):
-        def decorador(comando):
-            comando.category = nombre
-            return comando
-        return decorador
-    
     def __init__(self, bot):
         self.bot = bot
-        
-        
+
     # -----------------------------
     # Comando slash: /deck_add
     # -----------------------------
     @discord.app_commands.command(
         name="deck_add",
-        description="Añade una carta a tu mazo buscando por nombre exacto (slash)."
+        description="Add a card to your deck by exact name (slash)."
     )
-    async def add_deck_slash(self, interaction: discord.Interaction, nombre_carta: str):
-        servidor_id = str(interaction.guild.id)
-        usuario_id = str(interaction.user.id)
+    async def deck_add_slash(self, interaction: discord.Interaction, card_name: str):
+        # IDs del servidor y usuario
+        server_id = str(interaction.guild.id)
+        user_id = str(interaction.user.id)
 
-        # Buscar carta por nombre exacto
-        cartas = cargar_cartas()
-        carta = next((c for c in cartas if c["nombre"].lower() == nombre_carta.lower()), None)
+        # Buscar carta por nombre exacto en el JSON
+        cards = cargar_cartas()
+        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
 
-        if not carta:
+        # Si no existe la carta
+        if not card:
             await interaction.response.send_message(
-                f"❌ No existe ninguna carta con el nombre exacto '{nombre_carta}'.", ephemeral=False
+                f"❌ No card found with the exact name '{card_name}'.", ephemeral=False
             )
             return
 
-        carta_id = str(carta["id"])
+        card_id = str(card["id"])
 
         # Comprobar si el usuario tiene la carta en propiedad
-        propiedades = cargar_propiedades()
-        cartas_usuario = propiedades.get(servidor_id, {}).get(usuario_id, [])
+        properties = cargar_propiedades()
+        user_cards = properties.get(server_id, {}).get(user_id, [])
 
-        if carta_id not in map(str, cartas_usuario):
+        if card_id not in map(str, user_cards):
             await interaction.response.send_message(
-                f"❌ No tienes la carta '{carta['nombre']}' en tu colección.", ephemeral=False
+                f"❌ You do not own the card '{card['nombre']}'.", ephemeral=False
             )
             return
 
-        # Añadir al mazo
-        mazos = cargar_mazos()
-        servidor_mazos = mazos.setdefault(servidor_id, {})
-        mazo_usuario = servidor_mazos.setdefault(usuario_id, [])
+        # Añadir la carta al mazo en Firebase
+        decks = cargar_mazos()
+        server_decks = decks.setdefault(server_id, {})
+        user_deck = server_decks.setdefault(user_id, [])
 
-        if carta_id in mazo_usuario:
+        # Evitar duplicados en el mazo
+        if card_id in user_deck:
             await interaction.response.send_message(
-                f"⚠️ La carta '{carta['nombre']}' ya está en tu mazo.", ephemeral=False
+                f"⚠️ The card '{card['nombre']}' is already in your deck.", ephemeral=False
             )
             return
 
-        mazo_usuario.append(carta_id)
-        guardar_mazos(mazos)
+        user_deck.append(card_id)
+        guardar_mazos(decks)
 
+        # Confirmación al usuario
         await interaction.response.send_message(
-            f"✅ Carta '{carta['nombre']}' añadida a tu mazo.", ephemeral=False
+            f"✅ The card '{card['nombre']}' has been added to your deck.", ephemeral=False
         )
-        
+
     # -----------------------------
-    # Comando prefijo: y!add_deck
+    # Comando prefijo: y!deck_add
     # -----------------------------
-    @commands.command(name="add_deck")
-    async def add_deck_prefix(self, ctx: commands.Context, *, nombre_carta: str):
+    @commands.command(name="deck_add")
+    async def deck_add_prefix(self, ctx: commands.Context, *, card_name: str):
         """Añade una carta al mazo del usuario buscando por nombre exacto (prefijo)."""
-        servidor_id = str(ctx.guild.id)
-        usuario_id = str(ctx.author.id)
+        # IDs del servidor y usuario
+        server_id = str(ctx.guild.id)
+        user_id = str(ctx.author.id)
 
-        # Buscar carta por nombre exacto
-        cartas = cargar_cartas()
-        carta = next((c for c in cartas if c["nombre"].lower() == nombre_carta.lower()), None)
+        # Buscar carta por nombre exacto en el JSON
+        cards = cargar_cartas()
+        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
 
-        if not carta:
-            await ctx.send(f"❌ No existe ninguna carta con el nombre exacto '{nombre_carta}'.")
+        # Si no existe la carta
+        if not card:
+            await ctx.send(f"❌ No card found with the exact name '{card_name}'.")
             return
 
-        carta_id = str(carta["id"])
+        card_id = str(card["id"])
 
         # Comprobar si el usuario tiene la carta en propiedad
-        propiedades = cargar_propiedades()
-        cartas_usuario = propiedades.get(servidor_id, {}).get(usuario_id, [])
+        properties = cargar_propiedades()
+        user_cards = properties.get(server_id, {}).get(user_id, [])
 
-        if carta_id not in map(str, cartas_usuario):
-            await ctx.send(f"❌ No tienes la carta '{carta['nombre']}' en tu colección.")
+        if card_id not in map(str, user_cards):
+            await ctx.send(f"❌ You do not own the card '{card['nombre']}'.")
             return
 
-        # Añadir al mazo
-        mazos = cargar_mazos()
-        servidor_mazos = mazos.setdefault(servidor_id, {})
-        mazo_usuario = servidor_mazos.setdefault(usuario_id, [])
+        # Añadir la carta al mazo en Firebase
+        decks = cargar_mazos()
+        server_decks = decks.setdefault(server_id, {})
+        user_deck = server_decks.setdefault(user_id, [])
 
-        if carta_id in mazo_usuario:
-            await ctx.send(f"⚠️ La carta '{carta['nombre']}' ya está en tu mazo.")
+        # Evitar duplicados en el mazo
+        if card_id in user_deck:
+            await ctx.send(f"⚠️ The card '{card['nombre']}' is already in your deck.")
             return
 
-        mazo_usuario.append(carta_id)
-        guardar_mazos(mazos)
+        user_deck.append(card_id)
+        guardar_mazos(decks)
 
-        await ctx.send(f"✅ Carta '{carta['nombre']}' añadida a tu mazo.")
-        
-        
+        # Confirmación al usuario
+        await ctx.send(f"✅ The card '{card['nombre']}' has been added to your deck.")
+
+# Setup del cog
 async def setup(bot):
     await bot.add_cog(Battle(bot))
