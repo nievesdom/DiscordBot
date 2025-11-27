@@ -210,79 +210,91 @@ class Cartas(commands.Cog):
     # Lógica compartida
     # -----------------------------
     async def _mostrar_estado(self, servidor_id: str, usuario_id: str, nombre_usuario: str, enviar):
-        # Leer settings y pack_limit (estricto)
+        # Leer settings y pack_limit desde guilds
         settings = cargar_settings()
-        pack_limit = get_pack_limit_safe(settings, servidor_id)
-    
-        # Leer packs_opened (estricto)
+        servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
+        pack_limit = servidor_settings.get("pack_limit", 1)
+
+        # Leer colección principal packs
         packs = cargar_packs()
-        packs_opened = get_packs_opened_safe(packs, servidor_id, usuario_id)
-    
-        ahora = datetime.datetime.now()  # misma referencia temporal que /pack
+        servidor_packs = packs.get(servidor_id, {})
+        usuario_packs = servidor_packs.get(usuario_id, {"packs_opened": 0, "ultimo_paquete": None})
+
+        ahora = datetime.datetime.now()  # misma referencia temporal que /pack (naive local/server time)
         inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
         medianoche = inicio_dia + datetime.timedelta(days=1)
-    
-        # Último paquete (normalización si trae solo fecha)
-        usuario_packs = packs.get(servidor_id, {}).get(usuario_id, {})
+
+        packs_opened = usuario_packs.get("packs_opened", 0)
         ultimo_str = usuario_packs.get("ultimo_paquete")
+
+        # Normalizar ultimo_paquete si solo trae fecha (YYYY-MM-DD)
         ultimo_dt = None
         if ultimo_str:
             try:
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str)
             except ValueError:
                 ultimo_dt = datetime.datetime.fromisoformat(ultimo_str + "T00:00:00")
-    
-        # Franjas basadas en minutos exactos
-        interval_minutes = int(24 * 60 / pack_limit)
-        minutes_since_midnight = ahora.hour * 60 + ahora.minute
-        franja_actual = minutes_since_midnight // interval_minutes
-    
+            # no persisto aquí para no escribir desde status; /pack sí persiste la normalización
+
+        # Si es otro día, el conteo diario se considera 0 desde la lógica de /pack al abrir.
+        # Aquí mostramos estado actual sin mutar datos, pero reflejamos correctamente el límite.
+        # Calcular franjas con la misma lógica que /pack
+        intervalo_horas = 24 / pack_limit
+        franja_actual = int(ahora.hour // intervalo_horas)
+
+        # Determinar si ya se abrió en la franja actual
         ya_abierto_en_franja = False
         if ultimo_dt and ultimo_dt.date() == ahora.date():
-            franja_ultimo = (ultimo_dt.hour * 60 + ultimo_dt.minute) // interval_minutes
-            ya_abierto_en_franja = (franja_actual == franja_ultimo)
-    
-        # Ventanas de refresco en UTC como timestamps de Discord
+            franja_ultimo = int(ultimo_dt.hour // intervalo_horas)
+            if franja_actual == franja_ultimo:
+                ya_abierto_en_franja = True
+
+        # Calcular horas de refresco en GMT y mostrarlas como timestamps de Discord
         ahora_utc = datetime.datetime.now(datetime.timezone.utc)
-        base_utc = datetime.datetime.combine(ahora_utc.date(), datetime.time.min, tzinfo=datetime.timezone.utc)
         ventanas_utc = []
         for i in range(pack_limit):
-            v = base_utc + datetime.timedelta(minutes=i * interval_minutes)
-            if v < ahora_utc:
-                v += datetime.timedelta(days=1)
-            ventanas_utc.append(v)
+            # ventanas en UTC: inicio del día UTC + i * intervalo
+            base_utc = datetime.datetime.combine(ahora_utc.date(), datetime.time.min, tzinfo=datetime.timezone.utc)
+            ventana_dt = base_utc + datetime.timedelta(hours=i * intervalo_horas)
+            # si la ventana ya pasó hoy en UTC, se empuja a mañana
+            if ventana_dt < ahora_utc:
+                ventana_dt += datetime.timedelta(days=1)
+            ventanas_utc.append(ventana_dt)
         ventanas_utc.sort()
         ventanas_str = ", ".join([f"<t:{int(v.timestamp())}:t>" for v in ventanas_utc])
-    
-        # Mensaje de estado con horas y minutos
+
+        # Calcular tiempo restante
+        # 1) Si alcanzó el máximo diario → hasta medianoche
         if packs_opened >= pack_limit:
             restante = medianoche - ahora
             horas, resto = divmod(int(restante.total_seconds()), 3600)
             minutos = resto // 60
             estado_pack = f"⏳ Next reset in {horas}h {minutos}m (<t:{int(medianoche.replace(tzinfo=datetime.timezone.utc).timestamp())}:t>)"
         else:
+            # 2) Si ya abrió en esta franja → hasta inicio siguiente franja
             if ya_abierto_en_franja:
-                siguiente_inicio = inicio_dia + datetime.timedelta(minutes=(franja_actual + 1) * interval_minutes)
+                siguiente_inicio = inicio_dia + datetime.timedelta(hours=(franja_actual + 1) * intervalo_horas)
                 restante = siguiente_inicio - ahora
                 horas, resto = divmod(int(restante.total_seconds()), 3600)
                 minutos = resto // 60
                 estado_pack = f"🚫 You must wait {horas}h {minutos}m to open a new pack"
             else:
+                # 3) Si no ha abierto en esta franja y no superó el límite → puede abrir
                 estado_pack = "✅ You can open a pack now!"
-    
-        # Opcional: info de spawns si está activado (no tocamos pack_limit aquí)
-        servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
+
+        # Server spawn info SOLO si enabled == True
+        config = servidor_settings if servidor_settings else None
         spawn_info = ""
-        if servidor_settings and servidor_settings.get("enabled"):
-            intervalo = servidor_settings.get("interval", [1, 3])  # [min_horas, max_horas]
-            canal = servidor_settings.get("channel_id")
+        if config and config.get("enabled"):
+            intervalo = config.get("interval", [1, 3])  # [min_horas, max_horas]
+            canal = config.get("channel_id")
             spawn_info = (
                 f"\n\n📡 **Server spawn info:**\n"
                 f"- Channel: <#{canal}>\n"
                 f"- Spawn interval: {intervalo[0]}–{intervalo[1]} hours\n"
-                f"- Cards spawned today: {servidor_settings.get('count', 0)}"
+                f"- Cards spawned today: {config.get('count', 0)}"
             )
-    
+
         await enviar(
             f"📊 **Pack opening status for {nombre_usuario}:**\n"
             f"- Max packs per day: {pack_limit}\n"
@@ -291,7 +303,7 @@ class Cartas(commands.Cog):
             f"- {estado_pack}"
             f"{spawn_info}"
         )
-
+        
 
 
 
