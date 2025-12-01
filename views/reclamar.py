@@ -104,7 +104,7 @@ class ReclamarCarta(discord.ui.View):
                     f"🛡️ {carta_info.get('defense', '—')} | 💨 {carta_info.get('speed', '—')}"
                 )
             )
-            self.embed.set_footer(text=f"Carta reclamada por {interaction.user.display_name}")
+            self.embed.set_footer(text=f"Card claimed by {interaction.user.display_name}")
             self.reclamada = True
             self.clear_items()  # Quita el botón tras reclamar
 

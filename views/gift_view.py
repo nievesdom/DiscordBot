@@ -5,7 +5,7 @@ from core.firebase_storage import cargar_propiedades, guardar_propiedades
 class GiftView(View):
     def __init__(self, sender: discord.Member, recipient: discord.Member, carta_obj: dict,
                  propiedades, servidor_id, client: discord.Client):
-        super().__init__(timeout=60)
+        super().__init__(timeout=120)
         self.sender = sender
         self.recipient = recipient
         self.carta_obj = carta_obj
