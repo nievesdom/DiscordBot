@@ -114,10 +114,12 @@ class Generales(commands.Cog):
             "- Fixed an interaction error that made gifting not work during the first day.\n"
             "- Fixed an error that would make the bot say the wrong amount of time that had to be waited in order to to open a new pack when the number of daily packs was set to 5.\n"
             "- Fixed an error that sometimes caused the daily number of packs to revert back to an earlier number that was set.\n"
-            "- Fixed a bug that prevented certain Nanba cards from being gifted or traded, as they were duplicated in the database.\n\n"
+            "- Fixed a bug that prevented certain Nanba cards from being gifted or traded, as they were duplicated in the database.\n"
+            "- `y!search now works as intended.`\n\n"
 
             "**Quality of life changes:**\n"
-            "- Made the album and pack buttons work longer (5 minutes).\n\n"
+            "- Made the album and pack buttons work longer (5 minutes).\n"
+            "- The gifting buttons also last longer (2 minutes).\n\n"
             
             "**New cards:**\n"
             "- UR Toko Higashide\n"
@@ -138,16 +140,18 @@ class Generales(commands.Cog):
     async def updates_prefix(self, ctx: commands.Context):
         await ctx.send(
             "**Version 1.2.1 Patch notes**\n"
-            "Version 1.2.1 includes all the fixes and features of the previous versions (gifting, trading, seeing status and adjusting pack openings) and a couple of bug fixes. These fixes have been silently released since the last update.\n\n" 
+            "Version 1.2.1 includes all the fixes and features of the previous versions (gifting, trading, seeing status and adjusting pack openings) as well as new cards and a couple of bug fixes. These fixes have been silently released since the last update.\n\n" 
             
             "**Bug fixes:**\n"
             "- Fixed an interaction error that made gifting not work during the first day.\n"
             "- Fixed an error that would make the bot say the wrong amount of time that had to be waited in order to to open a new pack when the number of daily packs was set to 5.\n"
             "- Fixed an error that sometimes caused the daily number of packs to revert back to an earlier number that was set.\n"
-            "- Fixed a bug that prevented certain Nanba cards from being gifted or traded, as they were duplicated in the database.\n\n"
+            "- Fixed a bug that prevented certain Nanba cards from being gifted or traded, as they were duplicated in the database.\n"
+            "- `y!search now works as intended.`\n\n"
 
             "**Quality of life changes:**\n"
-            "- Made the album and pack buttons work longer (5 minutes).\n\n"
+            "- Made the album and pack buttons work longer (5 minutes).\n"
+            "- The gifting buttons also last longer (2 minutes).\n\n"
             
             "**New cards:**\n"
             "- UR Toko Higashide\n"
