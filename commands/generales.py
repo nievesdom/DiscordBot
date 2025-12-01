@@ -130,7 +130,7 @@ class Generales(commands.Cog):
             "- Alphabetical sorting mode for the album, independent from card rarity. This will group all the cards from the same character.\n"
             "- The choice to show wiki search results in the server's chat rather than in DMs.\n"
             "- Documentation for the bot.\n"
-            "- Community-made cards (just maybe)\n"
+            "- Community-made cards (just maybe).\n"
             "- Card combat (eventually)."
         )
 
@@ -160,7 +160,7 @@ class Generales(commands.Cog):
             "- Alphabetical sorting mode for the album, independent from card rarity. This will group all the cards from the same character.\n"
             "- The choice to show wiki search results in the server's chat rather than in DMs.\n"
             "- Documentation for the bot.\n"
-            "- Community-made cards (just maybe)\n"
+            "- Community-made cards (just maybe).\n"
             "- Card combat (eventually)."
         )
 
