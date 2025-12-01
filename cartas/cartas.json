@@ -11904,54 +11904,6 @@
     "speed": 153
   },
   {
-    "id": 993,
-    "nombre": "KSR Yu Nanba (Costume)",
-    "rareza": "KSR",
-    "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yu%20Nanba%20%28Costume%29.png",
-    "atributo": "light",
-    "tipo": "recovery",
-    "health": 990,
-    "attack": 244,
-    "defense": 235,
-    "speed": 122
-  },
-  {
-    "id": 994,
-    "nombre": "KSR Yu Nanba (YLAD Kiwami)",
-    "rareza": "KSR",
-    "imagen": "https://discordbot-n4ts.onrender.com/cartas/KSR%20Yu%20Nanba%20%28YLAD%20Kiwami%29.png",
-    "atributo": "heart",
-    "tipo": "support",
-    "health": 979,
-    "attack": 238,
-    "defense": 181,
-    "speed": 210
-  },
-  {
-    "id": 995,
-    "nombre": "SSR Yu Nanba (YLAD)",
-    "rareza": "SSR",
-    "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yu%20Nanba%20%28YLAD%29.png",
-    "atributo": "body",
-    "tipo": "support",
-    "health": 611,
-    "attack": 166,
-    "defense": 133,
-    "speed": 159
-  },
-  {
-    "id": 996,
-    "nombre": "SSR Yu Nanba",
-    "rareza": "SSR",
-    "imagen": "https://discordbot-n4ts.onrender.com/cartas/SSR%20Yu%20Nanba.png",
-    "atributo": "technique",
-    "tipo": "support",
-    "health": 762,
-    "attack": 215,
-    "defense": 201,
-    "speed": 181
-  },
-  {
     "id": 997,
     "nombre": "UR Akira Nishikiyama ('05 Black II)",
     "rareza": "UR",
@@ -12972,18 +12924,6 @@
     "speed": 219
   },
   {
-    "id": 1082,
-    "nombre": "UR Yu Nanba (YLAD Holographic)",
-    "rareza": "UR",
-    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Yu%20Nanba%20%28YLAD%20Holographic%29.png",
-    "atributo": "technique",
-    "tipo": "support",
-    "health": 1161,
-    "attack": 270,
-    "defense": 262,
-    "speed": 217
-  },
-  {
     "id": 1083,
     "nombre": "UR Yui (Lively)",
     "rareza": "UR",
@@ -13126,5 +13066,65 @@
     "attack": 309,
     "defense": 282,
     "speed": 146
+  },
+  {
+    "id": 1095,
+    "nombre": "UR Hikaru (Christmas Eve)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Hikaru%20%28Christmas%20Eve%29.png",
+    "atributo": "light",
+    "tipo": "support",
+    "health": 911,
+    "attack": 350,
+    "defense": 266,
+    "speed": 198
+  },
+  {
+    "id": 1096,
+    "nombre": "UR Mayumi Seto (True)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Mayumi%20Seto%20%28True%29.png",
+    "atributo": "technique",
+    "tipo": "support",
+    "health": 1045,
+    "attack": 263,
+    "defense": 197,
+    "speed": 193
+  },
+  {
+    "id": 1097,
+    "nombre": "UR Saeko Mukoda (YLAD Holographic II)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Saeko%20Mukoda%20%28YLAD%20Holographic%20II%29.png",
+    "atributo": "body",
+    "tipo": "recovery",
+    "health": 1345,
+    "attack": 232,
+    "defense": 234,
+    "speed": 216
+  },
+  {
+    "id": 1098,
+    "nombre": "UR Sofia (Christmas Eve)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Sofia%20%28Christmas%20Eve%29.png",
+    "atributo": "heart",
+    "tipo": "attack",
+    "health": 887,
+    "attack": 384,
+    "defense": 208,
+    "speed": 169
+  },
+  {
+    "id": 1099,
+    "nombre": "UR Toko Higashide",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Toko%20Higashide.png",
+    "atributo": "light",
+    "tipo": "support",
+    "health": 1173,
+    "attack": 302,
+    "defense": 278,
+    "speed": 204
   }
 ]

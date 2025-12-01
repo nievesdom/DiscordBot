@@ -138,7 +138,7 @@ class CartasAuto(commands.Cog):
                 self.marcar_cambios()
                 await interaction.followup.send("❌ Automatic card spawning deactivated.")
                 
-                # 🔥 Enviar log al servidor/canal de logs
+                # Enviar log al servidor/canal de logs
                 log_guild_id = 286617766516228096
                 log_channel_id = 1441990735883800607
                 log_guild = interaction.client.get_guild(log_guild_id)
@@ -165,7 +165,7 @@ class CartasAuto(commands.Cog):
             )
             return
     
-        # ✅ Validación de parámetros
+        # Validación de parámetros
         if max_horas is None:
             max_horas = 5
         else:
@@ -176,7 +176,7 @@ class CartasAuto(commands.Cog):
         else:
             max_diarias = min(max_diarias, 100)  # Limitar a 100 máximo
     
-        # ✅ Usamos update() para no borrar otras claves del servidor
+        # Usamos update() para no borrar otras claves del servidor
         self.settings["guilds"].setdefault(gid, {})
         self.settings["guilds"][gid].update({
             "enabled": True,
@@ -190,7 +190,7 @@ class CartasAuto(commands.Cog):
         self.marcar_cambios()
         self.tasks[gid] = asyncio.create_task(self.spawn_for_guild(interaction.guild_id))
         
-        # 🔥 Enviar log al servidor/canal de logs
+        # Enviar log al servidor/canal de logs
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
         log_guild = interaction.client.get_guild(log_guild_id)

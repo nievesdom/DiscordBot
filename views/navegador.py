@@ -3,7 +3,7 @@ import discord
 # Vista para navegar visualmente por las cartas de un usuario
 class Navegador(discord.ui.View):
     def __init__(self, context, cartas_ids, cartas_info, dueño):
-        super().__init__(timeout=180)  # La vista expira tras 3 minutos
+        super().__init__(timeout=300)  # La vista expira tras 5 minutos
         self.context = context  # Puede ser Interaction (slash) o Context (prefijo)
         self.cartas_ids = cartas_ids  # Lista de IDs de cartas del usuario
         self.cartas_info = cartas_info  # Diccionario con info de todas las cartas

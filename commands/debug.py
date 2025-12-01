@@ -255,25 +255,50 @@ class Debug(commands.Cog):
     )
     async def servers_info(self, interaction: discord.Interaction):
         """Muestra información de todos los servidores donde está el bot."""
-        # Ya no es ephemeral
         await interaction.response.defer(ephemeral=False)
     
         guilds = self.bot.guilds
         total_servers = len(guilds)
+    
+        # Construyo las líneas
         info_lines = [
             f"• **{g.name}** (ID: {g.id}) → 👥 {g.member_count} members"
             for g in guilds
         ]
-        listado = "\n".join(info_lines)
     
-        embed = discord.Embed(
+        # Discord permite 4096 caracteres en la descripcion del embed. Usamos 3800 para mayor seguridad.
+        LIMIT = 3800
+    
+        chunks = []
+        current_chunk = ""
+    
+        # Ensamblo los fragmentos sin romper líneas
+        for line in info_lines:
+            if len(current_chunk) + len(line) + 1 > LIMIT:
+                chunks.append(current_chunk)
+                current_chunk = ""
+            current_chunk += line + "\n"
+    
+        if current_chunk:
+            chunks.append(current_chunk)
+    
+        # Primer embed (con el título)
+        first_embed = discord.Embed(
             title="🌐 Servers where the bot is present",
-            description=f"Currently in **{total_servers} servers**:\n\n{listado}",
+            description=f"Currently in **{total_servers} servers**:\n\n{chunks[0]}",
             color=discord.Color.green()
         )
     
-        # Mensaje visible para todos en el canal
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=first_embed)
+    
+        # Embeds adicionales si hacen falta
+        for part in chunks[1:]:
+            embed = discord.Embed(
+                description=part,
+                color=discord.Color.green()
+            )
+            await interaction.followup.send(embed=embed)
+
         
     '''@app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)

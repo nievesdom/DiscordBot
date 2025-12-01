@@ -2,7 +2,7 @@ import discord
 
 class NavegadorPaquete(discord.ui.View):
     def __init__(self, context, cartas_ids, cartas_info, dueño):
-        super().__init__(timeout=180)
+        super().__init__(timeout=300)
         self.context = context
         self.cartas_ids = cartas_ids or []      # Protección por si viene None
         self.cartas_info = cartas_info or {}

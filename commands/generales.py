@@ -107,58 +107,60 @@ class Generales(commands.Cog):
     @app_commands.command(name="updates", description="Shows the latest updates and what's coming up.")
     async def updates_slash(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "**Version 1.2 Patch notes**\n"
-            "Version 1.2 is now live with some new features, quality of life changes and bug fixes. Some of the new features were already planned, but others were requested by you using the feedback form. So thanks to everyone who gave some criticism or suggestions.\n\n" 
-
-            "**New features:**\n"
-            "- The bot is now fully compatible with both regular commands and slash commands. Use commands with either `/` or `y!` as a prefix.\n"
-            "- `y!gift` and `/gift`: allows one user to gift a card to another user.\n"
-            "- `y!discard` and `/discard`: lets users discard a card from their inventory, totally getting rid of it.\n"
-            "- `y!pack_limit` and `/pack_limit`: this command gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n"
-            "- `y!status` and `/status`: shows information about packs for each user and card spawning.\n\n"
+            "**Version 1.2.1 Patch notes**\n"
+            "Version 1.2.1 includes all the fixes and features of the previous versions (gifting, trading, seeing status and adjusting pack openings) as well as new cards and a couple of bug fixes. These fixes have been silently released since the last update.\n\n" 
             
             "**Bug fixes:**\n"
-            "- Fixed a bug where the bot would sometimes select the wrong card if multiple cards had similar names.\n"
-            "- Fixed interaction errors where messages would fail to update after a trade was accepted or rejected, not showing the result of the trade even if it was successful.\n\n"
+            "- Fixed an interaction error that made gifting not work during the first day.\n"
+            "- Fixed an error that would make the bot say the wrong amount of time that had to be waited in order to to open a new pack when the number of daily packs was set to 5.\n"
+            "- Fixed an error that sometimes caused the daily number of packs to revert back to an earlier number that was set.\n"
+            "- Fixed a bug that prevented certain Nanba cards from being gifted or traded, as they were duplicated in the database.\n\n"
 
             "**Quality of life changes:**\n"
-            "- Expanded the window to claim a spawned card from 10 to 15 minutes. This change might have to be rolled back if it negatively impacts the bot's performance.\n"
-            "- Improved consistency in ephemeral vs public responses, making sure relevant information is shown to everybody.\n"
-            "- The collection command will now show card quantity if a card is repeated.\n\n"
+            "- Made the album and pack buttons work longer (5 minutes).\n\n"
+            
+            "**New cards:**\n"
+            "- UR Toko Higashide\n"
+            "- UR Saeko Mukoda (YLAD Holographic II)\n"
+            "- UR Mayumi Seto (True)\n"
+            "- UR Hikaru (Christmas Eve)\n"
+            "- UR Sofia (Christmas Eve)\n\n"
 
             "**Coming up:**\n"
             "- Alphabetical sorting mode for the album, independent from card rarity. This will group all the cards from the same character.\n"
             "- The choice to show wiki search results in the server's chat rather than in DMs.\n"
             "- Documentation for the bot.\n"
+            "- Community-made cards (just maybe)\n"
             "- Card combat (eventually)."
         )
 
     @commands.command(name="updates")
     async def updates_prefix(self, ctx: commands.Context):
         await ctx.send(
-            "**Version 1.2 Patch notes**\n"
-            "Version 1.2 is now live with some new features, quality of life changes and bug fixes. Some of the new features were already planned, but others were requested by you using the feedback form. So thanks to everyone who gave some criticism or suggestions.\n\n" 
-
-            "**New features:**\n"
-            "- The bot is now fully compatible with both regular commands and slash commands. Use commands with either `/` or `y!` as a prefix.\n"
-            "- `y!gift` and `/gift`: allows one user to gift a card to another user.\n"
-            "- `y!discard` and `/discard`: lets users discard a card from their inventory, totally getting rid of it.\n"
-            "- `y!pack_limit` and `/pack_limit`: this command gives admins control over how many packs can be opened in their server, up to 6 a day. Cooldowns work just like they did until now, so if a server chose to open 2 packs a day cooldowns would reset at both 12 AM and 12 PM (GMT) and the same logic applies to other amounts of packs.\n"
-            "- `y!status` and `/status`: shows information about packs for each user and card spawning.\n\n"
+            "**Version 1.2.1 Patch notes**\n"
+            "Version 1.2.1 includes all the fixes and features of the previous versions (gifting, trading, seeing status and adjusting pack openings) and a couple of bug fixes. These fixes have been silently released since the last update.\n\n" 
             
             "**Bug fixes:**\n"
-            "- Fixed a bug where the bot would sometimes select the wrong card if multiple cards had similar names.\n"
-            "- Fixed interaction errors where messages would fail to update after a trade was accepted or rejected, not showing the result of the trade even if it was successful.\n\n"
+            "- Fixed an interaction error that made gifting not work during the first day.\n"
+            "- Fixed an error that would make the bot say the wrong amount of time that had to be waited in order to to open a new pack when the number of daily packs was set to 5.\n"
+            "- Fixed an error that sometimes caused the daily number of packs to revert back to an earlier number that was set.\n"
+            "- Fixed a bug that prevented certain Nanba cards from being gifted or traded, as they were duplicated in the database.\n\n"
 
             "**Quality of life changes:**\n"
-            "- Expanded the window to claim a spawned card from 10 to 15 minutes. This change might have to be rolled back if it negatively impacts the bot's performance.\n"
-            "- Improved consistency in ephemeral vs public responses, making sure relevant information is shown to everybody.\n"
-            "- The collection command will now show card quantity if a card is repeated.\n\n"
+            "- Made the album and pack buttons work longer (5 minutes).\n\n"
+            
+            "**New cards:**\n"
+            "- UR Toko Higashide\n"
+            "- UR Saeko Mukoda (YLAD Holographic II)\n"
+            "- UR Mayumi Seto (True)\n"
+            "- UR Hikaru (Christmas Eve)\n"
+            "- UR Sofia (Christmas Eve)\n\n"
 
             "**Coming up:**\n"
             "- Alphabetical sorting mode for the album, independent from card rarity. This will group all the cards from the same character.\n"
             "- The choice to show wiki search results in the server's chat rather than in DMs.\n"
             "- Documentation for the bot.\n"
+            "- Community-made cards (just maybe)\n"
             "- Card combat (eventually)."
         )
 
