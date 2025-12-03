@@ -57,7 +57,7 @@ class NavegadorMazo(discord.ui.View):
                          f"🛡️ {carta.get('defense', '—')} | 💨 {carta.get('speed', '—')}")
         )
         embed.set_footer(
-            text=f"Card {self.i + 1} out of {len(self.cartas_ids)} • {self.dueño.display_name}'s daily pack"
+            text=f"Card {self.i + 1} out of {len(self.cartas_ids)} • {self.dueño.display_name}'s deck"
         )
 
         if imagen and str(imagen).startswith("http"):
