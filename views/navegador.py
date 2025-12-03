@@ -39,22 +39,37 @@ class Navegador(discord.ui.View):
     def lista(self):
         """Devuelve la lista de cartas según el orden actual."""
         if self.orden == "alfabetico":
-            # Ordenar ignorando la primera palabra (rareza) del nombre
-            return sorted(
-                self.cartas_ids,
-                key=lambda cid: " ".join(
-                    self.cartas_info.get(str(cid), {}).get("nombre", "").split(" ")[1:]
-                ).lower()
-            )
+            # Ordenar ignorando la primera palabra (rareza) y el contenido entre paréntesis
+            def clave_alfabetica(cid):
+                nombre = self.cartas_info.get(str(cid), {}).get("nombre", "")
+                # Quitar la primera palabra (rareza)
+                partes = nombre.split(" ")
+                nombre_sin_rareza = " ".join(partes[1:]) if len(partes) > 1 else nombre
+                # Quitar lo que haya entre paréntesis
+                import re
+                nombre_base = re.sub(r"\(.*?\)", "", nombre_sin_rareza).strip().lower()
+                rareza = self.cartas_info.get(str(cid), {}).get("rareza", "N")
+                prioridad = self.prioridad_rareza.get(rareza, 99)
+                # Clave: primero nombre base, luego prioridad de rareza
+                return (nombre_base, prioridad)
+
+            return sorted(self.cartas_ids, key=clave_alfabetica)
+
         elif self.orden == "rareza":
             # Ordenar por rareza según prioridad y luego alfabéticamente ignorando rareza
-            return sorted(
-                self.cartas_ids,
-                key=lambda cid: (
-                    self.prioridad_rareza.get(self.cartas_info.get(str(cid), {}).get("rareza", "N"), 99),
-                    " ".join(self.cartas_info.get(str(cid), {}).get("nombre", "").split(" ")[1:]).lower()
-                )
-            )
+            def clave_rareza(cid):
+                nombre = self.cartas_info.get(str(cid), {}).get("nombre", "")
+                partes = nombre.split(" ")
+                nombre_sin_rareza = " ".join(partes[1:]) if len(partes) > 1 else nombre
+                import re
+                nombre_base = re.sub(r"\(.*?\)", "", nombre_sin_rareza).strip().lower()
+                rareza = self.cartas_info.get(str(cid), {}).get("rareza", "N")
+                prioridad = self.prioridad_rareza.get(rareza, 99)
+                # Clave: primero prioridad de rareza, luego nombre base
+                return (prioridad, nombre_base)
+
+            return sorted(self.cartas_ids, key=clave_rareza)
+
         return self.cartas_ids
 
 
