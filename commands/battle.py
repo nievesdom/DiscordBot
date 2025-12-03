@@ -30,7 +30,7 @@ class Battle(commands.Cog):
         # Si no existe la carta
         if not card:
             await interaction.response.send_message(
-                f"❌ No card found with the exact name '{card_name}'.", ephemeral=False
+                f"❌ No card found with the name '{card_name}'.", ephemeral=False
             )
             return
 
@@ -200,6 +200,93 @@ class Battle(commands.Cog):
 
         # Enviar la vista
         await vista.enviar()
+        
+        
+    # -----------------------------
+    # Comando slash: /deck_remove
+    # -----------------------------
+    @discord.app_commands.command(
+        name="deck_remove",
+        description="Remove a card from your deck by exact name (slash)."
+    )
+    async def deck_remove_slash(self, interaction: discord.Interaction, card_name: str):
+        # IDs del servidor y usuario
+        server_id = str(interaction.guild.id)
+        user_id = str(interaction.user.id)
+
+        # Buscar carta por nombre exacto en el JSON
+        cards = cargar_cartas()
+        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
+
+        # Si no existe la carta
+        if not card:
+            await interaction.response.send_message(
+                f"❌ No card found with the name '{card_name}'.", ephemeral=False
+            )
+            return
+
+        card_id = str(card["id"])
+
+        # Cargar mazos desde Firebase
+        decks = cargar_mazos()
+        server_decks = decks.setdefault(server_id, {})
+        user_deck = server_decks.setdefault(user_id, [])
+
+        # Comprobar si la carta está en el mazo
+        if card_id not in user_deck:
+            await interaction.response.send_message(
+                f"❌ The card '{card['nombre']}' is not in your deck.", ephemeral=False
+            )
+            return
+
+        # Quitar una copia de la carta del mazo
+        user_deck.remove(card_id)
+        guardar_mazos(decks)
+
+        # Confirmación al usuario
+        await interaction.response.send_message(
+            f"✅ The card **{card['nombre']}** has been removed from your deck.", ephemeral=False
+        )
+
+
+    # -----------------------------
+    # Comando prefijo: y!deck_remove
+    # -----------------------------
+    @commands.command(name="deck_remove")
+    async def deck_remove_prefix(self, ctx: commands.Context, *, card_name: str):
+        """Quita una carta del mazo del usuario buscando por nombre exacto (prefijo)."""
+        # IDs del servidor y usuario
+        server_id = str(ctx.guild.id)
+        user_id = str(ctx.author.id)
+
+        # Buscar carta por nombre exacto en el JSON
+        cards = cargar_cartas()
+        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
+
+        # Si no existe la carta
+        if not card:
+            await ctx.send(f"❌ No card found with the name '{card_name}'.")
+            return
+
+        card_id = str(card["id"])
+
+        # Cargar mazos desde Firebase
+        decks = cargar_mazos()
+        server_decks = decks.setdefault(server_id, {})
+        user_deck = server_decks.setdefault(user_id, [])
+
+        # Comprobar si la carta está en el mazo
+        if card_id not in user_deck:
+            await ctx.send(f"❌ The card '{card['nombre']}' is not in your deck.")
+            return
+
+        # Quitar una copia de la carta del mazo
+        user_deck.remove(card_id)
+        guardar_mazos(decks)
+
+        # Confirmación al usuario
+        await ctx.send(f"✅ The card **{card['nombre']}** has been removed from your deck.")
+
 
 # Setup del cog
 async def setup(bot):
