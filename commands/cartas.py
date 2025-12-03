@@ -10,7 +10,7 @@ from collections import Counter
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
 from core.firebase_storage import cargar_settings, guardar_settings
-from core.firebase_storage import cargar_packs, guardar_packs, cargar_propiedades, guardar_propiedades
+from core.firebase_storage import cargar_packs, guardar_packs, cargar_propiedades, guardar_propiedades, cargar_mazos
 
 from core.cartas import cargar_cartas, cartas_por_id
 
@@ -23,6 +23,14 @@ from views.gift_view import GiftView
 
 # ID del dueño (ocultamos /carta solo para él)
 OWNER_ID = 182920174276575232
+
+def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
+    """Devuelve True si la carta está en el mazo del usuario en el servidor."""
+    decks = cargar_mazos()
+    server_decks = decks.get(servidor_id, {})
+    user_deck = server_decks.get(usuario_id, [])
+    return str(carta_id) in [str(cid) for cid in user_deck]
+
 
 def backup_settings(settings: dict) -> None:
     """Guarda una copia completa de settings en la colección settings_backup."""
@@ -689,6 +697,14 @@ class Cartas(commands.Cog):
         if str(carta_obj["id"]) not in [str(cid) for cid in sender_cards]:
             await interaction.response.send_message(f"❌ You don't own a card named {card}.", ephemeral=True)
             return
+        
+        # 🚫 Comprobar si la carta está en el mazo
+        if carta_en_mazo(servidor_id, sender_id, carta_obj['id']):
+            await interaction.response.send_message(
+                f"🚫 You can't gift **{carta_obj['nombre']}** because it is currently in your deck.",
+                ephemeral=True
+            )
+            return
 
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to gift you the card **{carta_obj['nombre']}**.\nDo you accept?",
@@ -717,6 +733,13 @@ class Cartas(commands.Cog):
 
         if str(carta_obj["id"]) not in [str(cid) for cid in sender_cards]:
             await ctx.send(f"❌ You don't own a card named {card}.")
+            return
+        
+        # 🚫 Comprobar si la carta está en el mazo
+        if carta_en_mazo(servidor_id, sender_id, carta_obj['id']):
+            await ctx.send(
+                f"🚫 You can't gift **{carta_obj['nombre']}** because it is currently in your deck."
+            )
             return
 
         await ctx.send(
@@ -862,6 +885,14 @@ class Cartas(commands.Cog):
         if not owns_card(coleccion1, carta1_obj.get("id")):
             await interaction.response.send_message(f"❌ You don't own a card named {card}.", ephemeral=True)
             return
+        
+        # 🚫 Comprobar si la carta está en el mazo
+        if carta_en_mazo(servidor_id, usuario1_id, carta1_obj.get("id")):
+            await interaction.response.send_message(
+                f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck.",
+                ephemeral=True
+            )
+            return
 
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
@@ -902,6 +933,13 @@ class Cartas(commands.Cog):
         # Comprobar posesión
         if not owns_card(coleccion1, carta1_obj.get("id")):
             await ctx.send(f"❌ You don't own a card named {card}.")
+            return
+        
+        # 🚫 Comprobar si la carta está en el mazo
+        if carta_en_mazo(servidor_id, usuario1_id, carta1_obj.get("id")):
+            await ctx.send(
+                f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck."
+            )
             return
 
         await ctx.send(
@@ -949,6 +987,14 @@ class Cartas(commands.Cog):
                 f"🚫 You don't have **{carta_nombre}** in your inventory.", ephemeral=True
             )
             return
+        
+        # 🚫 Comprobar si la carta está en el mazo
+        if carta_en_mazo(servidor_id, usuario_id, carta_id):
+            await interaction.response.send_message(
+                f"🚫 You can't discard **{carta_id['nombre']}** because it is currently in your deck.",
+                ephemeral=True
+            )
+            return
 
         guardar_propiedades(propiedades)
         await interaction.followup.send(
@@ -983,6 +1029,13 @@ class Cartas(commands.Cog):
         # Comprobar posesión y quitar solo una copia
         if not _remove_one_copy(usuario_cartas, carta_id):
             await ctx.send(f"🚫 {ctx.author.mention}, no tienes **{carta_nombre}** en tu inventario.")
+            return
+        
+        # 🚫 Comprobar si la carta está en el mazo
+        if carta_en_mazo(servidor_id, usuario_id, carta_id):
+            await ctx.send(
+                f"🚫 You can't discard **{carta_id['nombre']}** because it is currently in your deck."
+            )
             return
 
         guardar_propiedades(propiedades)
