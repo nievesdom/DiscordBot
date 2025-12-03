@@ -17,6 +17,11 @@ class Navegador(discord.ui.View):
             "UR": 0x8841f2, "KSR": 0xabfbff, "SSR": 0x57ffae,
             "SR": 0xfcb63d, "R": 0xfc3d3d, "N": 0x8c8c8c
         }
+
+        # Prioridad de rareza (para ordenar por rareza)
+        self.prioridad_rareza = {
+            "UR": 0, "KSR": 1, "SSR": 2, "SR": 3, "R": 4, "N": 5
+        }
         
         # Diccionario de atributos con símbolo japonés
         self.atributos = {
@@ -29,12 +34,29 @@ class Navegador(discord.ui.View):
             "attack": "⚔️ Attack", "defense": "🛡️ Defense",
             "recovery": "❤️ Recovery", "support": "✨ Support"
         }
-
+        
+        
     def lista(self):
         """Devuelve la lista de cartas según el orden actual."""
         if self.orden == "alfabetico":
-            return sorted(self.cartas_ids, key=lambda cid: self.cartas_info.get(str(cid), {}).get("nombre", "").lower())
+            # Ordenar ignorando la primera palabra (rareza) del nombre
+            return sorted(
+                self.cartas_ids,
+                key=lambda cid: " ".join(
+                    self.cartas_info.get(str(cid), {}).get("nombre", "").split(" ")[1:]
+                ).lower()
+            )
+        elif self.orden == "rareza":
+            # Ordenar por rareza según prioridad y luego alfabéticamente ignorando rareza
+            return sorted(
+                self.cartas_ids,
+                key=lambda cid: (
+                    self.prioridad_rareza.get(self.cartas_info.get(str(cid), {}).get("rareza", "N"), 99),
+                    " ".join(self.cartas_info.get(str(cid), {}).get("nombre", "").split(" ")[1:]).lower()
+                )
+            )
         return self.cartas_ids
+
 
     def mostrar(self):
         """Construye el embed de la carta actual."""
@@ -119,9 +141,18 @@ class Navegador(discord.ui.View):
     # Botón para cambiar el orden de visualización
     @discord.ui.button(label="📆 Order: by date", style=discord.ButtonStyle.primary, custom_id="orden")
     async def cambiar(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.orden = "alfabetico" if self.orden == "original" else "original"
+        # Ciclar entre original → alfabetico → rareza
+        if self.orden == "original":
+            self.orden = "alfabetico"
+            nuevo_label = "🔤 Order: alphabetic"
+        elif self.orden == "alfabetico":
+            self.orden = "rareza"
+            nuevo_label = "💎 Order: by rarity"
+        else:
+            self.orden = "original"
+            nuevo_label = "📆 Order: by date"
+
         self.i = 0
-        nuevo_label = "🔤 Order: alphabetic" if self.orden == "alfabetico" else "📆 Order: by date"
         for item in self.children:
             if isinstance(item, discord.ui.Button) and item.custom_id == "orden":
                 item.label = nuevo_label
