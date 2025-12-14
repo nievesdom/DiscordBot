@@ -32,9 +32,10 @@ class Debug(commands.Cog):
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
     @app_commands.command(
         name="backup_propiedades",
-        description="(Owner only) Create a backup of propiedades in Firebase."
+        description="(Owner only) Create a safe backup of propiedades in Firebase."
     )
     async def backup_propiedades(self, interaction: discord.Interaction):
+
         if interaction.user.id != OWNER_ID:
             await interaction.response.send_message(
                 "🚫 Only the bot owner can run this command.",
@@ -45,19 +46,46 @@ class Debug(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         try:
-            # 1. Cargar propiedades (documento grande)
-            doc = db.collection("propiedades").document("data").get()
-            propiedades = doc.to_dict() if doc.exists else {}
+            timestamp = datetime.datetime.now().isoformat()
+            backup_ref = db.collection("propiedades_backup").document(timestamp)
 
-            # 2. Crear ID de backup
-            timestamp = datetime.datetime.utcnow().isoformat()
-            backup_id = f"propiedades_backup_{timestamp}"
+            # ⚠️ IMPORTANTE: leer SIN to_dict()
+            doc = (
+                db.collection(PROPIEDADES_COLLECTION)
+                .document(PROPIEDADES_DOC)
+                .get()
+            )
 
-            # 3. Guardar copia
-            db.collection("propiedades_backup").document(backup_id).set(propiedades)
+            if not doc.exists:
+                await interaction.followup.send(
+                    "⚠️ No propiedades document found.",
+                    ephemeral=True
+                )
+                return
+
+            propiedades = doc.to_dict()
+            total_servidores = len(propiedades)
+
+            guardados = 0
+
+            for servidor_id, datos_servidor in propiedades.items():
+                backup_ref.collection("servidores").document(servidor_id).set(datos_servidor)
+                guardados += 1
+
+                # ceder control al event loop cada cierto número
+                if guardados % 10 == 0:
+                    await asyncio.sleep(0)
 
             await interaction.followup.send(
-                f"✅ Propiedades backup created as `{backup_id}`.",
+                f"✅ Propiedades backup completed.\n"
+                f"Servers backed up: {guardados}/{total_servidores}\n"
+                f"Backup ID: `{timestamp}`",
+                ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.followup.send(
+                f"❌ Propiedades backup failed:\n`{type(e).__name__}: {e}`",
                 ephemeral=True
             )
 
