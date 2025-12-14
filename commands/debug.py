@@ -22,6 +22,10 @@ from views.navegador_trade import TradeView
 # ID del dueño (ocultamos /carta solo para él)
 OWNER_ID = 182920174276575232
 
+PROPIEDADES_COLLECTION = "propiedades"
+PROPIEDADES_DOC = "data"
+
+
 class Debug(commands.Cog):
     """Cog con comandos exclusivos para el dueño del bot."""
 
