@@ -23,7 +23,7 @@ from views.navegador_trade import TradeView
 OWNER_ID = 182920174276575232
 
 PROPIEDADES_COLLECTION = "propiedades"
-PROPIEDADES_DOC = "data"
+PROPIEDADES_DOC = "global"
 
 
 class Debug(commands.Cog):
