@@ -28,7 +28,7 @@ def cargar_propiedades() -> Dict:
     doc = db.collection(PROPIEDADES_COLLECTION).document(PROPIEDADES_DOC).get()
     return doc.to_dict() if doc.exists else {}
 
-def guardar_cartas_usuario(servidor_id: str, usuario_id: str, cartas: list) -> None:
+def guardar_propiedades(servidor_id: str, usuario_id: str, cartas: list) -> None:
     db.collection(PROPIEDADES_COLLECTION).document(PROPIEDADES_DOC).update({
         f"{servidor_id}.{usuario_id}": cartas
     })
