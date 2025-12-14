@@ -50,8 +50,8 @@ class Debug(commands.Cog):
             doc = db.collection("propiedades").document("data").get()
             propiedades = doc.to_dict() if doc.exists else {}
 
-            # 2. Crear ID de backup
-            timestamp = datetime.datetime.utcnow().isoformat()
+            # 2. Crear ID de backup (timestamp seguro)
+            timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
             backup_id = f"propiedades_backup_{timestamp}"
 
             # 3. Guardar copia
@@ -59,6 +59,12 @@ class Debug(commands.Cog):
 
             await interaction.followup.send(
                 f"✅ Propiedades backup created as `{backup_id}`.",
+                ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.followup.send(
+                f"❌ Propiedades backup failed: {e}",
                 ephemeral=True
             )
 
