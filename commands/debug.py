@@ -28,6 +28,68 @@ class Debug(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
     
+
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(
+        name="backup_propiedades",
+        description="(Owner only) Create a safe backup of propiedades in Firebase."
+    )
+    async def backup_propiedades(self, interaction: discord.Interaction):
+
+        if interaction.user.id != OWNER_ID:
+            await interaction.response.send_message(
+                "🚫 Only the bot owner can run this command.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            timestamp = datetime.datetime.now().isoformat()
+            backup_ref = db.collection("propiedades_backup").document(timestamp)
+
+            # ⚠️ IMPORTANTE: leer SIN to_dict()
+            doc = (
+                db.collection(PROPIEDADES_COLLECTION)
+                .document(PROPIEDADES_DOC)
+                .get()
+            )
+
+            if not doc.exists:
+                await interaction.followup.send(
+                    "⚠️ No propiedades document found.",
+                    ephemeral=True
+                )
+                return
+
+            propiedades = doc.to_dict()
+            total_servidores = len(propiedades)
+
+            guardados = 0
+
+            for servidor_id, datos_servidor in propiedades.items():
+                backup_ref.collection("servidores").document(servidor_id).set(datos_servidor)
+                guardados += 1
+
+                # ceder control al event loop cada cierto número
+                if guardados % 10 == 0:
+                    await asyncio.sleep(0)
+
+            await interaction.followup.send(
+                f"✅ Propiedades backup completed.\n"
+                f"Servers backed up: {guardados}/{total_servidores}\n"
+                f"Backup ID: `{timestamp}`",
+                ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.followup.send(
+                f"❌ Propiedades backup failed:\n`{type(e).__name__}: {e}`",
+                ephemeral=True
+            )
+
     
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
