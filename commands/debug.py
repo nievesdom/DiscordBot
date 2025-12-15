@@ -561,6 +561,54 @@ class Debug(commands.Cog):
             f"✅ Reset completed. packs_opened has been reset to 0 for {total_reseteados} users.",
             ephemeral=True
         )
+        
+    
+    @app_commands.default_permissions()
+    @app_commands.check(lambda i: i.user.id == OWNER_ID)
+    @app_commands.command(
+        name="migrate_inventory",
+        description="Copies user inventories from 'propiedades/global' to the new 'inventario' structure (no deletion)."
+    )
+    async def migrate_inventory(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+    
+        # Leer documento gigante
+        doc = db.collection("propiedades").document("global").get()
+        propiedades = doc.to_dict()
+    
+        if not propiedades:
+            await interaction.followup.send("❌ No data found in propiedades/global.", ephemeral=True)
+            return
+    
+        migrated_servers = 0
+        migrated_users = 0
+    
+        for server_id, usuarios in propiedades.items():
+            if not isinstance(usuarios, dict):
+                continue
+            
+            server_ref = db.collection("inventario").document(server_id)
+            server_doc = server_ref.get().to_dict() or {}
+    
+            for user_id, cartas in usuarios.items():
+                # Si ya existe, no sobrescribimos
+                if user_id in server_doc:
+                    continue
+                
+                server_doc[user_id] = cartas
+                migrated_users += 1
+    
+            # Guardar documento del servidor
+            server_ref.set(server_doc, merge=True)
+            migrated_servers += 1
+    
+        await interaction.followup.send(
+            f"✅ Migration completed.\n"
+            f"📁 Servers processed: **{migrated_servers}**\n"
+            f"👤 Users copied: **{migrated_users}**\n"
+            f"⚠️ No data was deleted from propiedades/global.",
+            ephemeral=True
+        )
             
 
 # Setup del cog
