@@ -54,3 +54,73 @@ def cargar_mazos() -> Dict:
 
 def guardar_mazos(mazos: Dict) -> None:
     db.collection(MAZOS_COLLECTION).document(MAZOS_DOC).set(mazos, merge=True)
+
+
+INVENTARIO_COLLECTION = "inventario"
+
+def agregar_cartas_inventario(server_id: str, user_id: str, nuevas_cartas: list[str]) -> None:
+    """
+    Añade cartas al inventario del usuario en inventario/{server_id}.
+    Crea el documento si no existe. No reescribe todo el documento.
+    """
+    server_ref = db.collection(INVENTARIO_COLLECTION).document(server_id)
+
+    doc = server_ref.get()
+    data = doc.to_dict() or {}
+
+    cartas_usuario = data.get(user_id, [])
+
+    # Simplemente añadimos (permitiendo duplicados si quieres múltiples copias)
+    cartas_actualizadas = cartas_usuario + nuevas_cartas
+
+    server_ref.set(
+        {user_id: cartas_actualizadas},
+        merge=True
+    )
+    
+def quitar_cartas_inventario(server_id: str, user_id: str, cartas_a_quitar: list[str]) -> bool:
+    """
+    Quita UNA copia por cada ID en cartas_a_quitar del inventario del usuario.
+    Devuelve True si se modificó algo, False si no había cartas que quitar.
+    """
+    server_ref = db.collection(INVENTARIO_COLLECTION).document(server_id)
+
+    doc = server_ref.get()
+    data = doc.to_dict() or {}
+
+    cartas_usuario = data.get(user_id, [])
+
+    if not cartas_usuario:
+        return False
+
+    # Trabajamos con strings normalizadas
+    cartas_usuario = [str(c) for c in cartas_usuario]
+    objetivos = [str(c) for c in cartas_a_quitar]
+
+    changed = False
+
+    for objetivo in objetivos:
+        if objetivo in cartas_usuario:
+            cartas_usuario.remove(objetivo)  # quita solo UNA copia
+            changed = True
+
+    if not changed:
+        return False
+
+    # Actualizar solo el campo del usuario
+    server_ref.set(
+        {user_id: cartas_usuario},
+        merge=True
+    )
+    return True
+
+def cargar_inventario_usuario(server_id: str, user_id: str) -> list[str]:
+    """
+    Devuelve la lista de cartas del usuario.
+    Si no existe el servidor o el usuario, devuelve [].
+    """
+    doc = db.collection(INVENTARIO_COLLECTION).document(server_id).get()
+    data = doc.to_dict() or {}
+    return data.get(user_id, [])
+
+    

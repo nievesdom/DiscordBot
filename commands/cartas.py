@@ -10,7 +10,7 @@ from collections import Counter
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
 from core.firebase_storage import cargar_settings, guardar_settings
-from core.firebase_storage import cargar_packs, guardar_packs, cargar_propiedades, guardar_propiedades, cargar_mazos
+from core.firebase_storage import cargar_packs, guardar_packs, cargar_propiedades, guardar_propiedades, cargar_mazos, agregar_cartas_inventario, quitar_cartas_inventario, cargar_inventario_usuario
 
 from core.cartas import cargar_cartas, cartas_por_id
 
@@ -390,7 +390,6 @@ class Cartas(commands.Cog):
     # -----------------------------
     @app_commands.command(name="pack", description="Opens a pack of 5 cards")
     async def pack(self, interaction: discord.Interaction):
-        """Permite abrir un paquete diario de 5 cartas (slash)."""
         await interaction.response.defer(ephemeral=False)
 
         servidor_id = str(interaction.guild.id)
@@ -401,7 +400,7 @@ class Cartas(commands.Cog):
         servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
         pack_limit = servidor_settings.get("pack_limit", 1)
 
-        # Usar colección principal packs
+        # Packs
         packs = cargar_packs()
         servidor_packs = packs.setdefault(servidor_id, {})
         usuario_packs = servidor_packs.setdefault(usuario_id, {})
@@ -422,7 +421,7 @@ class Cartas(commands.Cog):
             )
             return
 
-        # Cada franja dura (24h / pack_limit)
+        # Intervalos
         interval_minutes = int(24 * 60 / pack_limit)
         minutes_since_midnight = ahora.hour * 60 + ahora.minute
         franja_actual = minutes_since_midnight // interval_minutes
@@ -462,24 +461,20 @@ class Cartas(commands.Cog):
         usuario_packs["packs_opened"] = packs_opened + 1
         guardar_packs(packs)
 
-        # Guardar cartas obtenidas
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        usuario_cartas = servidor_props.setdefault(usuario_id, [])
-        usuario_cartas.extend([c["id"] for c in nuevas_cartas])
-        guardar_propiedades(propiedades)
+        # ✅ Guardar cartas en la nueva colección inventario
+        ids = [c["id"] for c in nuevas_cartas]
+        agregar_cartas_inventario(servidor_id, usuario_id, ids)
 
         # Preparar vista
         cartas_info = cartas_por_id()
-        cartas_ids = [c["id"] for c in nuevas_cartas]
-        vista = NavegadorPaquete(interaction, cartas_ids, cartas_info, interaction.user)
+        vista = NavegadorPaquete(interaction, ids, cartas_info, interaction.user)
         embed, archivo = vista.mostrar()
 
-        # Enviar resultado al usuario
         if archivo:
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
         else:
             await interaction.followup.send(embed=embed, view=vista)
+
 
 
 
@@ -489,16 +484,13 @@ class Cartas(commands.Cog):
     # -----------------------------
     @commands.command(name="pack")
     async def pack_prefix(self, ctx: commands.Context):
-        """Permite abrir un paquete diario de 5 cartas (prefijo)."""
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
 
-        # Leer pack_limit desde settings
         settings = cargar_settings()
         servidor_settings = settings.get("guilds", {}).get(servidor_id, {})
         pack_limit = servidor_settings.get("pack_limit", 1)
 
-        # Usar colección principal packs
         packs = cargar_packs()
         servidor_packs = packs.setdefault(servidor_id, {})
         usuario_packs = servidor_packs.setdefault(usuario_id, {})
@@ -507,7 +499,6 @@ class Cartas(commands.Cog):
         inicio_dia = datetime.datetime.combine(ahora.date(), datetime.time.min)
         medianoche = inicio_dia + datetime.timedelta(days=1)
 
-        # Comprobar packs_opened
         packs_opened = usuario_packs.get("packs_opened", 0)
         if packs_opened >= pack_limit:
             restante = medianoche - ahora
@@ -519,12 +510,10 @@ class Cartas(commands.Cog):
             )
             return
 
-        # Cada franja dura (24h / pack_limit)
         interval_minutes = int(24 * 60 / pack_limit)
         minutes_since_midnight = ahora.hour * 60 + ahora.minute
         franja_actual = minutes_since_midnight // interval_minutes
 
-        # Comprobar último pack
         ultimo_str = usuario_packs.get("ultimo_paquete")
         if ultimo_str:
             try:
@@ -546,7 +535,6 @@ class Cartas(commands.Cog):
                     )
                     return
 
-        # Cargar cartas
         cartas = cargar_cartas()
         if not cartas:
             await ctx.send("❌ No cards available.")
@@ -554,25 +542,19 @@ class Cartas(commands.Cog):
 
         nuevas_cartas = random.sample(cartas, 5)
 
-        # Guardar fecha/hora exacta y actualizar packs_opened
         usuario_packs["ultimo_paquete"] = ahora.isoformat()
         usuario_packs["packs_opened"] = packs_opened + 1
         guardar_packs(packs)
 
-        # Guardar cartas obtenidas
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        usuario_cartas = servidor_props.setdefault(usuario_id, [])
-        usuario_cartas.extend([c["id"] for c in nuevas_cartas])
-        guardar_propiedades(propiedades)
+        # ✅ Guardar cartas en inventario
+        ids = [c["id"] for c in nuevas_cartas]
+        agregar_cartas_inventario(servidor_id, usuario_id, ids)
 
-        # Preparar vista
         cartas_info = cartas_por_id()
-        cartas_ids = [c["id"] for c in nuevas_cartas]
-        vista = NavegadorPaquete(ctx, cartas_ids, cartas_info, ctx.author)
+        vista = NavegadorPaquete(ctx, ids, cartas_info, ctx.author)
         embed, archivo = vista.mostrar()
 
-        # Enviar log al servidor/canal de logs
+        # Log opcional
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
         log_guild = ctx.bot.get_guild(log_guild_id)
@@ -588,11 +570,11 @@ class Cartas(commands.Cog):
                 except Exception as e:
                     print(f"[ERROR] Could not send log: {e}")
 
-        # Enviar resultado al usuario
         if archivo:
             await ctx.send(file=archivo, embed=embed, view=vista)
         else:
             await ctx.send(embed=embed, view=vista)
+
 
             
     
