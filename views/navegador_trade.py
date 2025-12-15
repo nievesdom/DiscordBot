@@ -1,12 +1,24 @@
 import discord, asyncio
 from discord.ui import View, button
-from core.cartas import cargar_cartas
+
+# ✅ Usamos SOLO funciones reales de core.firebase_storage
 from core.firebase_storage import (
     cargar_inventario_usuario,
     quitar_cartas_inventario,
-    agregar_cartas_inventario
+    agregar_cartas_inventario,
+    cargar_mazos
 )
-from commands.battle import carta_en_mazo
+
+from core.cartas import cargar_cartas
+
+
+def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
+    """Comprueba si una carta está en el mazo del usuario."""
+    mazos = cargar_mazos()
+    servidor = mazos.get(servidor_id, {})
+    mazo_usuario = servidor.get(usuario_id, [])
+    return str(carta_id) in map(str, mazo_usuario)
+
 
 class TradeView(View):
     """
@@ -59,30 +71,33 @@ class TradeView(View):
         usuario1_id = str(self.user1.id)
         usuario2_id = str(self.user2.id)
 
-        # Inventarios
+        # Inventarios reales
         col1 = cargar_inventario_usuario(servidor_id, usuario1_id)
         col2 = cargar_inventario_usuario(servidor_id, usuario2_id)
 
+        id1 = str(self.carta1_obj["id"])
+        id2 = str(carta2_obj["id"])
+
         # Comprobar posesión
-        if str(self.carta1_obj["id"]) not in col1:
+        if id1 not in col1:
             await interaction.followup.send(f"You no longer own {self.carta1_obj['nombre']}.")
             self.stop()
             return
 
-        if str(carta2_obj["id"]) not in col2:
+        if id2 not in col2:
             await interaction.followup.send(f"{self.user2.display_name} does not own {carta2_obj['nombre']}.")
             self.stop()
             return
 
-        # Comprobar mazo
-        if carta_en_mazo(servidor_id, usuario1_id, self.carta1_obj["id"]):
+        # Comprobar mazos
+        if carta_en_mazo(servidor_id, usuario1_id, id1):
             await interaction.followup.send(
                 f"🚫 You can't trade **{self.carta1_obj['nombre']}** because it is in your deck."
             )
             self.stop()
             return
 
-        if carta_en_mazo(servidor_id, usuario2_id, carta2_obj["id"]):
+        if carta_en_mazo(servidor_id, usuario2_id, id2):
             await interaction.followup.send(
                 f"🚫 {self.user2.display_name} can't trade **{carta2_obj['nombre']}** because it is in their deck."
             )
@@ -161,10 +176,6 @@ class ConfirmTradeView(View):
         # Añadir la carta recibida
         agregar_cartas_inventario(servidor_id, uid1, [id2])
         agregar_cartas_inventario(servidor_id, uid2, [id1])
-
-        # Log
-        print(f"[TRADE] {self.user1.display_name} traded '{self.carta1_obj['nombre']}' "
-              f"with {self.user2.display_name} for '{self.carta2_obj['nombre']}'.")
 
         # Editar mensaje final
         await interaction.message.edit(
