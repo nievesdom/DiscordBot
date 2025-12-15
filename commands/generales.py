@@ -114,7 +114,7 @@ class Generales(commands.Cog):
             "- Fixed an error that made adding cards to someone's inventory not work because the database where they were stored got too big. This involved changing many things in both the code and how cards are stored.\n"
             "- Removed a duplicate card.\n\n"
             
-            "**New features:\n**"
+            "**New features:**\n"
             "- Added a rarity order mode to the ''/album'' command. Now the alphabetical order ignores card rarity and therefore all of the cards of the same character will be together.\n\n"
 
             "**Quality of life changes:**\n"
@@ -146,7 +146,7 @@ class Generales(commands.Cog):
             "- Fixed an error that made adding cards to someone's inventory not work because the database where they were stored got too big. This involved changing many things in both the code and how cards are stored.\n"
             "- Removed a duplicate card.\n\n"
             
-            "**New features:\n**"
+            "**New features:**\n"
             "- Added a rarity order mode to the ''/album'' command. Now the alphabetical order ignores card rarity and therefore all of the cards of the same character will be together.\n\n"
 
             "**Quality of life changes:**\n"
