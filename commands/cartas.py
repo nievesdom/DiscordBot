@@ -10,7 +10,7 @@ from collections import Counter
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
 from core.firebase_storage import cargar_settings, guardar_settings
-from core.firebase_storage import cargar_packs, guardar_packs, cargar_propiedades, guardar_propiedades, cargar_mazos, agregar_cartas_inventario, quitar_cartas_inventario, cargar_inventario_usuario
+from core.firebase_storage import cargar_packs, guardar_packs, cargar_mazos, agregar_cartas_inventario, quitar_cartas_inventario, cargar_inventario_usuario
 
 from core.cartas import cargar_cartas, cartas_por_id
 
@@ -36,16 +36,7 @@ def backup_settings(settings: dict) -> None:
     """Guarda una copia completa de settings en la colección settings_backup."""
     timestamp = datetime.datetime.now().isoformat()
     db.collection("settings_backup").document(timestamp).set(settings)
-
-
-def _remove_one_copy(user_cards: list, card_id) -> bool:
-    """Quita solo la primera coincidencia de card_id en user_cards (normalizando a str)."""
-    target = str(card_id)
-    for idx, uid in enumerate(user_cards):
-        if str(uid) == target:
-            del user_cards[idx]
-            return True
-    return False
+    
     
 class Cartas(commands.Cog):
     """Cog principal para gestionar cartas y comandos del sistema RGGO."""
@@ -755,33 +746,33 @@ class Cartas(commands.Cog):
     async def gift_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
         servidor_id = str(ctx.guild.id)
         sender_id = str(ctx.author.id)
-    
+
         # ✅ Inventario del que regala
         sender_cards = cargar_inventario_usuario(servidor_id, sender_id)
-    
+
         # ✅ Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
         carta_obj = next((c for c in cartas if c["nombre"].lower() == name_lower), None)
-    
+
         if not carta_obj:
             await ctx.send(f"❌ No card found with exact name '{card}'.")
             return
-    
+
         carta_id = str(carta_obj["id"])
-    
+
         # ✅ Comprobar posesión
         if carta_id not in map(str, sender_cards):
             await ctx.send(f"❌ You don't own a card named {card}.")
             return
-    
+
         # ✅ Comprobar si está en el mazo
         if carta_en_mazo(servidor_id, sender_id, carta_id):
             await ctx.send(
                 f"🚫 You can't gift **{carta_obj['nombre']}** because it is currently in your deck."
             )
             return
-    
+
         # ✅ Enviar solicitud al receptor
         await ctx.send(
             f"{user.mention}, {ctx.author.display_name} wants to gift you the card **{carta_obj['nombre']}**.\nDo you accept?",

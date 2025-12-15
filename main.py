@@ -29,7 +29,7 @@ async def main():
     await bot.load_extension("commands.wiki")
     await bot.load_extension("commands.moderation")
     await bot.load_extension("commands.auto_cards")
-    await bot.load_extension("commands.battle")
+    #await bot.load_extension("commands.battle")
     await bot.load_extension("commands.debug")
     await bot.load_extension("commands.packs_reset")
 
