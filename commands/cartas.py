@@ -880,52 +880,58 @@ class Cartas(commands.Cog):
     # -----------------------------
     # /trade (intercambio de cartas entre jugadores)
     # -----------------------------
-    @app_commands.command(name="trade", description="Starts a card trade with another user")
+    @app_commands.command(
+        name="trade",
+        description="Starts a card trade with another user"
+    )
     @app_commands.describe(user="User to trade with", card="Exact name of the card to trade")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
         servidor_id = str(interaction.guild.id)
         usuario1_id = str(interaction.user.id)
 
-        # Inventario del iniciador
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        coleccion1 = servidor_props.setdefault(usuario1_id, [])
+        # ✅ Cargar inventario del iniciador
+        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
 
-        # Definición local: buscar carta por nombre exacto (case-insensitive)
-        def find_card_by_exact_name(name: str):
-            cartas = cargar_cartas()
-            name_lower = name.strip().lower()
-            return next((c for c in cartas if str(c.get("nombre", "")).lower() == name_lower), None)
+        # ✅ Buscar carta exacta (case-insensitive)
+        cartas = cargar_cartas()
+        name_lower = card.strip().lower()
+        carta1_obj = next(
+            (c for c in cartas if c.get("nombre", "").lower() == name_lower),
+            None
+        )
 
-        # Definición local: comprobar posesión normalizando IDs
-        def owns_card(user_cards: list, card_id) -> bool:
-            target = str(card_id)
-            return any(str(cid) == target for cid in user_cards)
-
-        # Buscar carta exacta
-        carta1_obj = find_card_by_exact_name(card)
         if not carta1_obj:
-            await interaction.response.send_message(f"❌ No card found with exact name '{card}'.", ephemeral=True)
+            await interaction.response.send_message(
+                f"❌ No card found with exact name '{card}'.",
+                ephemeral=True
+            )
             return
 
-        # Comprobar posesión
-        if not owns_card(coleccion1, carta1_obj.get("id")):
-            await interaction.response.send_message(f"❌ You don't own a card named {card}.", ephemeral=True)
+        carta1_id = str(carta1_obj["id"])
+
+        # ✅ Comprobar posesión
+        if carta1_id not in map(str, coleccion1):
+            await interaction.response.send_message(
+                f"❌ You don't own a card named {card}.",
+                ephemeral=True
+            )
             return
-        
-        # 🚫 Comprobar si la carta está en el mazo
-        if carta_en_mazo(servidor_id, usuario1_id, carta1_obj.get("id")):
+
+        # ✅ Comprobar si está en el mazo
+        if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
             await interaction.response.send_message(
                 f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck.",
                 ephemeral=True
             )
             return
 
+        # ✅ Enviar solicitud de trade
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
             f"Please choose whether to accept or reject.",
             view=TradeView(interaction.user, user, carta1_obj)
         )
+
 
     # -----------------------------
     # Prefijo: y!trade
@@ -934,46 +940,43 @@ class Cartas(commands.Cog):
     async def trade_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
         servidor_id = str(ctx.guild.id)
         usuario1_id = str(ctx.author.id)
-
-        # Inventario del iniciador
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        coleccion1 = servidor_props.setdefault(usuario1_id, [])
-
-        # Definición local: buscar carta por nombre exacto (case-insensitive)
-        def find_card_by_exact_name(name: str):
-            cartas = cargar_cartas()
-            name_lower = name.strip().lower()
-            return next((c for c in cartas if str(c.get("nombre", "")).lower() == name_lower), None)
-
-        # Definición local: comprobar posesión normalizando IDs
-        def owns_card(user_cards: list, card_id) -> bool:
-            target = str(card_id)
-            return any(str(cid) == target for cid in user_cards)
-
-        # Buscar carta exacta
-        carta1_obj = find_card_by_exact_name(card)
+    
+        # ✅ Cargar inventario del iniciador
+        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
+    
+        # ✅ Buscar carta exacta (case-insensitive)
+        cartas = cargar_cartas()
+        name_lower = card.strip().lower()
+        carta1_obj = next(
+            (c for c in cartas if c.get("nombre", "").lower() == name_lower),
+            None
+        )
+    
         if not carta1_obj:
             await ctx.send(f"❌ No card found with exact name '{card}'.")
             return
-
-        # Comprobar posesión
-        if not owns_card(coleccion1, carta1_obj.get("id")):
+    
+        carta1_id = str(carta1_obj["id"])
+    
+        # ✅ Comprobar posesión
+        if carta1_id not in map(str, coleccion1):
             await ctx.send(f"❌ You don't own a card named {card}.")
             return
-        
-        # 🚫 Comprobar si la carta está en el mazo
-        if carta_en_mazo(servidor_id, usuario1_id, carta1_obj.get("id")):
+    
+        # ✅ Comprobar si está en el mazo
+        if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
             await ctx.send(
                 f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck."
             )
             return
-
+    
+        # ✅ Enviar solicitud de trade
         await ctx.send(
             f"{user.mention}, {ctx.author.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
             f"Please choose whether to accept or reject.",
             view=TradeView(ctx.author, user, carta1_obj)
         )
+
 
         
     
@@ -1039,29 +1042,29 @@ class Cartas(commands.Cog):
     async def discard_prefix(self, ctx: commands.Context, *, nombre_carta: str):
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
-    
+
         # ✅ Buscar coincidencia exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = nombre_carta.strip().lower()
         carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
-    
+
         if not carta:
             await ctx.send(f"❌ No card found with the name '{nombre_carta}'.")
             return
-    
+
         carta_id = str(carta["id"])
         carta_nombre = carta.get("nombre", "Unknown")
-    
+
         # ✅ Cargar inventario del usuario
         inventario = cargar_inventario_usuario(servidor_id, usuario_id)
-    
+
         # ✅ Comprobar si la carta está en el mazo
         if carta_en_mazo(servidor_id, usuario_id, carta_id):
             await ctx.send(
                 f"🚫 You can't discard **{carta_nombre}** because it is currently in your deck."
             )
             return
-    
+
         # ✅ Quitar solo una copia
         ok = quitar_cartas_inventario(servidor_id, usuario_id, [carta_id])
         if not ok:
@@ -1069,7 +1072,7 @@ class Cartas(commands.Cog):
                 f"🚫 {ctx.author.mention}, you don't have **{carta_nombre}** in your inventory."
             )
             return
-    
+
         await ctx.send(
             f"✅ {ctx.author.display_name} discarded a copy of **{carta_nombre}**."
         )
