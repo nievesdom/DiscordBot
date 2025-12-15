@@ -107,31 +107,31 @@ class Generales(commands.Cog):
     @app_commands.command(name="updates", description="Shows the latest updates and what's coming up.")
     async def updates_slash(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "**Version 1.2.1 Patch notes**\n"
-            "Version 1.2.1 includes all the fixes and features of the previous versions (gifting, trading, seeing status and adjusting pack openings) as well as new cards and a couple of bug fixes. These fixes have been silently released since the last update.\n\n" 
+            "**Version 1.2.2 Patch notes**\n"
+            "Version 1.2.2 is mostly an urgent bug fixing update, but it also adds some new cards, a feature and some QoL changes. Also, sorry for the downtime of the bot, I wasn't home to fix the issue quickly.\n\n" 
             
             "**Bug fixes:**\n"
-            "- Fixed an interaction error that made gifting not work during the first day.\n"
-            "- Fixed an error that would make the bot say the wrong amount of time that had to be waited in order to to open a new pack when the number of daily packs was set to 5.\n"
-            "- Fixed an error that sometimes caused the daily number of packs to revert back to an earlier number that was set.\n"
-            "- Fixed a bug that prevented certain Nanba cards from being gifted or traded, as they were duplicated in the database.\n"
-            "- `y!search now works as intended.`\n\n"
+            "- Fixed an error that made adding cards to someone's inventory not work because the database where they were stored got too big. This involved changing many things in both the code and how cards are stored.\n"
+            "- Removed a duplicate card.\n\n"
+            
+            "**New features:\n**"
+            "- Added a rarity order mode to the ''/album'' command. Now the alphabetical order ignores card rarity and therefore all of the cards of the same character will be together.\n\n"
 
             "**Quality of life changes:**\n"
-            "- Made the album and pack buttons work longer (5 minutes).\n"
-            "- The gifting buttons also last longer (2 minutes).\n\n"
+            "- Due to the changes in how cards are saved and stored, the bot might be a bit quicker when using commands such as ''/pack''."
+            "- Added the number of copies of one card that are owned (if it's more than one) next to the card's name in the ''/search'' command, just like in the ''/collection'' command.\n\n"
             
             "**New cards:**\n"
-            "- UR Toko Higashide\n"
-            "- UR Saeko Mukoda (YLAD Holographic II)\n"
-            "- UR Mayumi Seto (True)\n"
-            "- UR Hikaru (Christmas Eve)\n"
-            "- UR Sofia (Christmas Eve)\n\n"
+            "- UR Masumi Arakawa (YLAD Summon)\n"
+            "- UR Taiga Saejima (Christmas Eve)\n"
+            "- UR Lily (Christmas Eve)\n"
+            "- UR Noah Rich (PY)\n"
+            "- UR Goro Majima (PY Mad Dog)\n\n"
 
             "**Coming up:**\n"
-            "- Alphabetical sorting mode for the album, independent from card rarity. This will group all the cards from the same character.\n"
             "- The choice to show wiki search results in the server's chat rather than in DMs.\n"
-            "- Documentation for the bot.\n"
+            "- Documentation for the bot (already started).\n"
+            "- Deck creation (almost done!)."
             "- Community-made cards (just maybe).\n"
             "- Card combat (eventually)."
         )

@@ -12108,18 +12108,6 @@
     "speed": 225
   },
   {
-    "id": 1014,
-    "nombre": "UR Haruka Sawamura ('05 Lively)",
-    "rareza": "UR",
-    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Haruka%20Sawamura%20%28%2705%20Lively%29.png",
-    "atributo": "shadow",
-    "tipo": "support",
-    "health": 1172,
-    "attack": 266,
-    "defense": 172,
-    "speed": 220
-  },
-  {
     "id": 1015,
     "nombre": "UR Haruka Sawamura ('10 Lively)",
     "rareza": "UR",
@@ -13126,5 +13114,65 @@
     "attack": 302,
     "defense": 278,
     "speed": 204
+  },
+  {
+    "id": 1100,
+    "nombre": "UR Goro Majima (PY Mad Dog)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Goro%20Majima%20%28PY%20Mad%20Dog%29.png",
+    "atributo": "heart",
+    "tipo": "defense",
+    "health": 1263,
+    "attack": 238,
+    "defense": 326,
+    "speed": 163
+  },
+  {
+    "id": 1101,
+    "nombre": "UR Lily (Christmas Eve)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Lily%20%28Christmas%20Eve%29.png",
+    "atributo": "body",
+    "tipo": "support",
+    "health": 1110,
+    "attack": 291,
+    "defense": 239,
+    "speed": 171
+  },
+  {
+    "id": 1102,
+    "nombre": "UR Masumi Arakawa (YLAD Summon)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Masumi%20Arakawa%20%28YLAD%20Summon%29.png",
+    "atributo": "body",
+    "tipo": "attack",
+    "health": 892,
+    "attack": 299,
+    "defense": 266,
+    "speed": 179
+  },
+  {
+    "id": 1103,
+    "nombre": "UR Noah Rich (PY)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Noah%20Rich%20%28PY%29.png",
+    "atributo": "heart",
+    "tipo": "support",
+    "health": 1107,
+    "attack": 282,
+    "defense": 285,
+    "speed": 170
+  },
+  {
+    "id": 1104,
+    "nombre": "UR Taiga Saejima (Christmas Eve)",
+    "rareza": "UR",
+    "imagen": "https://discordbot-n4ts.onrender.com/cartas/UR%20Taiga%20Saejima%20%28Christmas%20Eve%29.png",
+    "atributo": "shadow",
+    "tipo": "defense",
+    "health": 1274,
+    "attack": 278,
+    "defense": 282,
+    "speed": 175
   }
 ]

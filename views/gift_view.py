@@ -1,49 +1,72 @@
 import discord
 from discord.ui import View, button
-from core.firebase_storage import cargar_propiedades, guardar_propiedades
+
+from core.firebase_storage import (
+    cargar_inventario_usuario,
+    quitar_cartas_inventario,
+    agregar_cartas_inventario,
+    cargar_mazos
+)
+
+
+def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
+    mazos = cargar_mazos()
+    servidor = mazos.get(servidor_id, {})
+    mazo_usuario = servidor.get(usuario_id, [])
+    return str(carta_id) in map(str, mazo_usuario)
+
 
 class GiftView(View):
     def __init__(self, sender: discord.Member, recipient: discord.Member, carta_obj: dict,
-                 propiedades, servidor_id, client: discord.Client):
+                 servidor_id: str, client: discord.Client):
         super().__init__(timeout=120)
         self.sender = sender
         self.recipient = recipient
         self.carta_obj = carta_obj
-        self.propiedades = propiedades
         self.servidor_id = servidor_id
-        self.client = client  # Puede ser bot o interaction.client
+        self.client = client
 
     @button(label="Accept Gift", style=discord.ButtonStyle.green)
     async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Solo el destinatario puede aceptar
         if interaction.user.id != self.recipient.id:
             await interaction.response.send_message("This button is not for you.", ephemeral=True)
             return
 
-        servidor_props = self.propiedades.setdefault(self.servidor_id, {})
-        sender_cards = servidor_props.setdefault(str(self.sender.id), [])
-        recipient_cards = servidor_props.setdefault(str(self.recipient.id), [])
+        servidor_id = self.servidor_id
+        sender_id = str(self.sender.id)
+        recipient_id = str(self.recipient.id)
+        carta_id = str(self.carta_obj["id"])
 
-        # Normalizar tipos a string para comparación y eliminación
-        target_id = str(self.carta_obj["id"])
-        sender_cards_str = [str(cid) for cid in sender_cards]
+        sender_cards = cargar_inventario_usuario(servidor_id, sender_id)
+        recipient_cards = cargar_inventario_usuario(servidor_id, recipient_id)
 
-        if target_id not in sender_cards_str:
-            await interaction.response.send_message("❌ The sender no longer owns this card.", ephemeral=True)
+        if carta_id not in map(str, sender_cards):
+            await interaction.response.send_message(
+                "The sender no longer owns this card.",
+                ephemeral=True
+            )
             self.stop()
             return
 
-        # Transferencia (operar sobre listas normalizadas)
-        # Si la lista original mezcla tipos, reconstruimos a strings para consistencia
-        servidor_props[str(self.sender.id)] = sender_cards_str
-        servidor_props[str(self.recipient.id)] = [str(cid) for cid in recipient_cards]
+        if carta_en_mazo(servidor_id, sender_id, carta_id):
+            await interaction.response.send_message(
+                f"The sender cannot gift {self.carta_obj['nombre']} because it is currently in their deck.",
+                ephemeral=True
+            )
+            self.stop()
+            return
 
-        servidor_props[str(self.sender.id)].remove(target_id)
-        servidor_props[str(self.recipient.id)].append(target_id)
+        ok1 = quitar_cartas_inventario(servidor_id, sender_id, [carta_id])
+        if not ok1:
+            await interaction.response.send_message(
+                "Could not remove the card from the sender.",
+                ephemeral=True
+            )
+            self.stop()
+            return
 
-        guardar_propiedades(self.propiedades)
+        agregar_cartas_inventario(servidor_id, recipient_id, [carta_id])
 
-        # Log en canal de administración (no bloquea la respuesta del botón)
         try:
             log_guild_id = 286617766516228096
             log_channel_id = 1441990735883800607
@@ -58,10 +81,9 @@ class GiftView(View):
         except Exception as e:
             print(f"[ERROR] Could not send log: {e}")
 
-        # Editar el mensaje del botón usando la respuesta de la interacción (más fiable)
         await interaction.response.edit_message(
             content=(
-                f"✅ {self.recipient.mention} accepted the gift and received **{self.carta_obj['nombre']}**"
+                f"{self.recipient.mention} accepted the gift and received {self.carta_obj['nombre']}"
             ),
             view=None
         )
@@ -69,14 +91,12 @@ class GiftView(View):
 
     @button(label="Reject Gift", style=discord.ButtonStyle.red)
     async def reject(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Solo el destinatario puede rechazar
         if interaction.user.id != self.recipient.id:
             await interaction.response.send_message("This button is not for you.", ephemeral=True)
             return
 
-        # Para componentes, usa también edit_message como respuesta primaria
         await interaction.response.edit_message(
-            content=f"❌ {self.recipient.display_name} rejected the gift.",
+            content=f"{self.recipient.display_name} rejected the gift.",
             view=None
         )
         self.stop()
