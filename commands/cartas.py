@@ -69,30 +69,39 @@ class Cartas(commands.Cog):
     async def album(self, interaction: discord.Interaction, user: discord.Member = None):
         """Muestra la galería navegable de un usuario (slash)."""
         await self._safe_defer(interaction)
+
         objetivo = user or interaction.user
         servidor_id, usuario_id = str(interaction.guild.id), str(objetivo.id)
-        propiedades = cargar_propiedades()
-        cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
+
+        # ✅ Nueva lógica: cargar inventario del usuario
+        cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
+
         if not cartas_ids:
             await interaction.followup.send(f"{objetivo.display_name} has no cards yet.")
             return
+
         cartas_info = cartas_por_id()
         vista = Navegador(interaction, cartas_ids, cartas_info, objetivo)
         await vista.enviar()
+
 
     @commands.command(name="album")
     async def album_prefix(self, ctx: commands.Context, user: discord.Member = None):
         """Muestra la galería navegable de un usuario (prefijo)."""
         objetivo = user or ctx.author
         servidor_id, usuario_id = str(ctx.guild.id), str(objetivo.id)
-        propiedades = cargar_propiedades()
-        cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
+
+        # ✅ Nueva lógica: cargar inventario del usuario
+        cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
+
         if not cartas_ids:
             await ctx.send(f"{objetivo.display_name} has no cards yet.")
             return
+
         cartas_info = cartas_por_id()
         vista = Navegador(ctx, cartas_ids, cartas_info, objetivo)
         await vista.enviar()
+
         
 
     # -----------------------------
@@ -101,41 +110,46 @@ class Cartas(commands.Cog):
     @app_commands.command(name="collection", description="Shows a user's card collection in text mode")
     async def collection(self, interaction: discord.Interaction, user: discord.Member = None):
         """Muestra la colección como lista de nombres en texto plano (slash)."""
-        await self._safe_defer(interaction, ephemeral=False)  # Público para todos
+        await self._safe_defer(interaction, ephemeral=False)
 
         objetivo = user or interaction.user
         servidor_id, usuario_id = str(interaction.guild.id), str(objetivo.id)
 
-        propiedades = cargar_propiedades()
-        cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
+        # ✅ Nueva lógica: cargar inventario del usuario
+        cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
         if not cartas_ids:
             await interaction.followup.send(f"{objetivo.display_name} has no cards yet.")
             return
 
         cartas_info = cartas_por_id()
-        nombres = [cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}") for cid in cartas_ids]
+
+        # Convertir IDs a nombres
+        nombres = [
+            cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}")
+            for cid in cartas_ids
+        ]
 
         # Contar duplicados
         contador = Counter(nombres)
-        nombres_final = []
-        for nombre, cantidad in contador.items():
-            if cantidad > 1:
-                nombres_final.append(f"{nombre} **[{cantidad}]**")  # número resaltado
-            else:
-                nombres_final.append(nombre)
+        nombres_final = [
+            f"{nombre} **[{cantidad}]**" if cantidad > 1 else nombre
+            for nombre, cantidad in contador.items()
+        ]
 
         nombres_final = sorted(nombres_final, key=lambda s: s.lower())
 
         # Construir bloques sin cortar nombres
         encabezado = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n"
         bloques, bloque_actual = [], encabezado
+
         for nombre in nombres_final:
             linea = nombre + "\n"
-            if len(bloque_actual) + len(linea) > 1900:  # límite seguro
+            if len(bloque_actual) + len(linea) > 1900:
                 bloques.append(bloque_actual)
                 bloque_actual = linea
             else:
                 bloque_actual += linea
+
         if bloque_actual:
             bloques.append(bloque_actual)
 
@@ -152,27 +166,32 @@ class Cartas(commands.Cog):
         objetivo = user or ctx.author
         servidor_id, usuario_id = str(ctx.guild.id), str(objetivo.id)
 
-        propiedades = cargar_propiedades()
-        cartas_ids = propiedades.get(servidor_id, {}).get(usuario_id, [])
+        # ✅ Nueva lógica: cargar inventario del usuario
+        cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
         if not cartas_ids:
             await ctx.send(f"{objetivo.display_name} has no cards yet.")
             return
 
         cartas_info = cartas_por_id()
-        nombres = [cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}") for cid in cartas_ids]
 
+        # Convertir IDs a nombres
+        nombres = [
+            cartas_info.get(str(cid), {}).get("nombre", f"ID {cid}")
+            for cid in cartas_ids
+        ]
+
+        # Contar duplicados
         contador = Counter(nombres)
-        nombres_final = []
-        for nombre, cantidad in contador.items():
-            if cantidad > 1:
-                nombres_final.append(f"{nombre} **[{cantidad}]**")
-            else:
-                nombres_final.append(nombre)
+        nombres_final = [
+            f"{nombre} **[{cantidad}]**" if cantidad > 1 else nombre
+            for nombre, cantidad in contador.items()
+        ]
 
         nombres_final = sorted(nombres_final, key=lambda s: s.lower())
 
         encabezado = f"{objetivo.mention}, these are your cards ({len(cartas_ids)}):\n"
         bloques, bloque_actual = [], encabezado
+
         for nombre in nombres_final:
             linea = nombre + "\n"
             if len(bloque_actual) + len(linea) > 1900:
@@ -180,11 +199,13 @@ class Cartas(commands.Cog):
                 bloque_actual = linea
             else:
                 bloque_actual += linea
+
         if bloque_actual:
             bloques.append(bloque_actual)
 
         for b in bloques:
             await ctx.send(b)
+
             
             
     # -----------------------------
@@ -321,37 +342,50 @@ class Cartas(commands.Cog):
     @app_commands.command(name="search", description="Searches RGGO cards containing a term")
     async def search(self, interaction: discord.Interaction, term: str):
         """Busca cartas que contengan el término en su nombre (slash)."""
-        # No ephemeral
         await self._safe_defer(interaction, ephemeral=False)
-    
+
         if not term:
             await interaction.followup.send("You must provide a search term. Example: /search Yamai")
             return
-    
+
         cartas = cargar_cartas()
         coincidencias = [c for c in cartas if term.lower() in c["nombre"].lower()]
         coincidencias = sorted(coincidencias, key=lambda x: x["nombre"])
-    
+
         if not coincidencias:
             await interaction.followup.send(f"No cards found containing '{term}'.")
             return
-    
-        propiedades = cargar_propiedades()
-        cartas_usuario = propiedades.get(str(interaction.guild.id), {}).get(str(interaction.user.id), [])
-    
+
+        # ✅ Nueva lógica: cargar inventario del usuario
+        servidor_id = str(interaction.guild.id)
+        usuario_id = str(interaction.user.id)
+        cartas_usuario = cargar_inventario_usuario(servidor_id, usuario_id)
+
+        # Contar copias
+        conteo = {}
+        for cid in cartas_usuario:
+            conteo[cid] = conteo.get(cid, 0) + 1
+
         mensaje = "```diff\n"
         for c in coincidencias:
             cid = str(c["id"])
             nombre = c["nombre"]
-            if cid in map(str, cartas_usuario):
-                mensaje += f"+ {nombre}\n"
+
+            if cid in conteo:
+                copias = conteo[cid]
+                if copias > 1:
+                    mensaje += f"+ {nombre} [{copias}]\n"
+                else:
+                    mensaje += f"+ {nombre}\n"
             else:
                 mensaje += f"- {nombre}\n"
+
         mensaje += "```"
-    
+
         await interaction.followup.send(mensaje)
         await interaction.followup.send(f"{len(coincidencias)} cards found containing '{term}'.")
-    
+        
+
     @commands.command(name="search")
     async def search_prefix(self, ctx: commands.Context, *, term: str):
         """Busca cartas que contengan el término en su nombre (prefijo)."""
@@ -367,21 +401,35 @@ class Cartas(commands.Cog):
             await ctx.send(f"No cards found containing '{term}'.")
             return
 
-        propiedades = cargar_propiedades()
-        cartas_usuario = propiedades.get(str(ctx.guild.id), {}).get(str(ctx.author.id), [])
+        # ✅ Nueva lógica: cargar inventario del usuario
+        servidor_id = str(ctx.guild.id)
+        usuario_id = str(ctx.author.id)
+        cartas_usuario = cargar_inventario_usuario(servidor_id, usuario_id)
+
+        # Contar copias
+        conteo = {}
+        for cid in cartas_usuario:
+            conteo[cid] = conteo.get(cid, 0) + 1
 
         mensaje = "```diff\n"
         for c in coincidencias:
             cid = str(c["id"])
             nombre = c["nombre"]
-            if cid in map(str, cartas_usuario):
-                mensaje += f"+ {nombre}\n"
+
+            if cid in conteo:
+                copias = conteo[cid]
+                if copias > 1:
+                    mensaje += f"+ {nombre} [{copias}]\n"
+                else:
+                    mensaje += f"+ {nombre}\n"
             else:
                 mensaje += f"- {nombre}\n"
+
         mensaje += "```"
 
         await ctx.send(mensaje)
         await ctx.send(f"{len(coincidencias)} cards found containing '{term}'.")
+
         
         
 
@@ -474,9 +522,6 @@ class Cartas(commands.Cog):
             await interaction.followup.send(file=archivo, embed=embed, view=vista)
         else:
             await interaction.followup.send(embed=embed, view=vista)
-
-
-
 
 
     # -----------------------------
@@ -946,42 +991,46 @@ class Cartas(commands.Cog):
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
 
-        # Inventario
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        usuario_cartas = servidor_props.setdefault(usuario_id, [])
-
         # ✅ Buscar coincidencia exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = nombre_carta.strip().lower()
         carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
 
         if not carta:
-            await interaction.followup.send(f"❌ No card found with exact name '{nombre_carta}'.", ephemeral=True)
-            return
-
-        carta_id = carta.get("id")
-        carta_nombre = carta.get("nombre", "Unknown")
-
-        # Comprobar posesión y quitar solo una copia
-        if not _remove_one_copy(usuario_cartas, carta_id):
             await interaction.followup.send(
-                f"🚫 You don't have **{carta_nombre}** in your inventory.", ephemeral=True
-            )
-            return
-        
-        # 🚫 Comprobar si la carta está en el mazo
-        if carta_en_mazo(servidor_id, usuario_id, carta_id):
-            await interaction.response.send_message(
-                f"🚫 You can't discard **{carta_id['nombre']}** because it is currently in your deck.",
+                f"❌ No card found with the name '{nombre_carta}'.",
                 ephemeral=True
             )
             return
 
-        guardar_propiedades(propiedades)
+        carta_id = str(carta["id"])
+        carta_nombre = carta.get("nombre", "Unknown")
+
+        # ✅ Cargar inventario del usuario
+        inventario = cargar_inventario_usuario(servidor_id, usuario_id)
+
+        # ✅ Comprobar si la carta está en el mazo
+        if carta_en_mazo(servidor_id, usuario_id, carta_id):
+            await interaction.followup.send(
+                f"🚫 You can't discard **{carta_nombre}** because it is currently in your deck.",
+                ephemeral=True
+            )
+            return
+
+        # ✅ Quitar solo una copia
+        ok = quitar_cartas_inventario(servidor_id, usuario_id, [carta_id])
+        if not ok:
+            await interaction.followup.send(
+                f"🚫 You don't have **{carta_nombre}** in your inventory.",
+                ephemeral=True
+            )
+            return
+
         await interaction.followup.send(
-            f"✅ Discarded one copy of **{carta_nombre}**.", ephemeral=True
+            f"✅ Discarded one copy of **{carta_nombre}**.",
+            ephemeral=True
         )
+
 
     # -----------------------------
     # Prefijo: y!discard
@@ -990,38 +1039,41 @@ class Cartas(commands.Cog):
     async def discard_prefix(self, ctx: commands.Context, *, nombre_carta: str):
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
-
-        # Inventario
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        usuario_cartas = servidor_props.setdefault(usuario_id, [])
-
+    
         # ✅ Buscar coincidencia exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = nombre_carta.strip().lower()
         carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
-
+    
         if not carta:
-            await ctx.send(f"❌ No card found with exact name '{nombre_carta}'.")
+            await ctx.send(f"❌ No card found with the name '{nombre_carta}'.")
             return
-
-        carta_id = carta.get("id")
+    
+        carta_id = str(carta["id"])
         carta_nombre = carta.get("nombre", "Unknown")
-
-        # Comprobar posesión y quitar solo una copia
-        if not _remove_one_copy(usuario_cartas, carta_id):
-            await ctx.send(f"🚫 {ctx.author.mention}, no tienes **{carta_nombre}** en tu inventario.")
-            return
-        
-        # 🚫 Comprobar si la carta está en el mazo
+    
+        # ✅ Cargar inventario del usuario
+        inventario = cargar_inventario_usuario(servidor_id, usuario_id)
+    
+        # ✅ Comprobar si la carta está en el mazo
         if carta_en_mazo(servidor_id, usuario_id, carta_id):
             await ctx.send(
-                f"🚫 You can't discard **{carta_id['nombre']}** because it is currently in your deck."
+                f"🚫 You can't discard **{carta_nombre}** because it is currently in your deck."
             )
             return
+    
+        # ✅ Quitar solo una copia
+        ok = quitar_cartas_inventario(servidor_id, usuario_id, [carta_id])
+        if not ok:
+            await ctx.send(
+                f"🚫 {ctx.author.mention}, you don't have **{carta_nombre}** in your inventory."
+            )
+            return
+    
+        await ctx.send(
+            f"✅ {ctx.author.display_name} discarded a copy of **{carta_nombre}**."
+        )
 
-        guardar_propiedades(propiedades)
-        await ctx.send(f"✅ {ctx.author.mention}, has descartado una copia de **{carta_nombre}**.")
 
 # -----------------------------
 # Registro del cog en el bot
