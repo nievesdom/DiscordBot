@@ -708,35 +708,45 @@ class Cartas(commands.Cog):
         servidor_id = str(interaction.guild.id)
         sender_id = str(interaction.user.id)
 
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        sender_cards = servidor_props.setdefault(sender_id, [])
+        # ✅ Inventario del que regala
+        sender_cards = cargar_inventario_usuario(servidor_id, sender_id)
 
-        # Buscar carta por nombre exacto
+        # ✅ Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
-        carta_obj = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
+        carta_obj = next((c for c in cartas if c["nombre"].lower() == name_lower), None)
 
         if not carta_obj:
-            await interaction.response.send_message(f"❌ No card found with exact name '{card}'.", ephemeral=True)
+            await interaction.response.send_message(
+                f"❌ No card found with exact name '{card}'.",
+                ephemeral=True
+            )
             return
 
-        if str(carta_obj["id"]) not in [str(cid) for cid in sender_cards]:
-            await interaction.response.send_message(f"❌ You don't own a card named {card}.", ephemeral=True)
+        carta_id = str(carta_obj["id"])
+
+        # ✅ Comprobar posesión
+        if carta_id not in map(str, sender_cards):
+            await interaction.response.send_message(
+                f"❌ You don't own a card named {card}.",
+                ephemeral=True
+            )
             return
-        
-        # 🚫 Comprobar si la carta está en el mazo
-        if carta_en_mazo(servidor_id, sender_id, carta_obj['id']):
+
+        # ✅ Comprobar si está en el mazo
+        if carta_en_mazo(servidor_id, sender_id, carta_id):
             await interaction.response.send_message(
                 f"🚫 You can't gift **{carta_obj['nombre']}** because it is currently in your deck.",
                 ephemeral=True
             )
             return
 
+        # ✅ Enviar solicitud al receptor
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to gift you the card **{carta_obj['nombre']}**.\nDo you accept?",
-            view=GiftView(interaction.user, user, carta_obj, propiedades, servidor_id, interaction.client)
+            view=GiftView(interaction.user, user, carta_obj, servidor_id, interaction.client)
         )
+
         
     # -----------------------------
     # y!gift (regalar carta)
@@ -745,34 +755,39 @@ class Cartas(commands.Cog):
     async def gift_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
         servidor_id = str(ctx.guild.id)
         sender_id = str(ctx.author.id)
-
-        propiedades = cargar_propiedades()
-        servidor_props = propiedades.setdefault(servidor_id, {})
-        sender_cards = servidor_props.setdefault(sender_id, [])
-
+    
+        # ✅ Inventario del que regala
+        sender_cards = cargar_inventario_usuario(servidor_id, sender_id)
+    
+        # ✅ Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
-        carta_obj = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
-
+        carta_obj = next((c for c in cartas if c["nombre"].lower() == name_lower), None)
+    
         if not carta_obj:
             await ctx.send(f"❌ No card found with exact name '{card}'.")
             return
-
-        if str(carta_obj["id"]) not in [str(cid) for cid in sender_cards]:
+    
+        carta_id = str(carta_obj["id"])
+    
+        # ✅ Comprobar posesión
+        if carta_id not in map(str, sender_cards):
             await ctx.send(f"❌ You don't own a card named {card}.")
             return
-        
-        # 🚫 Comprobar si la carta está en el mazo
-        if carta_en_mazo(servidor_id, sender_id, carta_obj['id']):
+    
+        # ✅ Comprobar si está en el mazo
+        if carta_en_mazo(servidor_id, sender_id, carta_id):
             await ctx.send(
                 f"🚫 You can't gift **{carta_obj['nombre']}** because it is currently in your deck."
             )
             return
-
+    
+        # ✅ Enviar solicitud al receptor
         await ctx.send(
             f"{user.mention}, {ctx.author.display_name} wants to gift you the card **{carta_obj['nombre']}**.\nDo you accept?",
-            view=GiftView(ctx.author, user, carta_obj, propiedades, servidor_id, ctx.bot)
-        )       
+            view=GiftView(ctx.author, user, carta_obj, servidor_id, ctx.bot)
+        )
+
 
 
 
@@ -940,10 +955,10 @@ class Cartas(commands.Cog):
     async def trade_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
         servidor_id = str(ctx.guild.id)
         usuario1_id = str(ctx.author.id)
-    
+
         # ✅ Cargar inventario del iniciador
         coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-    
+
         # ✅ Buscar carta exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
@@ -951,25 +966,25 @@ class Cartas(commands.Cog):
             (c for c in cartas if c.get("nombre", "").lower() == name_lower),
             None
         )
-    
+
         if not carta1_obj:
             await ctx.send(f"❌ No card found with exact name '{card}'.")
             return
-    
+
         carta1_id = str(carta1_obj["id"])
-    
+
         # ✅ Comprobar posesión
         if carta1_id not in map(str, coleccion1):
             await ctx.send(f"❌ You don't own a card named {card}.")
             return
-    
+
         # ✅ Comprobar si está en el mazo
         if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
             await ctx.send(
                 f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck."
             )
             return
-    
+
         # ✅ Enviar solicitud de trade
         await ctx.send(
             f"{user.mention}, {ctx.author.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"

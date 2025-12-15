@@ -1,19 +1,23 @@
 import discord
 import os
-from core.firebase_storage import cargar_propiedades, guardar_propiedades
+
+# ✅ Sustituimos propiedades por inventario
+from core.firebase_storage import (
+    agregar_cartas_inventario,
+    cargar_inventario_usuario
+)
 
 from core.cartas import cargar_cartas
 
-# Reclamar una carta
+
 class ReclamarCarta(discord.ui.View):
     def __init__(self, carta_id, embed, imagen_ruta):
-        super().__init__(timeout=900)  # El botón expira tras 15 minutos
+        super().__init__(timeout=900)
         self.carta_id = carta_id
         self.embed = embed
         self.imagen_ruta = imagen_ruta
         self.reclamada = False
 
-        # Colores por rareza
         self.colores = {
             "UR": 0x8841f2,
             "KSR": 0xabfbff,
@@ -22,47 +26,32 @@ class ReclamarCarta(discord.ui.View):
             "R": 0xfc3d3d,
             "N": 0x8c8c8c
         }
-        
-        # Diccionario de atributos con color y símbolo
-        atributos = {
-            "heart": ("心", 0xFF0000),       # rojo
-            "technique": ("技", 0x00FF00),   # verde
-            "body": ("体", 0x0000FF),        # azul
-            "light": ("陽", 0xFFFF00),       # amarillo
-            "shadow": ("陰", 0x800080)       # morado/magenta
-        }
-
-        # Diccionario de tipos con emoji
-        tipos = {
-            "attack": "⚔️ Attack",
-            "defense": "🛡️ Defense",
-            "recovery": "❤️ Recovery",
-            "support": "✨ Support"
-        }
 
     @discord.ui.button(label="Claim 🐉", style=discord.ButtonStyle.success)
     async def reclamar(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
-            # Si ya se ha reclamado, avisa al usuario
             if self.reclamada:
                 await interaction.response.send_message("Esta carta ya ha sido reclamada.", ephemeral=True)
                 return
-    
+
             usuario_id = str(interaction.user.id)
             servidor_id = str(interaction.guild.id)
 
-            # Se cargan las cartas y se busca la carta correspondiente entre ellas
+            # Buscar carta en la base de datos
             cartas_guardadas = cargar_cartas()
             carta_info = next((c for c in cartas_guardadas if c["id"] == self.carta_id), None)
             if carta_info is None:
                 await interaction.response.send_message("No se encontró información de esta carta.", ephemeral=True)
                 return
-    
-            propiedades = cargar_propiedades()
-            propiedades.setdefault(servidor_id, {}).setdefault(usuario_id, []).append(self.carta_id)
-            guardar_propiedades(propiedades)
-    
-            # Diccionario de símbolos de atributos
+
+            # ✅ Guardar la carta en el inventario del usuario
+            agregar_cartas_inventario(servidor_id, usuario_id, [self.carta_id])
+
+            # Reconstruir embed
+            nombre_carta = carta_info.get("nombre", f"ID {self.carta_id}")
+            rareza = carta_info.get("rareza", "N")
+            color = self.colores.get(rareza, 0x8c8c8c)
+
             atributos = {
                 "heart": "心",
                 "technique": "技",
@@ -70,30 +59,23 @@ class ReclamarCarta(discord.ui.View):
                 "light": "陽",
                 "shadow": "陰",
             }
-    
-            # Diccionario de tipos con emoji
+
             tipos = {
                 "attack": "⚔️ Attack",
                 "defense": "🛡️ Defense",
                 "recovery": "❤️ Recovery",
                 "support": "✨ Support",
             }
-    
-            # Reconstruir embed con formato unificado
-            nombre_carta = carta_info.get("nombre", f"ID {self.carta_id}")
-            rareza = carta_info.get("rareza", "N")
-            color = self.colores.get(rareza, 0x8c8c8c)
-    
+
             atributo_raw = str(carta_info.get("atributo", "—")).lower()
             tipo_raw = str(carta_info.get("tipo", "—")).lower()
-    
-            # Formato de atributo y tipo
+
             attr_symbol = atributos.get(atributo_raw, "")
             attr_name = atributo_raw.capitalize() if atributo_raw != "—" else "—"
             atributo_fmt = f"{attr_symbol} {attr_name}" if attr_symbol else attr_name
-    
+
             tipo_fmt = tipos.get(tipo_raw, tipo_raw.capitalize() if tipo_raw != "—" else "—")
-    
+
             self.embed = discord.Embed(
                 title=f"{nombre_carta}",
                 color=color,
@@ -104,10 +86,10 @@ class ReclamarCarta(discord.ui.View):
                     f"🛡️ {carta_info.get('defense', '—')} | 💨 {carta_info.get('speed', '—')}"
                 )
             )
+
             self.embed.set_footer(text=f"Card claimed by {interaction.user.display_name}")
             self.reclamada = True
-            self.clear_items()  # Quita el botón tras reclamar
-
+            self.clear_items()
 
             # Imagen
             archivo = None
@@ -130,7 +112,7 @@ class ReclamarCarta(discord.ui.View):
                 ephemeral=False
             )
 
-            # 🔥 Enviar log al servidor/canal de logs
+            # Log
             log_guild_id = 286617766516228096
             log_channel_id = 1441990735883800607
 
@@ -140,8 +122,8 @@ class ReclamarCarta(discord.ui.View):
                 if log_channel:
                     try:
                         await log_channel.send(
-                            f"[CLAIM] {interaction.user.display_name} reclamó '{nombre_carta}' en {interaction.guild.name}.")
-                        
+                            f"[CLAIM] {interaction.user.display_name} reclamó '{nombre_carta}' en {interaction.guild.name}."
+                        )
                     except Exception as e:
                         print(f"[ERROR] Could not send log: {e}")
 
@@ -150,6 +132,12 @@ class ReclamarCarta(discord.ui.View):
         except Exception as e:
             print(f"[ERROR] en ReclamarCarta: {type(e).__name__} - {e}")
             try:
-                await interaction.response.send_message("Sorry, an error occured while trying to claim this card.", ephemeral=True)
+                await interaction.response.send_message(
+                    "Sorry, an error occured while trying to claim this card.",
+                    ephemeral=True
+                )
             except discord.InteractionResponded:
-                await interaction.followup.send("Sorry, an error occured while trying to claim this card.", ephemeral=True)
+                await interaction.followup.send(
+                    "Sorry, an error occured while trying to claim this card.",
+                    ephemeral=True
+                )
