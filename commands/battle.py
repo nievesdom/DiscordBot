@@ -1,7 +1,7 @@
 import asyncio
 import discord
 from discord.ext import commands
-from core.firebase_storage import cargar_inventario_usuario, cargar_mazo, cargar_mazos, guardar_mazo, guardar_mazos, cargar_propiedades
+from core.firebase_storage import cargar_inventario_usuario, cargar_mazo, cargar_mazo, guardar_mazo, guardar_mazo, cargar_propiedades
 from core.cartas import cargar_cartas, cartas_por_id
 from views.navegador_mazo import NavegadorMazo
 
@@ -113,7 +113,7 @@ class Battle(commands.Cog):
             return
 
         # Añadir la carta al mazo en Firebase
-        decks = cargar_mazos()
+        decks = cargar_mazo()
         server_decks = decks.setdefault(server_id, {})
         user_deck = server_decks.setdefault(user_id, [])
 
@@ -135,7 +135,7 @@ class Battle(commands.Cog):
 
         # Añadir la carta al mazo
         user_deck.append(card_id)
-        guardar_mazos(decks)
+        guardar_mazo(decks)
 
         # Confirmación al usuario
         await ctx.send(f"✅ The card **{card['nombre']}** has been added to your deck.")
@@ -154,7 +154,7 @@ class Battle(commands.Cog):
         user_id = str(interaction.user.id)
 
         # Cargar mazos desde Firebase
-        decks = cargar_mazos()
+        decks = cargar_mazo()
         server_decks = decks.get(server_id, {})
         user_deck = server_decks.get(user_id, [])
 
@@ -187,7 +187,7 @@ class Battle(commands.Cog):
         user_id = str(ctx.author.id)
 
         # Cargar mazos desde Firebase
-        decks = cargar_mazos()
+        decks = cargar_mazo()
         server_decks = decks.get(server_id, {})
         user_deck = server_decks.get(user_id, [])
 
@@ -232,7 +232,7 @@ class Battle(commands.Cog):
         card_id = str(card["id"])
 
         # Cargar mazos desde Firebase
-        decks = cargar_mazos()
+        decks = cargar_mazo()
         server_decks = decks.setdefault(server_id, {})
         user_deck = server_decks.setdefault(user_id, [])
 
@@ -245,7 +245,7 @@ class Battle(commands.Cog):
 
         # Quitar una copia de la carta del mazo
         user_deck.remove(card_id)
-        guardar_mazos(decks)
+        guardar_mazo(decks)
 
         # Confirmación al usuario
         await interaction.response.send_message(
@@ -275,7 +275,7 @@ class Battle(commands.Cog):
         card_id = str(card["id"])
 
         # Cargar mazos desde Firebase
-        decks = cargar_mazos()
+        decks = cargar_mazo()
         server_decks = decks.setdefault(server_id, {})
         user_deck = server_decks.setdefault(user_id, [])
 
@@ -286,7 +286,7 @@ class Battle(commands.Cog):
 
         # Quitar una copia de la carta del mazo
         user_deck.remove(card_id)
-        guardar_mazos(decks)
+        guardar_mazo(decks)
 
         # Confirmación al usuario
         await ctx.send(f"✅ The card **{card['nombre']}** has been removed from your deck.")
