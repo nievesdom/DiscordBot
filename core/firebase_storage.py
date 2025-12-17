@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from core.firebase_client import db
 
 # Colecciones y documentos
@@ -46,14 +46,64 @@ def backup_settings(settings: Dict) -> None:
     import datetime
     timestamp = datetime.datetime.now().isoformat()
     db.collection("settings_backup").document(timestamp).set(settings)
+   
     
 # Mazos
-def cargar_mazos() -> Dict:
-    doc = db.collection(MAZOS_COLLECTION).document(MAZOS_DOC).get()
-    return doc.to_dict() if doc.exists else {}
+def cargar_mazo(
+    servidor_id: str,
+    usuario_id: str,
+    letra_mazo: str   # "A", "B" o "C"
+) -> List[int]:
+    """
+    Carga un mazo concreto (A, B o C) de un usuario.
+    No lee el documento entero innecesariamente.
+    """
 
-def guardar_mazos(mazos: Dict) -> None:
-    db.collection(MAZOS_COLLECTION).document(MAZOS_DOC).set(mazos, merge=True)
+    doc = db.collection("mazos").document(servidor_id).get()
+
+    if not doc.exists:
+        return []
+
+    datos = doc.to_dict()
+
+    return (
+        datos
+        .get(usuario_id, {})
+        .get(letra_mazo, [])
+    )
+
+
+def guardar_mazo(
+    servidor_id: str,
+    usuario_id: str,
+    letra_mazo: str,   # "A", "B" o "C"
+    cartas: List[int]
+) -> None:
+    """
+    Guarda un mazo concreto (A, B o C) de un usuario sin tocar
+    el resto del documento ni los otros mazos.
+    """
+
+    doc_ref = db.collection("mazos").document(servidor_id)
+
+    # Ruta exacta del campo que se va a actualizar
+    campo = f"{usuario_id}.{letra_mazo}"
+
+    try:
+        # update() SOLO modifica ese campo
+        doc_ref.update({
+            campo: cartas
+        })
+    except Exception:
+        # Si el documento no existe todavía, lo crea con set + merge
+        doc_ref.set(
+            {
+                usuario_id: {
+                    letra_mazo: cartas
+                }
+            },
+            merge=True
+        )
 
 
 INVENTARIO_COLLECTION = "inventario"
