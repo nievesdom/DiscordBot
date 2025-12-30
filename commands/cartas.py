@@ -10,7 +10,7 @@ from collections import Counter
 
 # Core: carga/guardado en Gist y acceso a la base de cartas
 from core.firebase_storage import cargar_settings, guardar_settings
-from core.firebase_storage import cargar_packs, guardar_packs, cargar_mazos, agregar_cartas_inventario, quitar_cartas_inventario, cargar_inventario_usuario
+from core.firebase_storage import cargar_packs, guardar_packs, cargar_mazo, agregar_cartas_inventario, quitar_cartas_inventario, cargar_inventario_usuario
 
 from core.cartas import cargar_cartas, cartas_por_id
 
@@ -26,7 +26,7 @@ OWNER_ID = 182920174276575232
 
 def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
     """Devuelve True si la carta está en el mazo del usuario en el servidor."""
-    decks = cargar_mazos()
+    decks = cargar_mazo()
     server_decks = decks.get(servidor_id, {})
     user_deck = server_decks.get(usuario_id, [])
     return str(carta_id) in [str(cid) for cid in user_deck]

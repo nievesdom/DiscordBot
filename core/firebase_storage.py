@@ -49,7 +49,7 @@ def backup_settings(settings: Dict) -> None:
    
     
 # Mazos
-def cargar_mazos(
+def cargar_mazo(
     servidor_id: str,
     usuario_id: str,
     letra_mazo: str   # "A", "B" o "C"
