@@ -171,6 +171,9 @@ class Battle(commands.Cog):
         deck="Deck name: either A, B or C or 1, 2 or 3"
     )
     async def deck_slash(self, interaction: discord.Interaction, deck: str = "A"):
+        # Discord exige una respuesta inicial antes de enviar followups
+        await interaction.response.defer()
+
         server_id = str(interaction.guild.id)
         user_id = str(interaction.user.id)
 
@@ -180,9 +183,8 @@ class Battle(commands.Cog):
         user_deck = cargar_mazo(server_id, user_id, letra_mazo)
 
         if not user_deck:
-            await interaction.response.send_message(
-                f"{interaction.user.display_name}, your deck {letra_mazo} is empty.",
-                ephemeral=False
+            await interaction.followup.send(
+                f"{interaction.user.display_name}, your deck {letra_mazo} is empty."
             )
             return
 
@@ -190,6 +192,7 @@ class Battle(commands.Cog):
         vista = NavegadorMazo(interaction, user_deck, cartas_info, interaction.user)
 
         await vista.enviar()
+
         
     # -----------------------------
     # Comando prefijo: y!deck
@@ -199,19 +202,20 @@ class Battle(commands.Cog):
     async def deck_prefix(self, ctx: commands.Context, deck: str = "A"):
         server_id = str(ctx.guild.id)
         user_id = str(ctx.author.id)
-
+    
         letra_mazo = normalizar_mazo(deck)
-
+    
         user_deck = cargar_mazo(server_id, user_id, letra_mazo)
-
+    
         if not user_deck:
             await ctx.send(f"{ctx.author.display_name}, your deck {letra_mazo} is empty.")
             return
-
+    
         cartas_info = cartas_por_id()
         vista = NavegadorMazo(ctx, user_deck, cartas_info, ctx.author)
-
+    
         await vista.enviar()
+
 
         
         
