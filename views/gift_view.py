@@ -5,15 +5,30 @@ from core.firebase_storage import (
     cargar_inventario_usuario,
     quitar_cartas_inventario,
     agregar_cartas_inventario,
-    cargar_mazos
+    cargar_mazo
 )
 
 
 def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
-    mazos = cargar_mazos()
-    servidor = mazos.get(servidor_id, {})
-    mazo_usuario = servidor.get(usuario_id, [])
-    return str(carta_id) in map(str, mazo_usuario)
+    carta_id = str(carta_id)
+
+    # Comprobar mazo A
+    mazo_a = cargar_mazo(servidor_id, usuario_id, "A")
+    if carta_id in map(str, mazo_a):
+        return True
+
+    # Comprobar mazo B
+    mazo_b = cargar_mazo(servidor_id, usuario_id, "B")
+    if carta_id in map(str, mazo_b):
+        return True
+
+    # Comprobar mazo C
+    mazo_c = cargar_mazo(servidor_id, usuario_id, "C")
+    if carta_id in map(str, mazo_c):
+        return True
+
+    return False
+
 
 
 class GiftView(View):
