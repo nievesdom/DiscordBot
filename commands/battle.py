@@ -647,13 +647,15 @@ class Battle(commands.Cog):
             deck_cards=deck,
             cartas_info=session.cartas_info,
             used_indices=used,
-            on_choose=lambda i, idx, cid: self._on_card_chosen(
-                i, session, player, is_p1, idx, cid
+            on_choose=lambda interaction, idx, cid: self._on_card_chosen(
+                interaction, session, player, is_p1, idx, cid
             ),
         )
+
         
         # Dejar que la vista envíe el embed inicial
         await vista.enviar(inter)
+
 
 
 
