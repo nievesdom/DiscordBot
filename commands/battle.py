@@ -2,27 +2,33 @@ import asyncio
 import discord
 from discord.ext import commands
 from discord import app_commands
-from core.firebase_storage import cargar_inventario_usuario, cargar_mazo, cargar_mazo, guardar_mazo, guardar_mazo, cargar_propiedades
+from core.firebase_storage import (
+    cargar_inventario_usuario,
+    cargar_mazo,
+    guardar_mazo,
+    cargar_propiedades,
+)
 from core.cartas import cargar_cartas, cartas_por_id
 from views.navegador_mazo import NavegadorMazo
 
 from typing import Dict, Tuple, Optional
 from views.battle_views import AcceptDuelView, ChooseDeckView, ChooseCardView
 
-DECK_SIZE = 8 # Tamaño máximo del mazo
+DECK_SIZE = 8  # Tamaño máximo del mazo
 STATS_COMBAT = ["health", "attack", "defense", "speed"]
 
+
 def normalizar_mazo(nombre: str) -> str:
-        nombre = nombre.strip().lower()
+    nombre = nombre.strip().lower()
 
-        if nombre in ("a", "1"):
-            return "A"
-        if nombre in ("b", "2"):
-            return "B"
-        if nombre in ("c", "3"):
-            return "C"
-
+    if nombre in ("a", "1"):
         return "A"
+    if nombre in ("b", "2"):
+        return "B"
+    if nombre in ("c", "3"):
+        return "C"
+
+    return "A"
 
 
 class BattleSession:
@@ -80,37 +86,39 @@ class BattleSession:
         return None
 
 
-
 class Battle(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.active_battles: Dict[Tuple[int, int, int], BattleSession] = {}
-        
-        
+
     # -----------------------------
     # Comando slash: /deck_add
     # -----------------------------
     @discord.app_commands.command(
         name="deck_add",
-        description="Add a card to one of your decks (A, B or C)."
+        description="Add a card to one of your decks (A, B or C).",
     )
     @app_commands.describe(
         deck="Deck name: A, B, C or 1, 2, 3",
-        card_name="Exact name of the card"
+        card_name="Exact name of the card",
     )
-    async def deck_add_slash(self, interaction: discord.Interaction, deck: str, card_name: str):
+    async def deck_add_slash(
+        self, interaction: discord.Interaction, deck: str, card_name: str
+    ):
         server_id = str(interaction.guild.id)
         user_id = str(interaction.user.id)
 
         letra_mazo = normalizar_mazo(deck)
 
         cards = cargar_cartas()
-        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
+        card = next(
+            (c for c in cards if c["nombre"].lower() == card_name.lower()), None
+        )
 
         if not card:
             await interaction.response.send_message(
                 f"No card found with the name '{card_name}'.",
-                ephemeral=False
+                ephemeral=False,
             )
             return
 
@@ -121,7 +129,7 @@ class Battle(commands.Cog):
         if card_id not in map(str, user_cards):
             await interaction.response.send_message(
                 f"You do not own the card '{card['nombre']}'.",
-                ephemeral=False
+                ephemeral=False,
             )
             return
 
@@ -132,9 +140,9 @@ class Battle(commands.Cog):
 
         # Comprobar si la carta ya está en otro mazo
         total_en_mazos = (
-            sum(1 for c in mazo_a if str(c) == card_id) +
-            sum(1 for c in mazo_b if str(c) == card_id) +
-            sum(1 for c in mazo_c if str(c) == card_id)
+            sum(1 for c in mazo_a if str(c) == card_id)
+            + sum(1 for c in mazo_b if str(c) == card_id)
+            + sum(1 for c in mazo_c if str(c) == card_id)
         )
 
         owned_count = sum(1 for c in user_cards if str(c) == card_id)
@@ -143,7 +151,7 @@ class Battle(commands.Cog):
             await interaction.response.send_message(
                 f"You only own {owned_count} copies of '{card['nombre']}', "
                 f"and all of them are already in other decks.",
-                ephemeral=False
+                ephemeral=False,
             )
             return
 
@@ -153,7 +161,7 @@ class Battle(commands.Cog):
         if len(user_deck) >= DECK_SIZE:
             await interaction.response.send_message(
                 f"Your deck {letra_mazo} already has {DECK_SIZE} cards.",
-                ephemeral=False
+                ephemeral=False,
             )
             return
 
@@ -162,21 +170,25 @@ class Battle(commands.Cog):
 
         await interaction.response.send_message(
             f"The card '{card['nombre']}' has been added to deck {letra_mazo}.",
-            ephemeral=False
+            ephemeral=False,
         )
-        
+
     # -----------------------------
     # Comando prefijo: y!deck_add
     # -----------------------------
     @commands.command(name="deck_add")
-    async def deck_add_prefix(self, ctx: commands.Context, deck: str, *, card_name: str):
+    async def deck_add_prefix(
+        self, ctx: commands.Context, deck: str, *, card_name: str
+    ):
         server_id = str(ctx.guild.id)
         user_id = str(ctx.author.id)
 
         letra_mazo = normalizar_mazo(deck)
 
         cards = cargar_cartas()
-        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
+        card = next(
+            (c for c in cards if c["nombre"].lower() == card_name.lower()), None
+        )
 
         if not card:
             await ctx.send(f"No card found with the name '{card_name}'.")
@@ -195,9 +207,9 @@ class Battle(commands.Cog):
         mazo_c = cargar_mazo(server_id, user_id, "C")
 
         total_en_mazos = (
-            sum(1 for c in mazo_a if str(c) == card_id) +
-            sum(1 for c in mazo_b if str(c) == card_id) +
-            sum(1 for c in mazo_c if str(c) == card_id)
+            sum(1 for c in mazo_a if str(c) == card_id)
+            + sum(1 for c in mazo_b if str(c) == card_id)
+            + sum(1 for c in mazo_c if str(c) == card_id)
         )
 
         owned_count = sum(1 for c in user_cards if str(c) == card_id)
@@ -212,28 +224,29 @@ class Battle(commands.Cog):
         user_deck = cargar_mazo(server_id, user_id, letra_mazo)
 
         if len(user_deck) >= DECK_SIZE:
-            await ctx.send(f"Your deck {letra_mazo} already has {DECK_SIZE} cards.")
+            await ctx.send(
+                f"Your deck {letra_mazo} already has {DECK_SIZE} cards."
+            )
             return
 
         user_deck.append(card_id)
         guardar_mazo(server_id, user_id, letra_mazo, user_deck)
 
-        await ctx.send(f"The card '{card['nombre']}' has been added to deck {letra_mazo}.")
-
+        await ctx.send(
+            f"The card '{card['nombre']}' has been added to deck {letra_mazo}."
+        )
 
     # -----------------------------
     # Comando slash: /deck
     # -----------------------------
-
     @discord.app_commands.command(
         name="deck",
-        description="Shows one of your decks (A, B, C or 1, 2, 3)."
+        description="Shows one of your decks (A, B, C or 1, 2, 3).",
     )
     @app_commands.describe(
         deck="Deck name: either A, B or C or 1, 2 or 3"
     )
     async def deck_slash(self, interaction: discord.Interaction, deck: str = "A"):
-        # Discord exige una respuesta inicial antes de enviar followups
         await interaction.response.defer()
 
         server_id = str(interaction.guild.id)
@@ -241,7 +254,6 @@ class Battle(commands.Cog):
 
         letra_mazo = normalizar_mazo(deck)
 
-        # Cargar el mazo elegido
         user_deck = cargar_mazo(server_id, user_id, letra_mazo)
 
         if not user_deck:
@@ -255,56 +267,57 @@ class Battle(commands.Cog):
 
         await vista.enviar()
 
-        
     # -----------------------------
     # Comando prefijo: y!deck
     # -----------------------------
-
     @commands.command(name="deck")
     async def deck_prefix(self, ctx: commands.Context, deck: str = "A"):
         server_id = str(ctx.guild.id)
         user_id = str(ctx.author.id)
-    
+
         letra_mazo = normalizar_mazo(deck)
-    
+
         user_deck = cargar_mazo(server_id, user_id, letra_mazo)
-    
+
         if not user_deck:
-            await ctx.send(f"{ctx.author.display_name}, your deck {letra_mazo} is empty.")
+            await ctx.send(
+                f"{ctx.author.display_name}, your deck {letra_mazo} is empty."
+            )
             return
-    
+
         cartas_info = cartas_por_id()
         vista = NavegadorMazo(ctx, user_deck, cartas_info, ctx.author)
-    
+
         await vista.enviar()
 
-
-        
-        
     # -----------------------------
     # Comando slash: /deck_remove
     # -----------------------------
     @discord.app_commands.command(
         name="deck_remove",
-        description="Remove a card from one of your decks (A, B or C)."
+        description="Remove a card from one of your decks (A, B or C).",
     )
     @app_commands.describe(
         deck="Deck name: A, B, C or 1, 2, 3",
-        card_name="Exact name of the card"
+        card_name="Exact name of the card",
     )
-    async def deck_remove_slash(self, interaction: discord.Interaction, deck: str, card_name: str):
+    async def deck_remove_slash(
+        self, interaction: discord.Interaction, deck: str, card_name: str
+    ):
         server_id = str(interaction.guild.id)
         user_id = str(interaction.user.id)
 
         letra_mazo = normalizar_mazo(deck)
 
         cards = cargar_cartas()
-        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
+        card = next(
+            (c for c in cards if c["nombre"].lower() == card_name.lower()), None
+        )
 
         if not card:
             await interaction.response.send_message(
                 f"No card found with the name '{card_name}'.",
-                ephemeral=False
+                ephemeral=False,
             )
             return
 
@@ -315,7 +328,7 @@ class Battle(commands.Cog):
         if card_id not in map(str, user_deck):
             await interaction.response.send_message(
                 f"The card '{card['nombre']}' is not in deck {letra_mazo}.",
-                ephemeral=False
+                ephemeral=False,
             )
             return
 
@@ -324,21 +337,25 @@ class Battle(commands.Cog):
 
         await interaction.response.send_message(
             f"The card '{card['nombre']}' has been removed from deck {letra_mazo}.",
-            ephemeral=False
+            ephemeral=False,
         )
 
     # -----------------------------
     # Comando prefijo: y!deck_remove
     # -----------------------------
     @commands.command(name="deck_remove")
-    async def deck_remove_prefix(self, ctx: commands.Context, deck: str, *, card_name: str):
+    async def deck_remove_prefix(
+        self, ctx: commands.Context, deck: str, *, card_name: str
+    ):
         server_id = str(ctx.guild.id)
         user_id = str(ctx.author.id)
 
         letra_mazo = normalizar_mazo(deck)
 
         cards = cargar_cartas()
-        card = next((c for c in cards if c["nombre"].lower() == card_name.lower()), None)
+        card = next(
+            (c for c in cards if c["nombre"].lower() == card_name.lower()), None
+        )
 
         if not card:
             await ctx.send(f"No card found with the name '{card_name}'.")
@@ -349,18 +366,20 @@ class Battle(commands.Cog):
         user_deck = cargar_mazo(server_id, user_id, letra_mazo)
 
         if card_id not in map(str, user_deck):
-            await ctx.send(f"The card '{card['nombre']}' is not in deck {letra_mazo}.")
+            await ctx.send(
+                f"The card '{card['nombre']}' is not in deck {letra_mazo}."
+            )
             return
 
         user_deck.remove(card_id)
         guardar_mazo(server_id, user_id, letra_mazo, user_deck)
 
-        await ctx.send(f"The card '{card['nombre']}' has been removed from deck {letra_mazo}.")
-        
-
+        await ctx.send(
+            f"The card '{card['nombre']}' has been removed from deck {letra_mazo}."
+        )
 
     # ------------------------------
-    # Helpers
+    # Helpers battle
     # ------------------------------
     def _battle_key(self, guild_id: int, u1: int, u2: int):
         a, b = sorted([u1, u2])
@@ -391,7 +410,7 @@ class Battle(commands.Cog):
     def obtener_stat(self, carta: dict, stat: str) -> int:
         try:
             return int(carta.get(stat, 0))
-        except:
+        except Exception:
             return 0
 
     # ------------------------------
@@ -399,31 +418,46 @@ class Battle(commands.Cog):
     # ------------------------------
     @app_commands.command(
         name="battle",
-        description="Challenge another user to a card battle."
+        description="Challenge another user to a card battle.",
     )
     @app_commands.describe(user="User you want to challenge")
-    async def battle_slash(self, interaction: discord.Interaction, user: discord.Member):
+    async def battle_slash(
+        self, interaction: discord.Interaction, user: discord.Member
+    ):
         if user.bot:
-            await interaction.response.send_message("You cannot challenge a bot.", ephemeral=True)
+            await interaction.response.send_message(
+                "You cannot challenge a bot.", ephemeral=True
+            )
             return
 
         if user.id == interaction.user.id:
-            await interaction.response.send_message("You cannot challenge yourself.", ephemeral=True)
+            await interaction.response.send_message(
+                "You cannot challenge yourself.", ephemeral=True
+            )
             return
 
         guild_id = interaction.guild_id
         server_id = str(guild_id)
 
         if self._get_session(guild_id, interaction.user.id, user.id):
-            await interaction.response.send_message("There is already an active battle between you two.", ephemeral=True)
+            await interaction.response.send_message(
+                "There is already an active battle between you two.",
+                ephemeral=True,
+            )
             return
 
         if not self.tiene_mazo_lleno(server_id, str(interaction.user.id)):
-            await interaction.response.send_message("You need at least one full deck to battle.", ephemeral=True)
+            await interaction.response.send_message(
+                "You need at least one full deck to battle.",
+                ephemeral=True,
+            )
             return
 
         if not self.tiene_mazo_lleno(server_id, str(user.id)):
-            await interaction.response.send_message(f"{user.display_name} has no full decks.", ephemeral=True)
+            await interaction.response.send_message(
+                f"{user.display_name} has no full decks.",
+                ephemeral=True,
+            )
             return
 
         session = BattleSession(guild_id, interaction.user, user)
@@ -436,20 +470,31 @@ class Battle(commands.Cog):
                 on_decision=lambda i, accepted: asyncio.create_task(
                     self._on_duel_decision(i, session, accepted)
                 )
-            )
+            ),
         )
 
-    async def _on_duel_decision(self, interaction: discord.Interaction, session: BattleSession, accepted: bool):
+    async def _on_duel_decision(
+        self,
+        interaction: discord.Interaction,
+        session: BattleSession,
+        accepted: bool,
+    ):
         if interaction.user.id != session.p2.id:
-            await interaction.response.send_message("Only the challenged user can decide.", ephemeral=True)
+            await interaction.response.send_message(
+                "Only the challenged user can decide.", ephemeral=True
+            )
             return
 
         if not accepted:
-            await interaction.response.send_message("You declined the battle.", ephemeral=True)
+            await interaction.response.send_message(
+                "You declined the battle.", ephemeral=True
+            )
             self._clear_session(session)
             return
 
-        await interaction.response.send_message("You accepted the battle.", ephemeral=True)
+        await interaction.response.send_message(
+            "You accepted the battle.", ephemeral=True
+        )
 
         session.interaction_p2 = interaction
         session.public_channel = interaction.channel
@@ -462,16 +507,24 @@ class Battle(commands.Cog):
         await self._ask_deck_choice(session, session.p1)
         await self._ask_deck_choice(session, session.p2)
 
-    async def _ask_deck_choice(self, session: BattleSession, player: discord.Member):
+    async def _ask_deck_choice(
+        self, session: BattleSession, player: discord.Member
+    ):
         server_id = str(session.guild_id)
         llenos = self.mazos_llenos(server_id, str(player.id))
 
         if not llenos:
-            await session.public_channel.send(f"{player.mention} no longer has any full deck. Battle cancelled.")
+            await session.public_channel.send(
+                f"{player.mention} no longer has any full deck. Battle cancelled."
+            )
             self._clear_session(session)
             return
 
-        inter = session.interaction_p1 if player.id == session.p1.id else session.interaction_p2
+        inter = (
+            session.interaction_p1
+            if player.id == session.p1.id
+            else session.interaction_p2
+        )
 
         await inter.followup.send(
             "Choose your deck:",
@@ -480,19 +533,31 @@ class Battle(commands.Cog):
                 available_decks=llenos,
                 on_choose=lambda i, letra: asyncio.create_task(
                     self._on_deck_chosen(i, session, player, letra)
-                )
+                ),
             ),
-            ephemeral=True
+            ephemeral=True,
         )
 
-    async def _on_deck_chosen(self, interaction: discord.Interaction, session: BattleSession, player: discord.Member, letra: str):
-        await interaction.response.send_message(f"You chose deck {letra}.", ephemeral=True)
+    async def _on_deck_chosen(
+        self,
+        interaction: discord.Interaction,
+        session: BattleSession,
+        player: discord.Member,
+        letra: str,
+    ):
+        # Responder de forma segura la interacción del botón
+        await interaction.response.defer(ephemeral=True)
+        await interaction.followup.send(
+            f"You chose deck {letra}.", ephemeral=True
+        )
 
         server_id = str(session.guild_id)
         deck = cargar_mazo(server_id, str(player.id), letra)
 
         if len(deck) != DECK_SIZE:
-            await session.public_channel.send(f"{player.mention}, your deck {letra} is no longer full. Battle cancelled.")
+            await session.public_channel.send(
+                f"{player.mention}, your deck {letra} is no longer full. Battle cancelled."
+            )
             self._clear_session(session)
             return
 
@@ -506,7 +571,9 @@ class Battle(commands.Cog):
         if session.p1_deck_letter and session.p2_deck_letter:
             await self._start_round(session.public_channel, session)
 
-    async def _start_round(self, channel: discord.TextChannel, session: BattleSession):
+    async def _start_round(
+        self, channel: discord.TextChannel, session: BattleSession
+    ):
         if session.has_winner():
             await self._finish_battle(channel, session)
             return
@@ -523,11 +590,17 @@ class Battle(commands.Cog):
         await self._ask_card_choice(session, session.p1, True)
         await self._ask_card_choice(session, session.p2, False)
 
-    async def _ask_card_choice(self, session: BattleSession, player: discord.Member, is_p1: bool):
+    async def _ask_card_choice(
+        self, session: BattleSession, player: discord.Member, is_p1: bool
+    ):
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
 
-        inter = session.interaction_p1 if player.id == session.p1.id else session.interaction_p2
+        inter = (
+            session.interaction_p1
+            if player.id == session.p1.id
+            else session.interaction_p2
+        )
 
         await inter.followup.send(
             "Choose a card:",
@@ -537,14 +610,25 @@ class Battle(commands.Cog):
                 cartas_info=session.cartas_info,
                 used_indices=used,
                 on_choose=lambda i, idx, cid: asyncio.create_task(
-                    self._on_card_chosen(i, session, player, is_p1, idx, cid)
-                )
+                    self._on_card_chosen(
+                        i, session, player, is_p1, idx, cid
+                    )
+                ),
             ),
-            ephemeral=True
+            ephemeral=True,
         )
 
-    async def _on_card_chosen(self, interaction: discord.Interaction, session: BattleSession, player: discord.Member, is_p1: bool, index: int, card_id: str):
-        await interaction.response.send_message("Card selected.", ephemeral=True)
+    async def _on_card_chosen(
+        self,
+        interaction: discord.Interaction,
+        session: BattleSession,
+        player: discord.Member,
+        is_p1: bool,
+        index: int,
+        card_id: str,
+    ):
+        await interaction.response.defer(ephemeral=True)
+        await interaction.followup.send("Card selected.", ephemeral=True)
 
         if is_p1:
             session.p1_used_indices.add(index)
@@ -556,7 +640,9 @@ class Battle(commands.Cog):
         if session.waiting_p1_card and session.waiting_p2_card:
             await self._resolve_round(session.public_channel, session)
 
-    async def _resolve_round(self, channel: discord.TextChannel, session: BattleSession):
+    async def _resolve_round(
+        self, channel: discord.TextChannel, session: BattleSession
+    ):
         idx1, cid1 = session.waiting_p1_card
         idx2, cid2 = session.waiting_p2_card
 
@@ -571,16 +657,25 @@ class Battle(commands.Cog):
 
         if v1 > v2:
             session.score_p1 += 1
-            result = f"{session.p1.mention} wins the round. {nombre1} ({v1}) vs {nombre2} ({v2})."
+            result = (
+                f"{session.p1.mention} wins the round. "
+                f"{nombre1} ({v1}) vs {nombre2} ({v2})."
+            )
         elif v2 > v1:
             session.score_p2 += 1
-            result = f"{session.p2.mention} wins the round. {nombre1} ({v1}) vs {nombre2} ({v2})."
+            result = (
+                f"{session.p2.mention} wins the round. "
+                f"{nombre1} ({v1}) vs {nombre2} ({v2})."
+            )
         else:
-            result = f"Tie. {nombre1} ({v1}) vs {nombre2} ({v2})."
+            result = (
+                f"Tie. {nombre1} ({v1}) vs {nombre2} ({v2})."
+            )
 
         await channel.send(
             f"Round {session.round} result:\n{result}\n"
-            f"Score: {session.p1.display_name} {session.score_p1} – {session.score_p2} {session.p2.display_name}"
+            f"Score: {session.p1.display_name} {session.score_p1} – "
+            f"{session.score_p2} {session.p2.display_name}"
         )
 
         session.round += 1
@@ -590,22 +685,24 @@ class Battle(commands.Cog):
         else:
             await self._start_round(channel, session)
 
-    async def _finish_battle(self, channel: discord.TextChannel, session: BattleSession):
+    async def _finish_battle(
+        self, channel: discord.TextChannel, session: BattleSession
+    ):
         winner = session.winner()
         if winner:
             await channel.send(
                 f"Battle finished. Winner: {winner.mention} "
-                f"({session.p1.display_name} {session.score_p1} – {session.score_p2} {session.p2.display_name})."
+                f"({session.p1.display_name} {session.score_p1} – "
+                f"{session.score_p2} {session.p2.display_name})."
             )
         else:
             await channel.send(
-                f"Battle finished with a tie. "
-                f"Score: {session.p1.display_name} {session.score_p1} – {session.score_p2} {session.p2.display_name}."
+                "Battle finished with a tie. "
+                f"Score: {session.p1.display_name} {session.score_p1} – "
+                f"{session.score_p2} {session.p2.display_name}."
             )
 
         self._clear_session(session)
-
-
 
 
 # Setup del cog
