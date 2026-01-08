@@ -83,7 +83,8 @@ class ChooseCardView(discord.ui.View):
 
         # Lista de índices disponibles
         self.indices = [i for i in range(len(deck_cards)) if i not in used_indices]
-        self.i = 0  # índice actual
+
+        self.i = 0
 
         # Añadir select menu
         self.add_item(ElegirCartaSelect(self))
@@ -143,16 +144,14 @@ class ChooseCardView(discord.ui.View):
         return embed
 
     async def enviar(self, interaction: discord.Interaction):
+        self.i = 0
+
         embed = self._embed_actual()
         await interaction.followup.send(embed=embed, view=self, ephemeral=True)
 
     async def actualizar(self, interaction: discord.Interaction):
         embed = self._embed_actual()
         await interaction.response.edit_message(embed=embed, view=self)
-
-    # -------------------------
-    # Botones de navegación
-    # -------------------------
 
     @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
     async def atras(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -164,16 +163,13 @@ class ChooseCardView(discord.ui.View):
         self.i = (self.i + 1) % len(self.indices)
         await self.actualizar(interaction)
 
-    # -------------------------
-    # Botón para jugar carta
-    # -------------------------
-
-    @discord.ui.button(label="Jugar esta carta", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Play this card", style=discord.ButtonStyle.success)
     async def jugar(self, interaction: discord.Interaction, button: discord.ui.Button):
         idx = self.indices[self.i]
         cid = str(self.deck_cards[idx])
         await self.on_choose(interaction, idx, cid)
         self.stop()
+
 
 
 class ElegirCartaSelect(discord.ui.Select):
@@ -186,15 +182,29 @@ class ElegirCartaSelect(discord.ui.Select):
             cid = str(view.deck_cards[idx])
             carta = view.cartas_info.get(cid, {})
             nombre = carta.get("nombre", f"ID {cid}")
+
+            # Resumen compacto de stats
+            hp = carta.get("health", "—")
+            atk = carta.get("attack", "—")
+            defn = carta.get("defense", "—")
+            spd = carta.get("speed", "—")
+
+            stats_resumen = f"❤️{hp} ⚔️{atk} 🛡️{defn} 💨{spd}"
+
+            # Label final (máx 80 chars)
+            label = f"{nombre} — {stats_resumen}"
+            if len(label) > 80:
+                label = label[:77] + "..."
+
             opciones.append(
                 discord.SelectOption(
-                    label=nombre[:80],
+                    label=label,
                     value=str(idx)
                 )
             )
 
         super().__init__(
-            placeholder="Selecciona una carta...",
+            placeholder="Choose a card...",
             min_values=1,
             max_values=1,
             options=opciones
