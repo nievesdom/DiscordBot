@@ -545,16 +545,21 @@ class Battle(commands.Cog):
         player: discord.Member,
         letra: str,
     ):
-        # Para ver que la callback del botón se ejecuta
-        print(f"[DEBUG] _on_deck_chosen llamado por {player} con mazo {letra}")
+        # Mantener viva la interacción del botón
         await interaction.response.defer(ephemeral=True)
+
+        # GUARDAR INTERACCIÓN FRESCA (CRÍTICO)
+        if player.id == session.p1.id:
+            session.interaction_p1 = interaction
+        else:
+            session.interaction_p2 = interaction
+
         await interaction.followup.send(
             f"You chose deck {letra}.", ephemeral=True
         )
 
         server_id = str(session.guild_id)
         deck = cargar_mazo(server_id, str(player.id), letra)
-        print(f"[DEBUG] Cartas cargadas para {player}: {deck}")
 
         if len(deck) != DECK_SIZE:
             await session.public_channel.send(
@@ -570,10 +575,7 @@ class Battle(commands.Cog):
             session.p2_deck_letter = letra
             session.p2_deck_cards = [str(c) for c in deck]
 
-        # Trazas para ver el estado de la sesión
-        print(
-            f"[DEBUG] Estado mazos: p1={session.p1_deck_letter}, p2={session.p2_deck_letter}"
-        )
+        # DEBUG opcional
         await session.public_channel.send(
             f"[DEBUG] Decks chosen so far -> "
             f"{session.p1.display_name}: {session.p1_deck_letter}, "
@@ -581,13 +583,11 @@ class Battle(commands.Cog):
         )
 
         if session.p1_deck_letter and session.p2_deck_letter:
-            print("[DEBUG] Ambos mazos elegidos, llamando a _start_round")
             await session.public_channel.send(
                 "[DEBUG] Both decks chosen, starting first round..."
             )
             await self._start_round(session.public_channel, session)
-        else:
-            print("[DEBUG] Solo un mazo elegido, esperando al otro jugador")
+
 
     async def _start_round(
         self, channel: discord.TextChannel, session: BattleSession
@@ -601,52 +601,72 @@ class Battle(commands.Cog):
             f"p1_deck={session.p1_deck_letter}, "
             f"p2_deck={session.p2_deck_letter}"
         )
-    
-        if session.has_winner():
-            await self._finish_battle(channel, session)
-            return
-    
-        session.current_stat = random.choice(STATS_COMBAT)
-    
-        await channel.send(
-            f"Round {session.round}. Stat: **{session.current_stat.capitalize()}**."
-        )
-    
-        session.waiting_p1_card = None
-        session.waiting_p2_card = None
-    
-        await self._ask_card_choice(session, session.p1, True)
-        await self._ask_card_choice(session, session.p2, False)
+
+        try:
+            if session.has_winner():
+                await self._finish_battle(channel, session)
+                return
+
+            session.current_stat = random.choice(STATS_COMBAT)
+
+            await channel.send(
+                f"Round {session.round}. Stat: **{session.current_stat.capitalize()}**."
+            )
+
+            session.waiting_p1_card = None
+            session.waiting_p2_card = None
+
+            await self._ask_card_choice(session, session.p1, True)
+            await self._ask_card_choice(session, session.p2, False)
+
+        except Exception as e:
+            # LOG MUY EXPLÍCITO
+            print(f"[DEBUG ERROR] en _start_round: {repr(e)}")
+            await channel.send(f"[DEBUG ERROR] en _start_round: `{repr(e)}`")
+
 
 
     async def _ask_card_choice(
         self, session: BattleSession, player: discord.Member, is_p1: bool
     ):
-        deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
-        used = session.p1_used_indices if is_p1 else session.p2_used_indices
+        try:
+            deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
+            used = session.p1_used_indices if is_p1 else session.p2_used_indices
 
-        inter = (
-            session.interaction_p1
-            if player.id == session.p1.id
-            else session.interaction_p2
-        )
+            inter = (
+                session.interaction_p1
+                if player.id == session.p1.id
+                else session.interaction_p2
+            )
 
-        await inter.followup.send(
-            "Choose a card:",
-            view=ChooseCardView(
-                player=player,
-                deck_cards=deck,
-                cartas_info=session.cartas_info,
-                used_indices=used,
-                on_choose=lambda i, idx, cid: asyncio.create_task(
-                    self._on_card_chosen(
-                        i, session, player, is_p1, idx, cid
-                    )
+            await inter.followup.send(
+                "Choose a card:",
+                view=ChooseCardView(
+                    player=player,
+                    deck_cards=deck,
+                    cartas_info=session.cartas_info,
+                    used_indices=used,
+                    on_choose=lambda i, idx, cid: asyncio.create_task(
+                        self._on_card_chosen(
+                            i, session, player, is_p1, idx, cid
+                        )
+                    ),
                 ),
-            ),
-            ephemeral=True,
-        )
+                ephemeral=True,
+            )
 
+        except Exception as e:
+            print(
+                f"[DEBUG ERROR] en _ask_card_choice "
+                f"(player={player}, is_p1={is_p1}): {repr(e)}"
+            )
+            if session.public_channel:
+                await session.public_channel.send(
+                    f"[DEBUG ERROR] en _ask_card_choice "
+                    f"(player={player.display_name}, is_p1={is_p1}): `{repr(e)}`"
+                )
+
+    
     async def _on_card_chosen(
         self,
         interaction: discord.Interaction,
@@ -656,18 +676,28 @@ class Battle(commands.Cog):
         index: int,
         card_id: str,
     ):
+        # Mantener viva la interacción del botón
         await interaction.response.defer(ephemeral=True)
+    
+        # GUARDAR INTERACCIÓN FRESCA (CRÍTICO)
+        if player.id == session.p1.id:
+            session.interaction_p1 = interaction
+        else:
+            session.interaction_p2 = interaction
+    
         await interaction.followup.send("Card selected.", ephemeral=True)
-
+    
         if is_p1:
             session.p1_used_indices.add(index)
             session.waiting_p1_card = (index, card_id)
         else:
             session.p2_used_indices.add(index)
             session.waiting_p2_card = (index, card_id)
-
+    
         if session.waiting_p1_card and session.waiting_p2_card:
             await self._resolve_round(session.public_channel, session)
+
+
 
     async def _resolve_round(
         self, channel: discord.TextChannel, session: BattleSession
