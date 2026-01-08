@@ -25,46 +25,51 @@ def normalizar_mazo(nombre: str) -> str:
         return "A"
     
 
+
 class BattleSession:
     def __init__(self, guild_id: int, p1: discord.Member, p2: discord.Member):
         self.guild_id = guild_id
         self.p1 = p1
         self.p2 = p2
-        
+
+        self.public_channel: Optional[discord.TextChannel] = None
+
         self.p1_deck_letter: Optional[str] = None
         self.p2_deck_letter: Optional[str] = None
-        
+
         self.p1_deck_cards: list[str] = []
         self.p2_deck_cards: list[str] = []
-        
+
         self.p1_used_indices: set[int] = set()
         self.p2_used_indices: set[int] = set()
-        
+
         self.score_p1 = 0
         self.score_p2 = 0
-        
         self.round = 1
         self.current_stat: Optional[str] = None
+
         self.cartas_info = cartas_por_id()
+
         self.waiting_p1_card: Optional[Tuple[int, str]] = None
         self.waiting_p2_card: Optional[Tuple[int, str]] = None
-        
+
     def best_of_limit(self) -> int:
         return 5
-    
+
     def has_winner(self) -> bool:
         if self.score_p1 >= 3 or self.score_p2 >= 3:
             return True
         if self.round > self.best_of_limit() and self.score_p1 != self.score_p2:
             return True
         return False
-    
+
     def winner(self) -> Optional[discord.Member]:
         if self.score_p1 > self.score_p2:
             return self.p1
         if self.score_p2 > self.score_p1:
             return self.p2
         return None
+
 
 
 class Battle(commands.Cog):
@@ -343,7 +348,7 @@ class Battle(commands.Cog):
 
         await ctx.send(f"The card '{card['nombre']}' has been removed from deck {letra_mazo}.")
         
-
+        
     # ------------------------------
     # Helpers
     # ------------------------------
@@ -435,13 +440,15 @@ class Battle(commands.Cog):
 
         await interaction.response.send_message("You accepted the battle.", ephemeral=True)
 
-        channel = interaction.channel
-        await channel.send(
-            f"The battle between {session.p1.mention} and {session.p2.mention} begins. Choose your decks."
+        session.public_channel = interaction.channel
+
+        await session.public_channel.send(
+            f"The battle between {session.p1.mention} and {session.p2.mention} begins. "
+            f"Each player will now choose their deck."
         )
 
-        await self._ask_deck_choice(channel, session, session.p1)
-        await self._ask_deck_choice(channel, session, session.p2)
+        await self._ask_deck_choice(session.public_channel, session, session.p1)
+        await self._ask_deck_choice(session.public_channel, session, session.p2)
 
     async def _ask_deck_choice(self, channel: discord.TextChannel, session: BattleSession, player: discord.Member):
         server_id = str(session.guild_id)
@@ -460,7 +467,8 @@ class Battle(commands.Cog):
                 on_choose=lambda i, letra: asyncio.create_task(
                     self._on_deck_chosen(i, session, player, letra)
                 )
-            )
+            ),
+            ephemeral=True
         )
 
     async def _on_deck_chosen(self, interaction: discord.Interaction, session: BattleSession, player: discord.Member, letra: str):
@@ -470,7 +478,7 @@ class Battle(commands.Cog):
         deck = cargar_mazo(server_id, str(player.id), letra)
 
         if len(deck) != DECK_SIZE:
-            await interaction.channel.send(f"{player.mention}, your deck {letra} is no longer full. Battle cancelled.")
+            await session.public_channel.send(f"{player.mention}, your deck {letra} is no longer full. Battle cancelled.")
             self._clear_session(session)
             return
 
@@ -482,7 +490,7 @@ class Battle(commands.Cog):
             session.p2_deck_cards = [str(c) for c in deck]
 
         if session.p1_deck_letter and session.p2_deck_letter:
-            await self._start_round(interaction.channel, session)
+            await self._start_round(session.public_channel, session)
 
     async def _start_round(self, channel: discord.TextChannel, session: BattleSession):
         if session.has_winner():
@@ -490,6 +498,7 @@ class Battle(commands.Cog):
             return
 
         session.current_stat = random.choice(STATS_COMBAT)
+
         await channel.send(
             f"Round {session.round}. Stat: **{session.current_stat.capitalize()}**."
         )
@@ -514,7 +523,8 @@ class Battle(commands.Cog):
                 on_choose=lambda i, idx, cid: asyncio.create_task(
                     self._on_card_chosen(i, session, player, is_p1, idx, cid)
                 )
-            )
+            ),
+            ephemeral=True
         )
 
     async def _on_card_chosen(self, interaction: discord.Interaction, session: BattleSession, player: discord.Member, is_p1: bool, index: int, card_id: str):
@@ -528,7 +538,7 @@ class Battle(commands.Cog):
             session.waiting_p2_card = (index, card_id)
 
         if session.waiting_p1_card and session.waiting_p2_card:
-            await self._resolve_round(interaction.channel, session)
+            await self._resolve_round(session.public_channel, session)
 
     async def _resolve_round(self, channel: discord.TextChannel, session: BattleSession):
         idx1, cid1 = session.waiting_p1_card
@@ -578,7 +588,6 @@ class Battle(commands.Cog):
             )
 
         self._clear_session(session)
-
 
 
 
