@@ -1,5 +1,6 @@
 import asyncio
 import discord
+import random
 from discord.ext import commands
 from discord import app_commands
 from core.firebase_storage import (
@@ -678,22 +679,22 @@ class Battle(commands.Cog):
     ):
         # Mantener viva la interacción del botón
         await interaction.response.defer(ephemeral=True)
-    
+
         # GUARDAR INTERACCIÓN FRESCA (CRÍTICO)
         if player.id == session.p1.id:
             session.interaction_p1 = interaction
         else:
             session.interaction_p2 = interaction
-    
+
         await interaction.followup.send("Card selected.", ephemeral=True)
-    
+
         if is_p1:
             session.p1_used_indices.add(index)
             session.waiting_p1_card = (index, card_id)
         else:
             session.p2_used_indices.add(index)
             session.waiting_p2_card = (index, card_id)
-    
+
         if session.waiting_p1_card and session.waiting_p2_card:
             await self._resolve_round(session.public_channel, session)
 
