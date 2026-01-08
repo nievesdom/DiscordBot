@@ -632,16 +632,13 @@ class Battle(commands.Cog):
     ):
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
-
+    
         inter = (
             session.interaction_p1
             if player.id == session.p1.id
             else session.interaction_p2
         )
-        
-        
-
-        # Crear la vista
+    
         vista = ChooseCardView(
             player=player,
             deck_cards=deck,
@@ -651,11 +648,42 @@ class Battle(commands.Cog):
                 interaction, session, player, is_p1, idx, cid
             ),
         )
-
-        
-        # Dejar que la vista envíe el embed inicial
+    
         await vista.enviar(inter)
 
+
+
+    async def _on_card_chosen(
+        self,
+        interaction: discord.Interaction,
+        session: BattleSession,
+        player: discord.Member,
+        is_p1: bool,
+        index: int,
+        card_id: str,
+    ):
+        # Asegurar que la interacción tiene una respuesta inicial
+        if not interaction.response.is_done():
+            try:
+                await interaction.response.defer(ephemeral=True)
+            except Exception:
+                # Si por cualquier motivo ya está respondida, lo ignoramos
+                pass
+            
+        # Registrar carta elegida
+        if is_p1:
+            session.p1_used_indices.add(index)
+            session.waiting_p1_card = (index, card_id)
+        else:
+            session.p2_used_indices.add(index)
+            session.waiting_p2_card = (index, card_id)
+    
+        # Si ambos han elegido, resolvemos la ronda
+        if session.waiting_p1_card and session.waiting_p2_card:
+            # Usamos el canal público guardado en la sesión
+            if session.public_channel is not None:
+                await self._resolve_round(session.public_channel, session)
+    
 
 
 
