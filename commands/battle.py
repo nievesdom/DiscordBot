@@ -630,73 +630,31 @@ class Battle(commands.Cog):
     async def _ask_card_choice(
         self, session: BattleSession, player: discord.Member, is_p1: bool
     ):
-        try:
-            deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
-            used = session.p1_used_indices if is_p1 else session.p2_used_indices
+        deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
+        used = session.p1_used_indices if is_p1 else session.p2_used_indices
 
-            inter = (
-                session.interaction_p1
-                if player.id == session.p1.id
-                else session.interaction_p2
-            )
+        inter = (
+            session.interaction_p1
+            if player.id == session.p1.id
+            else session.interaction_p2
+        )
 
-            await inter.followup.send(
-                "Choose a card:",
-                view=ChooseCardView(
-                    player=player,
-                    deck_cards=deck,
-                    cartas_info=session.cartas_info,
-                    used_indices=used,
-                    on_choose=lambda i, idx, cid: asyncio.create_task(
-                        self._on_card_chosen(
-                            i, session, player, is_p1, idx, cid
-                        )
-                    ),
-                ),
-                ephemeral=True,
-            )
-
-        except Exception as e:
-            print(
-                f"[DEBUG ERROR] en _ask_card_choice "
-                f"(player={player}, is_p1={is_p1}): {repr(e)}"
-            )
-            if session.public_channel:
-                await session.public_channel.send(
-                    f"[DEBUG ERROR] en _ask_card_choice "
-                    f"(player={player.display_name}, is_p1={is_p1}): `{repr(e)}`"
+        # Crear la vista
+        vista = ChooseCardView(
+            player=player,
+            deck_cards=deck,
+            cartas_info=session.cartas_info,
+            used_indices=used,
+            on_choose=lambda i, idx, cid: asyncio.create_task(
+                self._on_card_chosen(
+                    i, session, player, is_p1, idx, cid
                 )
+            ),
+        )
 
-    
-    async def _on_card_chosen(
-        self,
-        interaction: discord.Interaction,
-        session: BattleSession,
-        player: discord.Member,
-        is_p1: bool,
-        index: int,
-        card_id: str,
-    ):
-        # Mantener viva la interacción del botón
-        await interaction.response.defer(ephemeral=True)
+        # Dejar que la vista envíe el embed inicial
+        await vista.enviar(inter)
 
-        # GUARDAR INTERACCIÓN FRESCA (CRÍTICO)
-        if player.id == session.p1.id:
-            session.interaction_p1 = interaction
-        else:
-            session.interaction_p2 = interaction
-
-        await interaction.followup.send("Card selected.", ephemeral=True)
-
-        if is_p1:
-            session.p1_used_indices.add(index)
-            session.waiting_p1_card = (index, card_id)
-        else:
-            session.p2_used_indices.add(index)
-            session.waiting_p2_card = (index, card_id)
-
-        if session.waiting_p1_card and session.waiting_p2_card:
-            await self._resolve_round(session.public_channel, session)
 
 
 
