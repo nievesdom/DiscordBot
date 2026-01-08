@@ -638,6 +638,8 @@ class Battle(commands.Cog):
             if player.id == session.p1.id
             else session.interaction_p2
         )
+        
+        
 
         # Crear la vista
         vista = ChooseCardView(
@@ -645,16 +647,13 @@ class Battle(commands.Cog):
             deck_cards=deck,
             cartas_info=session.cartas_info,
             used_indices=used,
-            on_choose=lambda i, idx, cid: asyncio.create_task(
-                self._on_card_chosen(
-                    i, session, player, is_p1, idx, cid
-                )
+            on_choose=lambda i, idx, cid: self._on_card_chosen(
+                i, session, player, is_p1, idx, cid
             ),
         )
-
+        
         # Dejar que la vista envíe el embed inicial
         await vista.enviar(inter)
-
 
 
 
