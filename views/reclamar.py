@@ -1,7 +1,7 @@
 import discord
 import os
 
-# ✅ Sustituimos propiedades por inventario
+# Sustituimos propiedades por inventario
 from core.firebase_storage import (
     agregar_cartas_inventario,
     cargar_inventario_usuario
@@ -44,7 +44,7 @@ class ReclamarCarta(discord.ui.View):
                 await interaction.response.send_message("No se encontró información de esta carta.", ephemeral=True)
                 return
 
-            # ✅ Guardar la carta en el inventario del usuario
+            # Guardar la carta en el inventario del usuario
             agregar_cartas_inventario(servidor_id, usuario_id, [self.carta_id])
 
             # Reconstruir embed
