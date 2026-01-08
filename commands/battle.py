@@ -545,7 +545,8 @@ class Battle(commands.Cog):
         player: discord.Member,
         letra: str,
     ):
-        # Responder de forma segura la interacción del botón
+        # Para ver que la callback del botón se ejecuta
+        print(f"[DEBUG] _on_deck_chosen llamado por {player} con mazo {letra}")
         await interaction.response.defer(ephemeral=True)
         await interaction.followup.send(
             f"You chose deck {letra}.", ephemeral=True
@@ -553,6 +554,7 @@ class Battle(commands.Cog):
 
         server_id = str(session.guild_id)
         deck = cargar_mazo(server_id, str(player.id), letra)
+        print(f"[DEBUG] Cartas cargadas para {player}: {deck}")
 
         if len(deck) != DECK_SIZE:
             await session.public_channel.send(
@@ -568,27 +570,54 @@ class Battle(commands.Cog):
             session.p2_deck_letter = letra
             session.p2_deck_cards = [str(c) for c in deck]
 
+        # Trazas para ver el estado de la sesión
+        print(
+            f"[DEBUG] Estado mazos: p1={session.p1_deck_letter}, p2={session.p2_deck_letter}"
+        )
+        await session.public_channel.send(
+            f"[DEBUG] Decks chosen so far -> "
+            f"{session.p1.display_name}: {session.p1_deck_letter}, "
+            f"{session.p2.display_name}: {session.p2_deck_letter}"
+        )
+
         if session.p1_deck_letter and session.p2_deck_letter:
+            print("[DEBUG] Ambos mazos elegidos, llamando a _start_round")
+            await session.public_channel.send(
+                "[DEBUG] Both decks chosen, starting first round..."
+            )
             await self._start_round(session.public_channel, session)
+        else:
+            print("[DEBUG] Solo un mazo elegido, esperando al otro jugador")
 
     async def _start_round(
         self, channel: discord.TextChannel, session: BattleSession
     ):
+        print(
+            f"[DEBUG] _start_round llamado. round={session.round}, "
+            f"p1_deck={session.p1_deck_letter}, p2_deck={session.p2_deck_letter}"
+        )
+        await channel.send(
+            f"[DEBUG] _start_round called. round={session.round}, "
+            f"p1_deck={session.p1_deck_letter}, "
+            f"p2_deck={session.p2_deck_letter}"
+        )
+    
         if session.has_winner():
             await self._finish_battle(channel, session)
             return
-
+    
         session.current_stat = random.choice(STATS_COMBAT)
-
+    
         await channel.send(
             f"Round {session.round}. Stat: **{session.current_stat.capitalize()}**."
         )
-
+    
         session.waiting_p1_card = None
         session.waiting_p2_card = None
-
+    
         await self._ask_card_choice(session, session.p1, True)
         await self._ask_card_choice(session, session.p2, False)
+
 
     async def _ask_card_choice(
         self, session: BattleSession, player: discord.Member, is_p1: bool
