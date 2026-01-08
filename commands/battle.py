@@ -486,7 +486,7 @@ class Battle(commands.Cog):
         )
 
     async def _on_deck_chosen(self, interaction: discord.Interaction, session: BattleSession, player: discord.Member, letra: str):
-        await interaction.followup.send(f"You chose deck {letra}.", ephemeral=True)
+        await interaction.response.send_message(f"You chose deck {letra}.", ephemeral=True)
 
         server_id = str(session.guild_id)
         deck = cargar_mazo(server_id, str(player.id), letra)
@@ -544,7 +544,7 @@ class Battle(commands.Cog):
         )
 
     async def _on_card_chosen(self, interaction: discord.Interaction, session: BattleSession, player: discord.Member, is_p1: bool, index: int, card_id: str):
-        await interaction.followup.send("Card selected.", ephemeral=True)
+        await interaction.response.send_message("Card selected.", ephemeral=True)
 
         if is_p1:
             session.p1_used_indices.add(index)
