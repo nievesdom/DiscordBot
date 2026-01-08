@@ -23,7 +23,6 @@ def normalizar_mazo(nombre: str) -> str:
             return "C"
 
         return "A"
-    
 
 
 class BattleSession:
@@ -32,24 +31,34 @@ class BattleSession:
         self.p1 = p1
         self.p2 = p2
 
+        # Canal público donde se anuncia la batalla
         self.public_channel: Optional[discord.TextChannel] = None
 
+        # Interacciones necesarias para enviar mensajes efímeros
+        self.interaction_p1: Optional[discord.Interaction] = None
+        self.interaction_p2: Optional[discord.Interaction] = None
+
+        # Mazos elegidos
         self.p1_deck_letter: Optional[str] = None
         self.p2_deck_letter: Optional[str] = None
 
         self.p1_deck_cards: list[str] = []
         self.p2_deck_cards: list[str] = []
 
+        # Cartas usadas
         self.p1_used_indices: set[int] = set()
         self.p2_used_indices: set[int] = set()
 
+        # Estado de la partida
         self.score_p1 = 0
         self.score_p2 = 0
         self.round = 1
         self.current_stat: Optional[str] = None
 
+        # Info de cartas
         self.cartas_info = cartas_por_id()
 
+        # Elecciones pendientes
         self.waiting_p1_card: Optional[Tuple[int, str]] = None
         self.waiting_p2_card: Optional[Tuple[int, str]] = None
 
@@ -348,7 +357,7 @@ class Battle(commands.Cog):
 
         await ctx.send(f"The card '{card['nombre']}' has been removed from deck {letra_mazo}.")
         
-        
+
     # ------------------------------
     # Helpers
     # ------------------------------
@@ -417,6 +426,7 @@ class Battle(commands.Cog):
             return
 
         session = BattleSession(guild_id, interaction.user, user)
+        session.interaction_p1 = interaction
         self._set_session(session)
 
         await interaction.response.send_message(
@@ -440,6 +450,7 @@ class Battle(commands.Cog):
 
         await interaction.response.send_message("You accepted the battle.", ephemeral=True)
 
+        session.interaction_p2 = interaction
         session.public_channel = interaction.channel
 
         await session.public_channel.send(
@@ -447,20 +458,22 @@ class Battle(commands.Cog):
             f"Each player will now choose their deck."
         )
 
-        await self._ask_deck_choice(session.public_channel, session, session.p1)
-        await self._ask_deck_choice(session.public_channel, session, session.p2)
+        await self._ask_deck_choice(session, session.p1)
+        await self._ask_deck_choice(session, session.p2)
 
-    async def _ask_deck_choice(self, channel: discord.TextChannel, session: BattleSession, player: discord.Member):
+    async def _ask_deck_choice(self, session: BattleSession, player: discord.Member):
         server_id = str(session.guild_id)
         llenos = self.mazos_llenos(server_id, str(player.id))
 
         if not llenos:
-            await channel.send(f"{player.mention} no longer has any full deck. Battle cancelled.")
+            await session.public_channel.send(f"{player.mention} no longer has any full deck. Battle cancelled.")
             self._clear_session(session)
             return
 
-        await channel.send(
-            f"{player.mention}, choose your deck.",
+        inter = session.interaction_p1 if player.id == session.p1.id else session.interaction_p2
+
+        await inter.followup.send(
+            "Choose your deck:",
             view=ChooseDeckView(
                 player=player,
                 available_decks=llenos,
@@ -506,15 +519,17 @@ class Battle(commands.Cog):
         session.waiting_p1_card = None
         session.waiting_p2_card = None
 
-        await self._ask_card_choice(channel, session, session.p1, True)
-        await self._ask_card_choice(channel, session, session.p2, False)
+        await self._ask_card_choice(session, session.p1, True)
+        await self._ask_card_choice(session, session.p2, False)
 
-    async def _ask_card_choice(self, channel: discord.TextChannel, session: BattleSession, player: discord.Member, is_p1: bool):
+    async def _ask_card_choice(self, session: BattleSession, player: discord.Member, is_p1: bool):
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
 
-        await channel.send(
-            f"{player.mention}, choose a card.",
+        inter = session.interaction_p1 if player.id == session.p1.id else session.interaction_p2
+
+        await inter.followup.send(
+            "Choose a card:",
             view=ChooseCardView(
                 player=player,
                 deck_cards=deck,
