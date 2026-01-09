@@ -17,6 +17,13 @@ from views.battle_views import AcceptDuelView, ChooseDeckView, ChooseCardView
 
 DECK_SIZE = 8  # Tamaño máximo del mazo
 STATS_COMBAT = ["health", "attack", "defense", "speed"]
+STAT_ICONS = {
+    "health": "❤️",
+    "attack": "⚔️",
+    "defense": "🛡️",
+    "speed": "💨",
+}
+
 
 
 def normalizar_mazo(nombre: str) -> str:
@@ -425,21 +432,25 @@ class Battle(commands.Cog):
     async def battle_slash(
         self, interaction: discord.Interaction, user: discord.Member
     ):
+        # No se permite retar a bots
         if user.bot:
             await interaction.response.send_message(
                 "You cannot challenge a bot.", ephemeral=True
             )
             return
 
+        # No se permite retarse a uno mismo
         if user.id == interaction.user.id:
             await interaction.response.send_message(
                 "You cannot challenge yourself.", ephemeral=True
             )
             return
 
+        # IDs del servidor y la guild
         guild_id = interaction.guild_id
         server_id = str(guild_id)
 
+        # Si ya existe una batalla activa entre estos dos usuarios, no se puede iniciar otra
         if self._get_session(guild_id, interaction.user.id, user.id):
             await interaction.response.send_message(
                 "There is already an active battle between you two.",
@@ -447,6 +458,7 @@ class Battle(commands.Cog):
             )
             return
 
+        # Comprobar que el retador tiene al menos un mazo lleno
         if not self.tiene_mazo_lleno(server_id, str(interaction.user.id)):
             await interaction.response.send_message(
                 "You need at least one full deck to battle.",
@@ -454,6 +466,7 @@ class Battle(commands.Cog):
             )
             return
 
+        # Comprobar que el retado también tiene un mazo lleno
         if not self.tiene_mazo_lleno(server_id, str(user.id)):
             await interaction.response.send_message(
                 f"{user.display_name} has no full decks.",
@@ -461,18 +474,32 @@ class Battle(commands.Cog):
             )
             return
 
+        # Crear sesión de batalla
         session = BattleSession(guild_id, interaction.user, user)
+
+        # Guardamos la interacción del jugador 1 (necesaria para mensajes efímeros)
         session.interaction_p1 = interaction
+
+        # Registrar la sesión como activa
         self._set_session(session)
 
-        await interaction.response.send_message(
-            f"{user.mention}, {interaction.user.display_name} challenges you to a battle.",
-            view=AcceptDuelView(
-                on_decision=lambda i, accepted: asyncio.create_task(
-                    self._on_duel_decision(i, session, accepted)
-                )
-            ),
+        # Enviar mensaje al jugador retado con botones Accept/Decline
+        view = AcceptDuelView(
+            on_decision=lambda i, accepted: asyncio.create_task(
+                self._on_duel_decision(i, session, accepted)
+            )
         )
+        
+        await interaction.response.send_message(
+            f"{user.display_name}, {interaction.user.display_name} challenges you to a battle.",
+            view=view
+        )
+        
+        # Guardar mensaje para timeout
+        view.message = await interaction.original_response()
+
+
+
 
     async def _on_duel_decision(
         self,
@@ -480,40 +507,52 @@ class Battle(commands.Cog):
         session: BattleSession,
         accepted: bool,
     ):
+        # Solo el jugador retado puede aceptar o rechazar
         if interaction.user.id != session.p2.id:
             await interaction.response.send_message(
                 "Only the challenged user can decide.", ephemeral=True
             )
             return
 
+        # Si rechaza, se cancela la batalla
         if not accepted:
-            await interaction.response.send_message(
-                "You declined the battle.", ephemeral=True
-            )
+            await session.public_channel.send(
+            f"{interaction.user.display_name} declined the battle."
+        )
             self._clear_session(session)
             return
 
+        # Si acepta, confirmamos
         await interaction.response.send_message(
             "You accepted the battle.", ephemeral=True
         )
 
+        # Guardamos interacción del jugador 2
         session.interaction_p2 = interaction
+
+        # Canal público donde se narrará la batalla
         session.public_channel = interaction.channel
 
+        # Anuncio público
         await session.public_channel.send(
-            f"The battle between {session.p1.mention} and {session.p2.mention} begins. "
-            f"Each player will now choose their deck."
+            f"The battle between {session.p1.mention} and {session.p2.mention} is about to start. "
+            f"Each player will now choose a deck to play with."
         )
 
+        # Pedir elección de mazo a ambos jugadores
         await self._ask_deck_choice(session, session.p1)
         await self._ask_deck_choice(session, session.p2)
+
+
 
     async def _ask_deck_choice(
         self, session: BattleSession, player: discord.Member
     ):
+        # Obtener qué mazos del jugador están llenos
         server_id = str(session.guild_id)
         llenos = self.mazos_llenos(server_id, str(player.id))
 
+        # Si ya no tiene mazos llenos, cancelar batalla
         if not llenos:
             await session.public_channel.send(
                 f"{player.mention} no longer has any full deck. Battle cancelled."
@@ -521,12 +560,14 @@ class Battle(commands.Cog):
             self._clear_session(session)
             return
 
+        # Elegir la interacción correcta (p1 o p2)
         inter = (
             session.interaction_p1
             if player.id == session.p1.id
             else session.interaction_p2
         )
 
+        # Enviar menú para elegir mazo
         await inter.followup.send(
             "Choose your deck:",
             view=ChooseDeckView(
@@ -539,6 +580,8 @@ class Battle(commands.Cog):
             ephemeral=True,
         )
 
+
+
     async def _on_deck_chosen(
         self,
         interaction: discord.Interaction,
@@ -549,19 +592,22 @@ class Battle(commands.Cog):
         # Mantener viva la interacción del botón
         await interaction.response.defer(ephemeral=True)
 
-        # GUARDAR INTERACCIÓN FRESCA (CRÍTICO)
+        # Guardar interacción fresca (muy importante para futuros followups)
         if player.id == session.p1.id:
             session.interaction_p1 = interaction
         else:
             session.interaction_p2 = interaction
 
+        # Confirmación efímera
         await interaction.followup.send(
             f"You chose deck {letra}.", ephemeral=True
         )
 
+        # Cargar mazo elegido
         server_id = str(session.guild_id)
         deck = cargar_mazo(server_id, str(player.id), letra)
 
+        # Si el mazo ya no está lleno, cancelar batalla
         if len(deck) != DECK_SIZE:
             await session.public_channel.send(
                 f"{player.mention}, your deck {letra} is no longer full. Battle cancelled."
@@ -569,6 +615,7 @@ class Battle(commands.Cog):
             self._clear_session(session)
             return
 
+        # Guardar mazo en la sesión
         if player.id == session.p1.id:
             session.p1_deck_letter = letra
             session.p1_deck_cards = [str(c) for c in deck]
@@ -576,13 +623,14 @@ class Battle(commands.Cog):
             session.p2_deck_letter = letra
             session.p2_deck_cards = [str(c) for c in deck]
 
-        # DEBUG opcional
+        # Mensaje de debug
         await session.public_channel.send(
             f"[DEBUG] Decks chosen so far -> "
             f"{session.p1.display_name}: {session.p1_deck_letter}, "
             f"{session.p2.display_name}: {session.p2_deck_letter}"
         )
 
+        # Si ambos ya eligieron mazo, iniciar primera ronda
         if session.p1_deck_letter and session.p2_deck_letter:
             await session.public_channel.send(
                 "[DEBUG] Both decks chosen, starting first round..."
@@ -590,13 +638,17 @@ class Battle(commands.Cog):
             await self._start_round(session.public_channel, session)
 
 
+
     async def _start_round(
         self, channel: discord.TextChannel, session: BattleSession
     ):
+        # Log de debug
         print(
             f"[DEBUG] _start_round llamado. round={session.round}, "
             f"p1_deck={session.p1_deck_letter}, p2_deck={session.p2_deck_letter}"
         )
+
+        # Mensaje público de debug
         await channel.send(
             f"[DEBUG] _start_round called. round={session.round}, "
             f"p1_deck={session.p1_deck_letter}, "
@@ -604,24 +656,33 @@ class Battle(commands.Cog):
         )
 
         try:
+            # Si ya hay ganador, terminar batalla
             if session.has_winner():
                 await self._finish_battle(channel, session)
                 return
 
+            # Elegir stat aleatorio para este round
             session.current_stat = random.choice(STATS_COMBAT)
 
+            # Anunciar stat del round
+            icono = STAT_ICONS.get(session.current_stat, "")
+            nombre = session.current_stat.upper()
+
             await channel.send(
-                f"Round {session.round}. Stat: **{session.current_stat.capitalize()}**."
+                f"Round {session.round}. Stat: {icono} **{nombre}**"
             )
 
+
+
+            # Resetear elecciones
             session.waiting_p1_card = None
             session.waiting_p2_card = None
 
+            # Pedir carta a ambos jugadores
             await self._ask_card_choice(session, session.p1, True)
             await self._ask_card_choice(session, session.p2, False)
 
         except Exception as e:
-            # LOG MUY EXPLÍCITO
             print(f"[DEBUG ERROR] en _start_round: {repr(e)}")
             await channel.send(f"[DEBUG ERROR] en _start_round: `{repr(e)}`")
 
@@ -630,15 +691,18 @@ class Battle(commands.Cog):
     async def _ask_card_choice(
         self, session: BattleSession, player: discord.Member, is_p1: bool
     ):
+        # Obtener mazo y cartas ya usadas
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
     
+        # Interacción efímera correcta
         inter = (
             session.interaction_p1
             if player.id == session.p1.id
             else session.interaction_p2
         )
     
+        # Crear vista de selección de carta
         vista = ChooseCardView(
             player=player,
             deck_cards=deck,
@@ -649,7 +713,9 @@ class Battle(commands.Cog):
             ),
         )
     
+        # Enviar embed inicial + vista
         await vista.enviar(inter)
+
 
 
 
@@ -690,66 +756,85 @@ class Battle(commands.Cog):
     async def _resolve_round(
         self, channel: discord.TextChannel, session: BattleSession
     ):
+        # Recuperamos las cartas elegidas por cada jugador:
+        # idx = índice dentro del mazo, cid = ID de la carta
         idx1, cid1 = session.waiting_p1_card
         idx2, cid2 = session.waiting_p2_card
 
+        # Obtenemos la información completa de cada carta
         c1 = session.cartas_info.get(cid1, {})
         c2 = session.cartas_info.get(cid2, {})
 
+        # Extraemos el valor de la estadística actual (health/attack/defense/speed)
         v1 = self.obtener_stat(c1, session.current_stat)
         v2 = self.obtener_stat(c2, session.current_stat)
 
+        # Nombres legibles de las cartas
         nombre1 = c1.get("nombre", f"ID {cid1}")
         nombre2 = c2.get("nombre", f"ID {cid2}")
 
+        # Comparamos los valores de la stat para determinar el ganador del round
         if v1 > v2:
-            session.score_p1 += 1
+            session.score_p1 += 1  # Suma punto jugador 1
             result = (
                 f"{session.p1.mention} wins the round. "
                 f"{nombre1} ({v1}) vs {nombre2} ({v2})."
             )
         elif v2 > v1:
-            session.score_p2 += 1
+            session.score_p2 += 1  # Suma punto jugador 2
             result = (
                 f"{session.p2.mention} wins the round. "
                 f"{nombre1} ({v1}) vs {nombre2} ({v2})."
             )
         else:
+            # Empate: nadie suma puntos
             result = (
                 f"Tie. {nombre1} ({v1}) vs {nombre2} ({v2})."
             )
 
+        # Enviamos al canal público el resultado del round y el marcador actual
         await channel.send(
             f"Round {session.round} result:\n{result}\n"
             f"Score: {session.p1.display_name} {session.score_p1} – "
             f"{session.score_p2} {session.p2.display_name}"
         )
 
+        # Pasamos al siguiente round
         session.round += 1
 
+        # Si ya hay ganador (3 puntos o final BO5), terminamos la batalla
         if session.has_winner():
             await self._finish_battle(channel, session)
         else:
+            # Si no, iniciamos el siguiente round
             await self._start_round(channel, session)
+
+
 
     async def _finish_battle(
         self, channel: discord.TextChannel, session: BattleSession
     ):
+        # Determinamos quién ganó la batalla completa
         winner = session.winner()
+
         if winner:
+            # Mensaje de victoria
             await channel.send(
                 f"Battle finished. Winner: {winner.mention} "
                 f"({session.p1.display_name} {session.score_p1} – "
                 f"{session.score_p2} {session.p2.display_name})."
             )
         else:
+            # Caso improbable: empate total
             await channel.send(
                 "Battle finished with a tie. "
                 f"Score: {session.p1.display_name} {session.score_p1} – "
                 f"{session.score_p2} {session.p2.display_name}."
             )
 
+        # Eliminamos la sesión activa de la memoria del bot
         self._clear_session(session)
+
 
 
 # Setup del cog

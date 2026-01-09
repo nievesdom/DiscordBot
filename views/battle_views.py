@@ -12,6 +12,7 @@ class AcceptDuelView(discord.ui.View):
     def __init__(self, on_decision: Callable[[discord.Interaction, bool], None]):
         super().__init__(timeout=120)
         self.on_decision = on_decision
+        self.message: Optional[discord.Message] = None  # Necesario para timeout
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.success)
     async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -22,6 +23,17 @@ class AcceptDuelView(discord.ui.View):
     async def decline_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.on_decision(interaction, False)
         self.stop()
+
+    async def on_timeout(self):
+        # Si expira, mensaje público sin mencionar
+        try:
+            if self.message:
+                await self.message.channel.send(
+                    f"The battle request from {self.message.interaction.user.display_name} has expired."
+                )
+        except Exception:
+            pass
+
 
 
 class ChooseDeckView(discord.ui.View):
