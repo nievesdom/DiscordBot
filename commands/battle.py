@@ -746,7 +746,6 @@ class Battle(commands.Cog):
 
 
     async def _resolve_round(self, channel, session):
-
         idx1, cid1 = session.waiting_p1_card
         idx2, cid2 = session.waiting_p2_card
     
@@ -767,62 +766,60 @@ class Battle(commands.Cog):
         if v1 > v2:
             session.score_p1 += 1
             resultado = f"{session.p1.display_name} wins the round!"
-            color = 0x4CAF50  # verde
+            color1, color2 = 0x4CAF50, 0xE53935  # verde / rojo
         elif v2 > v1:
             session.score_p2 += 1
             resultado = f"{session.p2.display_name} wins the round!"
-            color = 0xE53935  # rojo
+            color1, color2 = 0xE53935, 0x4CAF50  # rojo / verde
         else:
             resultado = "Tie!"
-            color = 0x9E9E9E  # gris
+            color1 = color2 = 0x9E9E9E  # gris
     
-        # Función para formatear stats con el stat comparado en negrita y color
+        # Función para formatear stats con el stat comparado en negrita y flecha
         def fmt(carta, valor_stat):
-            def stat_line(label, key):
+            def line(key):
                 val = carta.get(key, "—")
+                icon = STAT_ICONS.get(key, "")
                 if key == stat:
-                    return f"**{icono} {val} ←**"
-                icons = {
-                    "health": "❤️", "attack": "⚔️", "defense": "🛡️", "speed": "💨"
-                }
-                return f"{icons.get(key,'')} {val}"
+                    return f"**{icon} {val} ←**"
+                return f"{icon} {val}"
+            return "\n".join([line("health"), line("attack"), line("defense"), line("speed")])
     
-            return "\n".join([
-                stat_line("Health", "health"),
-                stat_line("Attack", "attack"),
-                stat_line("Defense", "defense"),
-                stat_line("Speed", "speed"),
-            ])
+        # Embed carta 1
+        embed1 = discord.Embed(
+            title=f"{session.p1.display_name}\n{nombre1}",
+            color=color1
+        )
+        embed1.add_field(name=f"{stat_name} Comparison", value=fmt(c1, v1), inline=False)
+        if c1.get("imagen"):
+            embed1.set_image(url=c1["imagen"])
     
-        # Crear embed comparativo
-        embed = discord.Embed(
-            title=f"Round {session.round} — {icono} {stat_name} comparison",
-            description=resultado,
-            color=color
+        # Embed VS central
+        embed_vs = discord.Embed(
+            title="⚔️ VS ⚔️",
+            description=f"**{stat_name} battle**\n{resultado}",
+            color=0xFFD700
         )
     
-        # Añadir campos de cada carta
-        embed.add_field(
-            name=f"{session.p1.display_name}\n{nombre1}",
-            value=fmt(c1, v1),
-            inline=True
+        # Embed carta 2
+        embed2 = discord.Embed(
+            title=f"{session.p2.display_name}\n{nombre2}",
+            color=color2
         )
+        embed2.add_field(name=f"{stat_name} Comparison", value=fmt(c2, v2), inline=False)
+        if c2.get("imagen"):
+            embed2.set_image(url=c2["imagen"])
     
-        embed.add_field(
-            name=f"{session.p2.display_name}\n{nombre2}",
-            value=fmt(c2, v2),
-            inline=True
-        )
-    
-        await channel.send(embed=embed)
+        # Enviar los tres embeds juntos
+        await channel.send(embeds=[embed1, embed_vs, embed2])
     
         # Continuar flujo
         session.round += 1
-    
         if session.has_winner():
             await self._finish_battle(channel, session)
         else:
             await self._start_round(channel, session)
+
     
 
 
