@@ -494,16 +494,11 @@ class Battle(commands.Cog):
             f"{user.display_name}, {interaction.user.display_name} challenges you to a battle.",
             view=view
         )
-        
+
         # ESTE es el mensaje real donde vive la vista
         view.message = await interaction.original_response()
-
-
-
-
-
-
-
+        
+        
     async def _on_duel_decision(
         self,
         interaction: discord.Interaction,
@@ -516,73 +511,80 @@ class Battle(commands.Cog):
                 "Only the challenged user can decide.", ephemeral=True
             )
             return
-
-        # Si rechaza, se cancela la batalla
+    
+        # REFERENCIA AL MENSAJE ORIGINAL DONDE VIVE LA VISTA
+        original_msg = await session.interaction_p1.original_response()
+    
+        # -------------------------
+        #   RECHAZAR BATALLA
+        # -------------------------
         if not accepted:
-            # Responder la interacción
+        
+            # Responder la interacción (obligatorio)
             if not interaction.response.is_done():
                 try:
-                    await interaction.response.defer(ephemeral=True)
+                    await interaction.response.defer()
                 except:
                     pass
                 
-            # Editar el mensaje original
-            if session.interaction_p1:
-                view_message = session.interaction_p1
-            else:
-                view_message = interaction
-
+            # Editar mensaje original
             try:
-                await session.public_channel.send(
-                    f"{interaction.user.display_name} declined the battle."
-                )
-                await session.interaction_p1.original_response().edit(
+                await original_msg.edit(
                     content=f"{interaction.user.display_name} declined the battle.",
                     view=None
                 )
             except:
                 pass
             
+            # Mensaje público opcional
+            await session.public_channel.send(
+                f"{interaction.user.display_name} declined the battle."
+            )
+    
             self._clear_session(session)
             return
-
-
-
-
-        # Responder la interacción
+    
+        # -------------------------
+        #   ACEPTAR BATALLA
+        # -------------------------
+    
+        # Responder interacción
         if not interaction.response.is_done():
             try:
-                await interaction.response.defer(ephemeral=True)
+                await interaction.response.defer()
             except:
                 pass
             
-        # Editar el mensaje original
+        # Editar mensaje original
         try:
-            await session.interaction_p1.original_response().edit(
+            await original_msg.edit(
                 content=(
-                    f"{session.p2.display_name} accepted the battle."
+                    f"{interaction.user.display_name} accepted the battle.\n"
+                    f"The battle is about to start. Both players must now choose a deck."
                 ),
                 view=None
             )
         except:
             pass
-
-
-        # Guardamos interacción del jugador 2
+        
+        # Guardar interacción del jugador 2
         session.interaction_p2 = interaction
-
+    
         # Canal público donde se narrará la batalla
         session.public_channel = interaction.channel
-
+    
         # Anuncio público
         await session.public_channel.send(
-            f"The battle between {session.p1.mention} and {session.p2.mention} is about to start. "
-            f"Each player will now choose a deck to play with."
+            f"The battle between {session.p1.display_name} and {session.p2.display_name} begins!"
         )
-
+    
         # Pedir elección de mazo a ambos jugadores
         await self._ask_deck_choice(session, session.p1)
         await self._ask_deck_choice(session, session.p2)
+
+    
+
+
 
 
 
