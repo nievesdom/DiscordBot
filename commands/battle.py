@@ -732,12 +732,11 @@ class Battle(commands.Cog):
             ),
         )
     
+        # Usar la interacción efímera NUEVA creada en _start_round
         inter = session.card_interaction_p1 if is_p1 else session.card_interaction_p2
     
-        await inter.edit_original_response(
-            content=f"{player.display_name}, choose your card:",
-            view=vista
-        )
+        await vista.enviar(inter)
+
 
 
 

@@ -165,7 +165,7 @@ class ChooseCardView(discord.ui.View):
 
     async def enviar(self, interaction: discord.Interaction):
         self.i = 0
-    
+
         embed = self._embed_actual()
         # Mensaje efímero independiente (NO responde al deck)
         self.message = await interaction.followup.send(
@@ -254,4 +254,3 @@ class ElegirCartaSelect(discord.ui.Select):
         idx = int(self.values[0])
         self.view_ref.i = self.view_ref.indices.index(idx)
         await self.view_ref.actualizar(interaction)
-
