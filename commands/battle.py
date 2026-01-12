@@ -491,7 +491,7 @@ class Battle(commands.Cog):
         )
 
         await interaction.response.send_message(
-            f"{user.display_name}, {interaction.user.display_name} challenges you to a battle.",
+            f"{user.mention}, {interaction.user.display_name} challenges you to a battle.",
             view=view
         )
 
@@ -527,8 +527,9 @@ class Battle(commands.Cog):
                 except:
                     pass
                 
-            # Editar mensaje original
+            # Editar el mensaje original donde estaba la vista
             try:
+                original_msg = await session.interaction_p1.original_response()
                 await original_msg.edit(
                     content=f"{interaction.user.display_name} declined the battle.",
                     view=None
@@ -537,12 +538,18 @@ class Battle(commands.Cog):
                 pass
             
             # Mensaje público opcional
-            await session.public_channel.send(
-                f"{interaction.user.display_name} declined the battle."
-            )
-    
+            try:
+                await session.public_channel.send(
+                    f"{interaction.user.display_name} declined the battle."
+                )
+            except:
+                pass
+            
+            # Eliminar la batalla activa
             self._clear_session(session)
+
             return
+
     
         # -------------------------
         #   ACEPTAR BATALLA
