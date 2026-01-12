@@ -165,10 +165,15 @@ class ChooseCardView(discord.ui.View):
 
     async def enviar(self, interaction: discord.Interaction):
         self.i = 0
-
+    
         embed = self._embed_actual()
-        # Guardamos el mensaje efímero para poder editarlo después
-        self.message = await interaction.edit_original_response(embed=embed, view=self)
+        # Mensaje efímero independiente (NO responde al deck)
+        self.message = await interaction.followup.send(
+            embed=embed,
+            view=self,
+            ephemeral=True
+        )
+
 
 
     async def actualizar(self, interaction: discord.Interaction):
