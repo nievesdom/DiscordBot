@@ -694,8 +694,11 @@ class Battle(commands.Cog):
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
 
-        inter = session.interaction_p1 if is_p1 else session.interaction_p2
-
+        # Usamos la interacción original del duelo, no la del deck
+        inter = (
+            session.interaction_p1 if player.id == session.p1.id else session.interaction_p2
+        )
+        
         vista = ChooseCardView(
             player=player,
             deck_cards=deck,
@@ -705,9 +708,9 @@ class Battle(commands.Cog):
                 interaction, session, player, is_p1, idx, cid
             ),
         )
-
-        # Enviar mensaje efímero independiente
+        
         await vista.enviar(inter)
+
 
 
     async def _on_card_chosen(
