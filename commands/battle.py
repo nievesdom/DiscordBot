@@ -711,7 +711,14 @@ class Battle(commands.Cog):
         # Obtener mazo y cartas ya usadas
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
-    
+
+        # Elegir la interacción efímera correcta
+        inter = (
+            session.interaction_p1
+            if player.id == session.p1.id
+            else session.interaction_p2
+        )
+
         # Crear vista de selección de carta
         vista = ChooseCardView(
             player=player,
@@ -722,13 +729,14 @@ class Battle(commands.Cog):
                 interaction, session, player, is_p1, idx, cid
             ),
         )
-    
-        # Enviar el mensaje efímero como RESPUESTA al mensaje del stat
-        await session.stat_message.reply(
+
+        # Enviar mensaje efímero independiente
+        await inter.followup.send(
             f"{player.display_name}, choose your card:",
             view=vista,
-            mention_author=False
+            ephemeral=True
         )
+
 
 
 
