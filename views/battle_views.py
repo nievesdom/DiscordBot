@@ -20,7 +20,7 @@ class AcceptDuelView(discord.ui.View):
             await interaction.response.defer()
         await self.on_decision(interaction, True)
         self.stop()
-    
+
     @discord.ui.button(label="Decline", style=discord.ButtonStyle.danger)
     async def decline_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not interaction.response.is_done():
@@ -187,8 +187,20 @@ class ChooseCardView(discord.ui.View):
     async def jugar(self, interaction: discord.Interaction, button: discord.ui.Button):
         idx = self.indices[self.i]
         cid = str(self.deck_cards[idx])
+    
+        # Llamamos a la lógica del combate
         await self.on_choose(interaction, idx, cid)
+    
+        # Editamos el embed para indicar que la carta ha sido elegida
+        embed = self._embed_actual()
+        embed.set_footer(text=f"{self.player.display_name} has selected this card.")
+    
+        # Eliminamos todos los botones
+        await interaction.response.edit_message(embed=embed, view=None)
+    
+        # Cerramos la vista
         self.stop()
+
 
 
 

@@ -580,11 +580,6 @@ class Battle(commands.Cog):
         # Canal público donde se narrará la batalla
         session.public_channel = interaction.channel
     
-        # Anuncio público
-        await session.public_channel.send(
-            f"The battle between {session.p1.display_name} and {session.p2.display_name} begins!"
-        )
-    
         # Pedir elección de mazo a ambos jugadores
         await self._ask_deck_choice(session, session.p1)
         await self._ask_deck_choice(session, session.p2)
