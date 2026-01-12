@@ -490,13 +490,14 @@ class Battle(commands.Cog):
             )
         )
 
-        msg = await interaction.response.send_message(
+        await interaction.response.send_message(
             f"{user.display_name}, {interaction.user.display_name} challenges you to a battle.",
             view=view
         )
-
-        # Guardar el mensaje real donde vive la vista
+        
+        # ESTE es el mensaje real donde vive la vista
         view.message = await interaction.original_response()
+
 
 
 

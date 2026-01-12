@@ -16,13 +16,18 @@ class AcceptDuelView(discord.ui.View):
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.success)
     async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.response.is_done():
+            await interaction.response.defer()
         await self.on_decision(interaction, True)
         self.stop()
-
+    
     @discord.ui.button(label="Decline", style=discord.ButtonStyle.danger)
     async def decline_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.response.is_done():
+            await interaction.response.defer()
         await self.on_decision(interaction, False)
         self.stop()
+
 
     async def on_timeout(self):
         # Si expira, editamos el mensaje original
