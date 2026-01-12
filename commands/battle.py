@@ -623,32 +623,32 @@ class Battle(commands.Cog):
 
 
 
-    async def _on_deck_chosen(
-        self,
-        interaction: discord.Interaction,
-        session: BattleSession,
-        player: discord.Member,
-        letra: str,
-    ):
-        # Mantener viva la interacción del botón
-        await interaction.response.defer(ephemeral=True)
+    async def _on_deck_chosen(self, interaction, session, player, letra):
 
-        # Guardar interacción fresca (muy importante para futuros followups)
+        # Editar el mensaje donde estaban los botones
+        try:
+            await interaction.response.edit_message(
+                content=f"You chose deck {letra}.",
+                view=None
+            )
+        except:
+            # Si ya estaba respondido, usamos followup.edit_original_response
+            try:
+                msg = await interaction.original_response()
+                await msg.edit(content=f"You chose deck {letra}.", view=None)
+            except:
+                pass
+
+        # Guardar la interacción si la necesitas después
         if player.id == session.p1.id:
             session.interaction_p1 = interaction
         else:
             session.interaction_p2 = interaction
 
-        # Confirmación efímera
-        await interaction.followup.send(
-            f"You chose deck {letra}.", ephemeral=True
-        )
-
-        # Cargar mazo elegido
+        # Cargar el mazo
         server_id = str(session.guild_id)
         deck = cargar_mazo(server_id, str(player.id), letra)
 
-        # Si el mazo ya no está lleno, cancelar batalla
         if len(deck) != DECK_SIZE:
             await session.public_channel.send(
                 f"{player.mention}, your deck {letra} is no longer full. Battle cancelled."
@@ -656,18 +656,17 @@ class Battle(commands.Cog):
             self._clear_session(session)
             return
 
-        # Guardar mazo en la sesión
         if player.id == session.p1.id:
             session.p1_deck_letter = letra
             session.p1_deck_cards = [str(c) for c in deck]
         else:
             session.p2_deck_letter = letra
             session.p2_deck_cards = [str(c) for c in deck]
-       
 
-        # Si ambos ya eligieron mazo, iniciar primera ronda
+        # Si ambos han elegido, empieza la ronda
         if session.p1_deck_letter and session.p2_deck_letter:
             await self._start_round(session.public_channel, session)
+
 
 
     async def _start_round(self, channel, session):
@@ -746,61 +745,83 @@ class Battle(commands.Cog):
 
 
 
-    async def _resolve_round(
-        self, channel: discord.TextChannel, session: BattleSession
-    ):
-        # Recuperamos las cartas elegidas por cada jugador:
-        # idx = índice dentro del mazo, cid = ID de la carta
+    async def _resolve_round(self, channel, session):
+
         idx1, cid1 = session.waiting_p1_card
         idx2, cid2 = session.waiting_p2_card
-
-        # Obtenemos la información completa de cada carta
+    
         c1 = session.cartas_info.get(cid1, {})
         c2 = session.cartas_info.get(cid2, {})
-
-        # Extraemos el valor de la estadística actual (health/attack/defense/speed)
-        v1 = self.obtener_stat(c1, session.current_stat)
-        v2 = self.obtener_stat(c2, session.current_stat)
-
-        # Nombres legibles de las cartas
+    
+        stat = session.current_stat
+        icono = STAT_ICONS.get(stat, "")
+    
+        v1 = self.obtener_stat(c1, stat)
+        v2 = self.obtener_stat(c2, stat)
+    
         nombre1 = c1.get("nombre", f"ID {cid1}")
         nombre2 = c2.get("nombre", f"ID {cid2}")
-
-        # Comparamos los valores de la stat para determinar el ganador del round
+    
+        # Determinar ganador
         if v1 > v2:
-            session.score_p1 += 1  # Suma punto jugador 1
-            result = (
-                f"{session.p1.mention} wins the round. "
-                f"{nombre1} ({v1}) vs {nombre2} ({v2})."
-            )
+            session.score_p1 += 1
+            resultado = f"{session.p1.display_name} wins the round."
         elif v2 > v1:
-            session.score_p2 += 1  # Suma punto jugador 2
-            result = (
-                f"{session.p2.mention} wins the round. "
-                f"{nombre1} ({v1}) vs {nombre2} ({v2})."
-            )
+            session.score_p2 += 1
+            resultado = f"{session.p2.display_name} wins the round."
         else:
-            # Empate: nadie suma puntos
-            result = (
-                f"Tie. {nombre1} ({v1}) vs {nombre2} ({v2})."
-            )
-
-        # Enviamos al canal público el resultado del round y el marcador actual
-        await channel.send(
-            f"Round {session.round} result:\n{result}\n"
-            f"Score: {session.p1.display_name} {session.score_p1} – "
-            f"{session.score_p2} {session.p2.display_name}"
+            resultado = "Tie."
+    
+        # Crear embed comparativo
+        embed = discord.Embed(
+            title=f"Round {session.round} — {icono} {stat.upper()} comparison",
+            color=0x00ffcc
         )
-
-        # Pasamos al siguiente round
+    
+        # Imagenes
+        if c1.get("imagen"):
+            embed.set_thumbnail(url=c1["imagen"])
+        if c2.get("imagen"):
+            embed.set_image(url=c2["imagen"])
+    
+        # Campos comparativos
+        def fmt(carta, valor_stat):
+            return (
+                f"❤️ {carta.get('health','—')}\n"
+                f"⚔️ {carta.get('attack','—')}{' ←' if stat=='attack' else ''}\n"
+                f"🛡️ {carta.get('defense','—')}{' ←' if stat=='defense' else ''}\n"
+                f"💨 {carta.get('speed','—')}{' ←' if stat=='speed' else ''}\n"
+                f"\n**{icono} {valor_stat}**"
+            )
+    
+        embed.add_field(
+            name=f"{session.p1.display_name} — {nombre1}",
+            value=fmt(c1, v1),
+            inline=True
+        )
+    
+        embed.add_field(
+            name=f"{session.p2.display_name} — {nombre2}",
+            value=fmt(c2, v2),
+            inline=True
+        )
+    
+        embed.add_field(
+            name="Result",
+            value=resultado,
+            inline=False
+        )
+    
+        await channel.send(embed=embed)
+    
+        # Continuar flujo normal
         session.round += 1
-
-        # Si ya hay ganador (3 puntos o final BO5), terminamos la batalla
+    
         if session.has_winner():
             await self._finish_battle(channel, session)
         else:
-            # Si no, iniciamos el siguiente round
             await self._start_round(channel, session)
+
 
 
 
