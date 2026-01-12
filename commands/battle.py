@@ -849,7 +849,6 @@ class Battle(commands.Cog):
         self._clear_session(session)
 
 
-
 # Setup del cog
 async def setup(bot):
     await bot.add_cog(Battle(bot))

@@ -167,7 +167,9 @@ class ChooseCardView(discord.ui.View):
         self.i = 0
 
         embed = self._embed_actual()
-        await interaction.followup.send(embed=embed, view=self, ephemeral=True)
+        # Guardamos el mensaje efímero para poder editarlo después
+        self.message = await interaction.followup.send(embed=embed, view=self, ephemeral=True)
+
 
     async def actualizar(self, interaction: discord.Interaction):
         embed = self._embed_actual()
@@ -187,19 +189,23 @@ class ChooseCardView(discord.ui.View):
     async def jugar(self, interaction: discord.Interaction, button: discord.ui.Button):
         idx = self.indices[self.i]
         cid = str(self.deck_cards[idx])
-    
-        # Llamamos a la lógica del combate
+
+        # Lógica del combate
         await self.on_choose(interaction, idx, cid)
-    
-        # Editamos el embed para indicar que la carta ha sido elegida
+
+        # Crear embed actualizado
         embed = self._embed_actual()
-        embed.set_footer(text=f"{self.player.display_name} has selected this card.")
-    
-        # Eliminamos todos los botones
-        await interaction.response.edit_message(embed=embed, view=None)
-    
-        # Cerramos la vista
+        embed.set_footer(text=f"Card selected.")
+
+        # EDITAR EL MENSAJE EFÍMERO REAL
+        try:
+            await self.message.edit(embed=embed, view=None)
+        except Exception as e:
+            print("[DEBUG ERROR editando mensaje de carta]", e)
+
+        # Cerrar la vista
         self.stop()
+
 
 
 
