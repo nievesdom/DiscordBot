@@ -681,6 +681,17 @@ class Battle(commands.Cog):
         nombre = session.current_stat.upper()
 
         await channel.send(f"Round {session.round}. Stat: {icono} **{nombre}**")
+        
+        # Crear interacciones efímeras nuevas para esta ronda
+        session.round_interaction_p1 = await session.interaction_p1.followup.send(
+            "Preparing your card selection...",
+            ephemeral=True
+        )
+
+        session.round_interaction_p2 = await session.interaction_p2.followup.send(
+            "Preparing your card selection...",
+            ephemeral=True
+        )
 
         session.waiting_p1_card = None
         session.waiting_p2_card = None
@@ -694,10 +705,7 @@ class Battle(commands.Cog):
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
 
-        # Usamos la interacción original del duelo, no la del deck
-        inter = (
-            session.interaction_p1 if player.id == session.p1.id else session.interaction_p2
-        )
+        inter = session.round_interaction_p1 if is_p1 else session.round_interaction_p2
         
         vista = ChooseCardView(
             player=player,
