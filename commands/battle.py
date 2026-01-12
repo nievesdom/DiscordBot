@@ -489,14 +489,15 @@ class Battle(commands.Cog):
                 self._on_duel_decision(i, session, accepted)
             )
         )
-        
-        await interaction.response.send_message(
+
+        msg = await interaction.response.send_message(
             f"{user.display_name}, {interaction.user.display_name} challenges you to a battle.",
             view=view
         )
-        
-        # Guardar mensaje para timeout
+
+        # Guardar mensaje real para timeout
         view.message = await interaction.original_response()
+
 
 
 
@@ -516,11 +517,11 @@ class Battle(commands.Cog):
 
         # Si rechaza, se cancela la batalla
         if not accepted:
-            # Asegurar que la interacción queda respondida correctamente
+            # Responder la interacción correctamente
             if not interaction.response.is_done():
                 try:
                     await interaction.response.defer(ephemeral=True)
-                except Exception:
+                except:
                     pass
                 
             # Mensaje público sin mencionar
@@ -530,6 +531,7 @@ class Battle(commands.Cog):
         
             self._clear_session(session)
             return
+
 
 
         # Si acepta, confirmamos

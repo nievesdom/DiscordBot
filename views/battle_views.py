@@ -10,7 +10,7 @@ class AcceptDuelView(discord.ui.View):
     Llama a on_decision(interaction, accepted: bool).
     """
     def __init__(self, on_decision: Callable[[discord.Interaction, bool], None]):
-        super().__init__(timeout=180)
+        super().__init__(timeout=120)
         self.on_decision = on_decision
         self.message: Optional[discord.Message] = None  # Necesario para timeout
 
@@ -25,7 +25,7 @@ class AcceptDuelView(discord.ui.View):
         self.stop()
 
     async def on_timeout(self):
-        # Si expira, mensaje público sin mencionar
+        # Mensaje público sin mencionar
         try:
             if self.message:
                 await self.message.channel.send(
@@ -33,6 +33,7 @@ class AcceptDuelView(discord.ui.View):
                 )
         except Exception:
             pass
+
 
 
 
