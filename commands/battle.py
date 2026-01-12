@@ -584,10 +584,6 @@ class Battle(commands.Cog):
         await self._ask_deck_choice(session, session.p1)
         await self._ask_deck_choice(session, session.p2)
 
-    
-
-
-
 
 
     async def _ask_deck_choice(
@@ -667,19 +663,10 @@ class Battle(commands.Cog):
         else:
             session.p2_deck_letter = letra
             session.p2_deck_cards = [str(c) for c in deck]
-
-        # Mensaje de debug
-        await session.public_channel.send(
-            f"[DEBUG] Decks chosen so far -> "
-            f"{session.p1.display_name}: {session.p1_deck_letter}, "
-            f"{session.p2.display_name}: {session.p2_deck_letter}"
-        )
+       
 
         # Si ambos ya eligieron mazo, iniciar primera ronda
         if session.p1_deck_letter and session.p2_deck_letter:
-            await session.public_channel.send(
-                "[DEBUG] Both decks chosen, starting first round..."
-            )
             await self._start_round(session.public_channel, session)
 
 
@@ -687,19 +674,6 @@ class Battle(commands.Cog):
     async def _start_round(
         self, channel: discord.TextChannel, session: BattleSession
     ):
-        # Log de debug
-        print(
-            f"[DEBUG] _start_round llamado. round={session.round}, "
-            f"p1_deck={session.p1_deck_letter}, p2_deck={session.p2_deck_letter}"
-        )
-
-        # Mensaje público de debug
-        await channel.send(
-            f"[DEBUG] _start_round called. round={session.round}, "
-            f"p1_deck={session.p1_deck_letter}, "
-            f"p2_deck={session.p2_deck_letter}"
-        )
-
         try:
             # Si ya hay ganador, terminar batalla
             if session.has_winner():
@@ -717,8 +691,6 @@ class Battle(commands.Cog):
                 f"Round {session.round}. Stat: {icono} **{nombre}**"
             )
 
-
-
             # Resetear elecciones
             session.waiting_p1_card = None
             session.waiting_p2_card = None
@@ -728,9 +700,8 @@ class Battle(commands.Cog):
             await self._ask_card_choice(session, session.p2, False)
 
         except Exception as e:
-            print(f"[DEBUG ERROR] en _start_round: {repr(e)}")
-            await channel.send(f"[DEBUG ERROR] en _start_round: `{repr(e)}`")
-
+            print(f"[ERROR] in _start_round: {repr(e)}")
+            await channel.send(f"ERROR] in _start_round: `{repr(e)}`")
 
 
     async def _ask_card_choice(
@@ -760,8 +731,6 @@ class Battle(commands.Cog):
     
         # Enviar embed inicial + vista
         await vista.enviar(inter)
-
-
 
 
     async def _on_card_chosen(
@@ -794,7 +763,6 @@ class Battle(commands.Cog):
             # Usamos el canal público guardado en la sesión
             if session.public_channel is not None:
                 await self._resolve_round(session.public_channel, session)
-    
 
 
 
