@@ -687,9 +687,10 @@ class Battle(commands.Cog):
             icono = STAT_ICONS.get(session.current_stat, "")
             nombre = session.current_stat.upper()
 
-            await channel.send(
+            session.stat_message = await channel.send(
                 f"Round {session.round}. Stat: {icono} **{nombre}**"
             )
+
 
             # Resetear elecciones
             session.waiting_p1_card = None
@@ -711,13 +712,6 @@ class Battle(commands.Cog):
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
     
-        # Interacción efímera correcta
-        inter = (
-            session.interaction_p1
-            if player.id == session.p1.id
-            else session.interaction_p2
-        )
-    
         # Crear vista de selección de carta
         vista = ChooseCardView(
             player=player,
@@ -729,8 +723,13 @@ class Battle(commands.Cog):
             ),
         )
     
-        # Enviar embed inicial + vista
-        await vista.enviar(inter)
+        # Enviar el mensaje efímero como RESPUESTA al mensaje del stat
+        await session.stat_message.reply(
+            f"{player.display_name}, choose your card:",
+            view=vista,
+            mention_author=False
+        )
+
 
 
     async def _on_card_chosen(

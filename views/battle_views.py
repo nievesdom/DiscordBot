@@ -207,9 +207,6 @@ class ChooseCardView(discord.ui.View):
         self.stop()
 
 
-
-
-
 class ElegirCartaSelect(discord.ui.Select):
     """Select menu para elegir carta directamente."""
     def __init__(self, view: ChooseCardView):
