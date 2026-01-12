@@ -755,6 +755,7 @@ class Battle(commands.Cog):
     
         stat = session.current_stat
         icono = STAT_ICONS.get(stat, "")
+        stat_name = stat.upper()
     
         v1 = self.obtener_stat(c1, stat)
         v2 = self.obtener_stat(c2, stat)
@@ -765,76 +766,64 @@ class Battle(commands.Cog):
         # Determinar ganador
         if v1 > v2:
             session.score_p1 += 1
-            ganador = 1
             resultado = f"{session.p1.display_name} wins the round!"
+            color = 0x4CAF50  # verde
         elif v2 > v1:
             session.score_p2 += 1
-            ganador = 2
             resultado = f"{session.p2.display_name} wins the round!"
+            color = 0xE53935  # rojo
         else:
-            ganador = 0
             resultado = "Tie!"
+            color = 0x9E9E9E  # gris
     
-        # Colores dinámicos
-        COLOR_WIN = 0x4CAF50   # verde
-        COLOR_LOSE = 0xE53935  # rojo
-        COLOR_TIE = 0x9E9E9E   # gris
-    
-        if ganador == 1:
-            color1 = COLOR_WIN
-            color2 = COLOR_LOSE
-        elif ganador == 2:
-            color1 = COLOR_LOSE
-            color2 = COLOR_WIN
-        else:
-            color1 = color2 = COLOR_TIE
-    
-        # Función para formatear stats
+        # Función para formatear stats con el stat comparado en negrita y color
         def fmt(carta, valor_stat):
-            return (
-                f"❤️ {carta.get('health','—')}\n"
-                f"⚔️ {carta.get('attack','—')}{'  ⬅' if stat=='attack' else ''}\n"
-                f"🛡️ {carta.get('defense','—')}{'  ⬅' if stat=='defense' else ''}\n"
-                f"💨 {carta.get('speed','—')}{'  ⬅' if stat=='speed' else ''}\n"
-                f"\n**{icono} {valor_stat}**"
-            )
+            def stat_line(label, key):
+                val = carta.get(key, "—")
+                if key == stat:
+                    return f"**{icono} {val} ←**"
+                icons = {
+                    "health": "❤️", "attack": "⚔️", "defense": "🛡️", "speed": "💨"
+                }
+                return f"{icons.get(key,'')} {val}"
     
-        # Embed carta 1
-        embed1 = discord.Embed(
-            title=f"{session.p1.display_name}\n{nombre1}",
-            color=color1
+            return "\n".join([
+                stat_line("Health", "health"),
+                stat_line("Attack", "attack"),
+                stat_line("Defense", "defense"),
+                stat_line("Speed", "speed"),
+            ])
+    
+        # Crear embed comparativo
+        embed = discord.Embed(
+            title=f"Round {session.round} — {icono} {stat_name} comparison",
+            description=resultado,
+            color=color
         )
-        if c1.get("imagen"):
-            embed1.set_image(url=c1["imagen"])
-        embed1.add_field(name="Stats", value=fmt(c1, v1), inline=False)
     
-        # Embed central VS
-        embed_vs = discord.Embed(
-            title="⚔️ VS ⚔️",
-            description=f"**{icono} {stat.upper()} comparison**\n\n{resultado}",
-            color=0xFFD700
+        # Añadir campos de cada carta
+        embed.add_field(
+            name=f"{session.p1.display_name}\n{nombre1}",
+            value=fmt(c1, v1),
+            inline=True
         )
     
-        # Embed carta 2
-        embed2 = discord.Embed(
-            title=f"{session.p2.display_name}\n{nombre2}",
-            color=color2
+        embed.add_field(
+            name=f"{session.p2.display_name}\n{nombre2}",
+            value=fmt(c2, v2),
+            inline=True
         )
-        if c2.get("imagen"):
-            embed2.set_image(url=c2["imagen"])
-        embed2.add_field(name="Stats", value=fmt(c2, v2), inline=False)
     
-        # Enviar los 3 embeds juntos
-        await channel.send(embeds=[embed1, embed_vs, embed2])
+        await channel.send(embed=embed)
     
-        # Continuar flujo normal
+        # Continuar flujo
         session.round += 1
     
         if session.has_winner():
             await self._finish_battle(channel, session)
         else:
             await self._start_round(channel, session)
-
+    
 
 
 
