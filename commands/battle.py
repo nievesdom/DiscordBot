@@ -690,6 +690,17 @@ class Battle(commands.Cog):
             session.stat_message = await channel.send(
                 f"Round {session.round}. Stat: {icono} **{nombre}**"
             )
+            
+            session.card_interaction_p1 = await session.interaction_p1.followup.send(
+                "Preparing card selection...",
+                ephemeral=True
+            )
+
+            session.card_interaction_p2 = await session.interaction_p2.followup.send(
+                "Preparing card selection...",
+                ephemeral=True
+            )
+
 
 
             # Resetear elecciones
@@ -708,18 +719,9 @@ class Battle(commands.Cog):
     async def _ask_card_choice(
         self, session: BattleSession, player: discord.Member, is_p1: bool
     ):
-        # Obtener mazo y cartas ya usadas
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
-
-        # Elegir la interacción efímera correcta
-        inter = (
-            session.interaction_p1
-            if player.id == session.p1.id
-            else session.interaction_p2
-        )
-
-        # Crear vista de selección de carta
+    
         vista = ChooseCardView(
             player=player,
             deck_cards=deck,
@@ -729,14 +731,13 @@ class Battle(commands.Cog):
                 interaction, session, player, is_p1, idx, cid
             ),
         )
-
-        # Enviar mensaje efímero independiente
-        await inter.followup.send(
-            f"{player.display_name}, choose your card:",
-            view=vista,
-            ephemeral=True
+    
+        inter = session.card_interaction_p1 if is_p1 else session.card_interaction_p2
+    
+        await inter.edit_original_response(
+            content=f"{player.display_name}, choose your card:",
+            view=vista
         )
-
 
 
 
