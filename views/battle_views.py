@@ -10,7 +10,7 @@ class AcceptDuelView(discord.ui.View):
     Llama a on_decision(interaction, accepted: bool).
     """
     def __init__(self, on_decision: Callable[[discord.Interaction, bool], None]):
-        super().__init__(timeout=120)
+        super().__init__(timeout=180)
         self.on_decision = on_decision
         self.message: Optional[discord.Message] = None  # Necesario para timeout
 
@@ -48,7 +48,7 @@ class ChooseDeckView(discord.ui.View):
         available_decks: List[str],
         on_choose: Callable[[discord.Interaction, str], None]
     ):
-        super().__init__(timeout=120)
+        super().__init__(timeout=180)
         self.player = player
         self.on_choose = on_choose
 

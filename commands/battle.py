@@ -516,11 +516,21 @@ class Battle(commands.Cog):
 
         # Si rechaza, se cancela la batalla
         if not accepted:
+            # Asegurar que la interacción queda respondida correctamente
+            if not interaction.response.is_done():
+                try:
+                    await interaction.response.defer(ephemeral=True)
+                except Exception:
+                    pass
+                
+            # Mensaje público sin mencionar
             await session.public_channel.send(
-            f"{interaction.user.display_name} declined the battle."
-        )
+                f"{interaction.user.display_name} declined the battle."
+            )
+        
             self._clear_session(session)
             return
+
 
         # Si acepta, confirmamos
         await interaction.response.send_message(
