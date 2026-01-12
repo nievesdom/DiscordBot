@@ -670,58 +670,32 @@ class Battle(commands.Cog):
             await self._start_round(session.public_channel, session)
 
 
+    async def _start_round(self, channel, session):
 
-    async def _start_round(
-        self, channel: discord.TextChannel, session: BattleSession
-    ):
-        try:
-            # Si ya hay ganador, terminar batalla
-            if session.has_winner():
-                await self._finish_battle(channel, session)
-                return
+        if session.has_winner():
+            await self._finish_battle(channel, session)
+            return
 
-            # Elegir stat aleatorio para este round
-            session.current_stat = random.choice(STATS_COMBAT)
+        session.current_stat = random.choice(STATS_COMBAT)
+        icono = STAT_ICONS.get(session.current_stat, "")
+        nombre = session.current_stat.upper()
 
-            # Anunciar stat del round
-            icono = STAT_ICONS.get(session.current_stat, "")
-            nombre = session.current_stat.upper()
+        await channel.send(f"Round {session.round}. Stat: {icono} **{nombre}**")
 
-            session.stat_message = await channel.send(
-                f"Round {session.round}. Stat: {icono} **{nombre}**"
-            )
-            
-            session.card_interaction_p1 = await session.interaction_p1.followup.send(
-                "Preparing card selection...",
-                ephemeral=True
-            )
+        session.waiting_p1_card = None
+        session.waiting_p2_card = None
 
-            session.card_interaction_p2 = await session.interaction_p2.followup.send(
-                "Preparing card selection...",
-                ephemeral=True
-            )
+        await self._ask_card_choice(session, session.p1, True)
+        await self._ask_card_choice(session, session.p2, False)
 
 
+    async def _ask_card_choice(self, session, player, is_p1):
 
-            # Resetear elecciones
-            session.waiting_p1_card = None
-            session.waiting_p2_card = None
-
-            # Pedir carta a ambos jugadores
-            await self._ask_card_choice(session, session.p1, True)
-            await self._ask_card_choice(session, session.p2, False)
-
-        except Exception as e:
-            print(f"[ERROR] in _start_round: {repr(e)}")
-            await channel.send(f"ERROR] in _start_round: `{repr(e)}`")
-
-
-    async def _ask_card_choice(
-        self, session: BattleSession, player: discord.Member, is_p1: bool
-    ):
         deck = session.p1_deck_cards if is_p1 else session.p2_deck_cards
         used = session.p1_used_indices if is_p1 else session.p2_used_indices
-    
+
+        inter = session.interaction_p1 if is_p1 else session.interaction_p2
+
         vista = ChooseCardView(
             player=player,
             deck_cards=deck,
@@ -731,13 +705,9 @@ class Battle(commands.Cog):
                 interaction, session, player, is_p1, idx, cid
             ),
         )
-    
-        # Usar la interacción efímera NUEVA creada en _start_round
-        inter = session.card_interaction_p1 if is_p1 else session.card_interaction_p2
-    
+
+        # Enviar mensaje efímero independiente
         await vista.enviar(inter)
-
-
 
 
     async def _on_card_chosen(
