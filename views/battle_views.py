@@ -9,10 +9,10 @@ class AcceptDuelView(discord.ui.View):
     Vista para que el jugador retado acepte o rechace el combate.
     Llama a on_decision(interaction, accepted: bool).
     """
-    def __init__(self, on_decision: Callable[[discord.Interaction, bool], None]):
+    def __init__(self, on_decision):
         super().__init__(timeout=120)
         self.on_decision = on_decision
-        self.message: Optional[discord.Message] = None  # Necesario para timeout
+        self.message: discord.Message | None = None  # mensaje donde vive la vista
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.success)
     async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -25,14 +25,16 @@ class AcceptDuelView(discord.ui.View):
         self.stop()
 
     async def on_timeout(self):
-        # Mensaje público sin mencionar
+        # Si expira, editamos el mensaje original
         try:
             if self.message:
-                await self.message.channel.send(
-                    f"The battle request from {self.message.interaction.user.display_name} has expired."
+                await self.message.edit(
+                    content=f"The battle request from {self.message.interaction.user.display_name} has expired.",
+                    view=None
                 )
-        except Exception:
+        except:
             pass
+
 
 
 

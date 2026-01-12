@@ -495,8 +495,9 @@ class Battle(commands.Cog):
             view=view
         )
 
-        # Guardar mensaje real para timeout
+        # Guardar el mensaje real donde vive la vista
         view.message = await interaction.original_response()
+
 
 
 
@@ -517,27 +518,54 @@ class Battle(commands.Cog):
 
         # Si rechaza, se cancela la batalla
         if not accepted:
-            # Responder la interacción correctamente
+            # Responder la interacción
             if not interaction.response.is_done():
                 try:
                     await interaction.response.defer(ephemeral=True)
                 except:
                     pass
                 
-            # Mensaje público sin mencionar
-            await session.public_channel.send(
-                f"{interaction.user.display_name} declined the battle."
-            )
-        
+            # Editar el mensaje original
+            if session.interaction_p1:
+                view_message = session.interaction_p1
+            else:
+                view_message = interaction
+
+            try:
+                await session.public_channel.send(
+                    f"{interaction.user.display_name} declined the battle."
+                )
+                await session.interaction_p1.original_response().edit(
+                    content=f"{interaction.user.display_name} declined the battle.",
+                    view=None
+                )
+            except:
+                pass
+            
             self._clear_session(session)
             return
 
 
 
-        # Si acepta, confirmamos
-        await interaction.response.send_message(
-            "You accepted the battle.", ephemeral=True
-        )
+
+        # Responder la interacción
+        if not interaction.response.is_done():
+            try:
+                await interaction.response.defer(ephemeral=True)
+            except:
+                pass
+            
+        # Editar el mensaje original
+        try:
+            await session.interaction_p1.original_response().edit(
+                content=(
+                    f"{session.p2.display_name} accepted the battle."
+                ),
+                view=None
+            )
+        except:
+            pass
+
 
         # Guardamos interacción del jugador 2
         session.interaction_p2 = interaction
