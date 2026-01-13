@@ -746,23 +746,22 @@ class Battle(commands.Cog):
 
 
     async def _resolve_round(self, channel, session):
-
         idx1, cid1 = session.waiting_p1_card
         idx2, cid2 = session.waiting_p2_card
-    
+
         c1 = session.cartas_info.get(cid1, {})
         c2 = session.cartas_info.get(cid2, {})
-    
+
         stat = session.current_stat
         icono = STAT_ICONS.get(stat, "")
         stat_name = stat.upper()
-    
+
         v1 = self.obtener_stat(c1, stat)
         v2 = self.obtener_stat(c2, stat)
-    
+
         nombre1 = c1.get("nombre", f"ID {cid1}")
         nombre2 = c2.get("nombre", f"ID {cid2}")
-    
+
         # Determinar ganador
         if v1 > v2:
             session.score_p1 += 1
@@ -775,22 +774,17 @@ class Battle(commands.Cog):
         else:
             resultado = "Tie!"
             color1 = color2 = 0x9E9E9E
-    
-        # Formato tipo deck
+
+        # Formato horizontal de stats
         def fmt(carta):
-            def line(key):
-                val = carta.get(key, "—")
+            def val(key):
+                raw = carta.get(key, "—")
                 icon = STAT_ICONS.get(key, "")
                 if key == stat:
-                    return f"**{icon} {val} ←**"
-                return f"{icon} {val}"
-            return "\n".join([
-                line("health"),
-                line("attack"),
-                line("defense"),
-                line("speed")
-            ])
-    
+                    return f"**{icon} {raw} ←**"
+                return f"{icon} {raw}"
+            return " | ".join([val("health"), val("attack"), val("defense"), val("speed")])
+
         # Embed carta 1
         embed1 = discord.Embed(
             title=nombre1,
@@ -799,14 +793,14 @@ class Battle(commands.Cog):
         if c1.get("imagen"):
             embed1.set_image(url=c1["imagen"])
         embed1.add_field(name=session.p1.display_name, value=fmt(c1), inline=False)
-    
+
         # Embed VS central
         embed_vs = discord.Embed(
             title="⚔️ VS ⚔️",
             description=f"**{stat_name} battle**\n{resultado}",
             color=0xFFD700
         )
-    
+
         # Embed carta 2
         embed2 = discord.Embed(
             title=nombre2,
@@ -815,9 +809,9 @@ class Battle(commands.Cog):
         if c2.get("imagen"):
             embed2.set_image(url=c2["imagen"])
         embed2.add_field(name=session.p2.display_name, value=fmt(c2), inline=False)
-    
+
         await channel.send(embeds=[embed1, embed_vs, embed2])
-    
+
         session.round += 1
         if session.has_winner():
             await self._finish_battle(channel, session)
