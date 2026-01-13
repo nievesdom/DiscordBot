@@ -775,40 +775,50 @@ class Battle(commands.Cog):
             resultado = "Tie!"
             color1 = color2 = 0x9E9E9E
 
-        # Formato horizontal de stats
+        # Stats en una sola línea
         def fmt(carta):
             def val(key):
                 raw = carta.get(key, "—")
                 icon = STAT_ICONS.get(key, "")
+                # El stat a comparar se destaca
                 if key == stat:
                     return f"**{icon} {raw} ←**"
                 return f"{icon} {raw}"
-            return " | ".join([val("health"), val("attack"), val("defense"), val("speed")])
+            return " | ".join([
+                val("health"),
+                val("attack"),
+                val("defense"),
+                val("speed")
+            ])
 
         # Embed carta 1
         embed1 = discord.Embed(
-            title=nombre1,
+            title=f"{session.p1.display_name}\n{nombre1}",
             color=color1
         )
         if c1.get("imagen"):
             embed1.set_image(url=c1["imagen"])
-        embed1.add_field(name=session.p1.display_name, value=fmt(c1), inline=False)
+        embed1.add_field(name="Stats", value=fmt(c1), inline=False)
 
         # Embed VS central
         embed_vs = discord.Embed(
             title="⚔️ VS ⚔️",
-            description=f"**{stat_name} battle**\n{resultado}",
+            description=(
+                f"**{stat_name} battle**\n"
+                f"**{icono} {v1}** vs **{v2} {icono}**\n"
+                f"{resultado}"
+            ),
             color=0xFFD700
         )
 
         # Embed carta 2
         embed2 = discord.Embed(
-            title=nombre2,
+            title=f"{session.p2.display_name}\n{nombre2}",
             color=color2
         )
         if c2.get("imagen"):
             embed2.set_image(url=c2["imagen"])
-        embed2.add_field(name=session.p2.display_name, value=fmt(c2), inline=False)
+        embed2.add_field(name="Stats", value=fmt(c2), inline=False)
 
         await channel.send(embeds=[embed1, embed_vs, embed2])
 
@@ -817,7 +827,6 @@ class Battle(commands.Cog):
             await self._finish_battle(channel, session)
         else:
             await self._start_round(channel, session)
-
 
 
 
