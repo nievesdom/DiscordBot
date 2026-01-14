@@ -45,6 +45,8 @@ class BattleSession:
         self.p1 = p1
         self.p2 = p2
         self.last_round_result: str | None = None
+        self.current_stats: list[str] = []
+
 
 
         # Canal público donde se anuncia la batalla
@@ -677,24 +679,47 @@ class Battle(commands.Cog):
             await self._finish_battle(channel, session)
             return
 
-        session.current_stat = random.choice(STATS_COMBAT)
-        icono = STAT_ICONS.get(session.current_stat, "")
-        nombre = session.current_stat.upper()
-        texto=""
-        
-        # Añadir ganador de la ronda anterior (excepto en la primera)
+        # 40% de probabilidad de multi-stat
+        if random.random() < 0.40:
+            # Elegir entre 2 y 4 stats distintos
+            n = random.randint(2, 4)
+            session.current_stats = random.sample(STATS_COMBAT, n)
+        else:
+            # Solo 1 stat
+            session.current_stats = [random.choice(STATS_COMBAT)]
+
+        # Construir texto de stats
+        partes = []
+        for st in session.current_stats:
+            icono = STAT_ICONS.get(st, "")
+            partes.append(f"{icono} **{st.upper()}**")
+
+        texto_stats = " + ".join(partes)
+
+        # Mensaje de inicio de ronda
+        texto = ""
+
+        # Ganador de la ronda anterior
         if session.round > 1 and session.last_round_result:
-            texto += f"\nPrevious round: {session.last_round_result}"
-        
-        texto+=(f"Round {session.round}. Stat: {icono} **{nombre}**")
+            texto += f"{session.last_round_result}\n"
+            texto += (
+                f"Score: {session.p1.display_name} {session.score_p1} - "
+                f"{session.score_p2} {session.p2.display_name}\n"
+            )
+
+
+        texto += f"Round {session.round}. Stats: {texto_stats}"
 
         await channel.send(texto)
-        
+
+        # Reset de elecciones
         session.waiting_p1_card = None
         session.waiting_p2_card = None
 
+        # Pedir cartas
         await self._ask_card_choice(session, session.p1, True)
         await self._ask_card_choice(session, session.p2, False)
+
 
 
     async def _ask_card_choice(self, session, player, is_p1):
@@ -763,20 +788,25 @@ class Battle(commands.Cog):
 
         stat = session.current_stat
         icono = STAT_ICONS.get(stat, "")
-        stat_name = stat.upper()
-
-        v1 = self.obtener_stat(c1, stat)
-        v2 = self.obtener_stat(c2, stat)
+        
+        # Multi-stat: sumar todos los stats seleccionados
+        total1 = 0
+        total2 = 0
+        
+        for st in session.current_stats:
+            total1 += self.obtener_stat(c1, st)
+            total2 += self.obtener_stat(c2, st)
+        
 
         nombre1 = c1.get("nombre", f"ID {cid1}")
         nombre2 = c2.get("nombre", f"ID {cid2}")
 
         # Determinar ganador
-        if v1 > v2:
+        if total1 > total2:
             session.score_p1 += 1
             resultado = f"{session.p1.display_name} wins the round!"
             color1, color2 = 0x4CAF50, 0xE53935
-        elif v2 > v1:
+        elif total2 > total1:
             session.score_p2 += 1
             resultado = f"{session.p2.display_name} wins the round!"
             color1, color2 = 0xE53935, 0x4CAF50
@@ -789,16 +819,20 @@ class Battle(commands.Cog):
             def val(key):
                 raw = carta.get(key, "—")
                 icon = STAT_ICONS.get(key, "")
-                # El stat a comparar se destaca
-                if key == stat:
+
+                # Destacar TODOS los stats usados en la ronda
+                if key in session.current_stats:
                     return f"**{icon} {raw} ←**"
+
                 return f"{icon} {raw}"
+
             return " | ".join([
                 val("health"),
                 val("attack"),
                 val("defense"),
                 val("speed")
             ])
+
 
         # Embed carta 1
         embed1 = discord.Embed(
@@ -809,12 +843,18 @@ class Battle(commands.Cog):
             embed1.set_image(url=c1["imagen"])
         embed1.add_field(name="Stats", value=fmt(c1), inline=False)
 
+        # Construir texto de stats combinados (1 o varios)
+        stats_text = " + ".join(
+            f"{STAT_ICONS[s]} {s.upper()}"
+            for s in session.current_stats
+        )
+
         # Embed VS central
         embed_vs = discord.Embed(
             title="⚔️ VS ⚔️",
             description=(
-                f"**{stat_name} battle**\n"
-                f"**{icono} {v1}** vs **{v2} {icono}**\n"
+                f"**{stats_text} battle**\n"
+                f"**{total1}** vs **{total2}**\n"
                 f"{resultado}"
             ),
             color=0xFFD700
@@ -828,6 +868,7 @@ class Battle(commands.Cog):
         if c2.get("imagen"):
             embed2.set_image(url=c2["imagen"])
         embed2.add_field(name="Stats", value=fmt(c2), inline=False)
+
 
         await channel.send(embeds=[embed1, embed_vs, embed2])
 
