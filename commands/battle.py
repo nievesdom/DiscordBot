@@ -883,27 +883,42 @@ class Battle(commands.Cog):
 
 
     async def _finish_battle(
-        self, channel: discord.TextChannel, session: BattleSession
-    ):
-        # Determinamos quién ganó la batalla completa
+            self, channel: discord.TextChannel, session: BattleSession
+        ):
+        # Determinar ganador
         winner = session.winner()
 
         if winner:
-            # Mensaje de victoria
-            await channel.send(
-                f"Battle finished. Winner: {winner.mention} "
-                f"({session.p1.display_name} {session.score_p1} – "
-                f"{session.score_p2} {session.p2.display_name})."
-            )
-        else:
-            # Caso improbable: empate total
-            await channel.send(
-                "Battle finished with a tie. "
-                f"Score: {session.p1.display_name} {session.score_p1} – "
-                f"{session.score_p2} {session.p2.display_name}."
+            # Embed de victoria
+            embed = discord.Embed(
+                title="🏆 BATTLE FINISHED! 🏆",
+                description=(
+                    f"**Winner:** {winner.mention}\n\n"
+                    f"**Final Score:**\n"
+                    f"{session.p1.display_name} {session.score_p1} – "
+                    f"{session.score_p2} {session.p2.display_name}"
+                ),
+                color=0xFFD700
             )
 
-        # Eliminamos la sesión activa de la memoria del bot
+            await channel.send(embed=embed)
+
+        else:
+            # Empate total (muy raro)
+            embed = discord.Embed(
+                title="🏆 BATTLE FINISHED! 🏆",
+                description=(
+                    "**The battle ended in a tie.**\n\n"
+                    f"**Final Score:**\n"
+                    f"{session.p1.display_name} {session.score_p1} – "
+                    f"{session.score_p2} {session.p2.display_name}"
+                ),
+                color=0x9E9E9E
+            )
+
+            await channel.send(embed=embed)
+
+        # Limpiar sesión
         self._clear_session(session)
 
 
