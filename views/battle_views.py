@@ -1,5 +1,3 @@
-# views/battle_views.py
-
 import discord
 from typing import Callable, Dict, List, Optional
 
@@ -9,10 +7,11 @@ class AcceptDuelView(discord.ui.View):
     Vista para que el jugador retado acepte o rechace el combate.
     Llama a on_decision(interaction, accepted: bool).
     """
-    def __init__(self, on_decision):
-        super().__init__(timeout=120)
+    def __init__(self, on_decision, on_timeout_callback=None):
+        super().__init__(timeout=180)
         self.on_decision = on_decision
-        self.message: discord.Message | None = None  # mensaje donde vive la vista
+        self.on_timeout_callback = on_timeout_callback 
+        self.message: discord.Message | None = None
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.success)
     async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -28,9 +27,7 @@ class AcceptDuelView(discord.ui.View):
         await self.on_decision(interaction, False)
         self.stop()
 
-
     async def on_timeout(self):
-        # Si expira, editamos el mensaje original
         try:
             if self.message:
                 await self.message.edit(
@@ -40,6 +37,9 @@ class AcceptDuelView(discord.ui.View):
         except:
             pass
 
+        # Avisar al sistema de combate
+        if self.on_timeout_callback:
+            await self.on_timeout_callback()
 
 
 
@@ -54,17 +54,24 @@ class ChooseDeckView(discord.ui.View):
         self,
         player: discord.Member,
         available_decks: List[str],
-        on_choose: Callable[[discord.Interaction, str], None]
+        on_choose: Callable[[discord.Interaction, str], None],
+        on_timeout_callback=None  # ← añadido
     ):
         super().__init__(timeout=180)
         self.player = player
         self.on_choose = on_choose
+        self.on_timeout_callback = on_timeout_callback  # ← añadido
 
         for letra in available_decks:
             self.add_item(DeckButton(letra))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.player.id
+
+    async def on_timeout(self):  # ← añadido
+        if self.on_timeout_callback:
+            await self.on_timeout_callback(self.player)
+
 
 
 class DeckButton(discord.ui.Button):
@@ -79,20 +86,14 @@ class DeckButton(discord.ui.Button):
 
 
 class ChooseCardView(discord.ui.View):
-    """
-    Vista avanzada para elegir una carta:
-    - Embed estilo NavegadorMazo
-    - Botones de navegación
-    - Botón para jugar la carta
-    - Select Menu para elegir directamente
-    """
     def __init__(
         self,
         player: discord.Member,
         deck_cards: List[str],
         cartas_info: Dict[str, Dict],
         used_indices: set[int],
-        on_choose: Callable[[discord.Interaction, int, str], None]
+        on_choose: Callable[[discord.Interaction, int, str], None],
+        on_timeout_callback: Callable[[discord.Member], None]   # ← NUEVO
     ):
         super().__init__(timeout=180)
         self.player = player
@@ -100,14 +101,27 @@ class ChooseCardView(discord.ui.View):
         self.cartas_info = cartas_info
         self.used_indices = used_indices
         self.on_choose = on_choose
+        self.on_timeout_callback = on_timeout_callback   # ← NUEVO
 
-        # Lista de índices disponibles
         self.indices = [i for i in range(len(deck_cards)) if i not in used_indices]
-
         self.i = 0
 
-        # Añadir select menu
         self.add_item(ElegirCartaSelect(self))
+
+    async def on_timeout(self):
+        # El jugador NO ha jugado carta a tiempo → abandono
+        try:
+            if hasattr(self, "message") and self.message:
+                await self.message.edit(
+                    content="⏳ You did not play a card in time.",
+                    view=None
+                )
+        except:
+            pass
+
+        # Avisar al sistema de combate
+        await self.on_timeout_callback(self.player)
+
 
     def _embed_actual(self):
         """Genera el embed estilo NavegadorMazo."""

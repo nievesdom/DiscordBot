@@ -489,10 +489,10 @@ class Battle(commands.Cog):
 
         # Enviar mensaje al jugador retado con botones Accept/Decline
         view = AcceptDuelView(
-            on_decision=lambda i, accepted: asyncio.create_task(
-                self._on_duel_decision(i, session, accepted)
-            )
+            on_decision=self._on_duel_decision,
+            on_timeout_callback=lambda: self._prebattle_timeout(session, session.p2)
         )
+
 
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} challenges you to a battle.",
@@ -506,9 +506,10 @@ class Battle(commands.Cog):
     async def _on_duel_decision(
         self,
         interaction: discord.Interaction,
-        session: BattleSession,
         accepted: bool,
     ):
+        session = self._get_session(interaction.guild_id, interaction.user.id, interaction.message.interaction.user.id)
+
         # Solo el jugador retado puede aceptar o rechazar
         if interaction.user.id != session.p2.id:
             await interaction.response.send_message(
@@ -615,13 +616,13 @@ class Battle(commands.Cog):
         # Enviar menú para elegir mazo
         await inter.followup.send(
             "Choose your deck:",
-            view=ChooseDeckView(
+            view = ChooseDeckView(
                 player=player,
                 available_decks=llenos,
-                on_choose=lambda i, letra: asyncio.create_task(
-                    self._on_deck_chosen(i, session, player, letra)
-                ),
+                on_choose=lambda inter, letra: self._on_deck_chosen(inter, session, player, letra),
+                on_timeout_callback=lambda p=player: self._prebattle_timeout(session, p)
             ),
+
             ephemeral=True,
         )
 
@@ -731,7 +732,7 @@ class Battle(commands.Cog):
         inter = (
             session.interaction_p1 if player.id == session.p1.id else session.interaction_p2
         )
-        
+
         vista = ChooseCardView(
             player=player,
             deck_cards=deck,
@@ -740,10 +741,10 @@ class Battle(commands.Cog):
             on_choose=lambda interaction, idx, cid: self._on_card_chosen(
                 interaction, session, player, is_p1, idx, cid
             ),
+            on_timeout_callback=lambda p=player: self._player_timeout(session, p)  # ← NUEVO
         )
-        
-        await vista.enviar(inter)
 
+        await vista.enviar(inter)
 
 
     async def _on_card_chosen(
@@ -920,6 +921,70 @@ class Battle(commands.Cog):
 
         # Limpiar sesión
         self._clear_session(session)
+        
+        
+    async def _player_timeout(self, session, player):
+
+        # Marcar abandono
+        if not hasattr(session, "abandonos"):
+            session.abandonos = set()
+
+        session.abandonos.add(player.id)
+
+        # Si ambos abandonaron → empate
+        if len(session.abandonos) == 2:
+            await session.public_channel.send(
+                "⚠️ **Both players failed to play a card in time.**\n"
+                "**The battle ends in a draw by abandonment.**"
+            )
+            self._clear_session(session)
+            return
+
+        # Si solo uno abandonó → derrota por abandono
+        other = session.p1 if player.id == session.p2.id else session.p2
+
+        await session.public_channel.send(
+            f"⚠️ **{player.display_name} did not play a card in time.**\n"
+            f"🏳️ **{player.display_name} loses by abandonment.**\n"
+            f"🏆 Winner: {other.display_name}"
+        )
+
+        self._clear_session(session)
+        
+        
+    async def _prebattle_timeout(self, session, player):
+        """
+        Se llama cuando un jugador no acepta el duelo o no elige deck.
+        La batalla aún no ha empezado, así que solo se cancela.
+        """
+
+        # Si ya se limpió la sesión, no hacer nada
+        if session not in self.active_sessions.values():
+            return
+
+        # Si ambos fallan (muy raro pero posible)
+        if not hasattr(session, "prebattle_abandon"):
+            session.prebattle_abandon = set()
+
+        session.prebattle_abandon.add(player.id)
+
+        # Si ambos han fallado
+        if len(session.prebattle_abandon) == 2:
+            await session.public_channel.send(
+                "⚠️ **The battle request was cancelled because neither player responded in time.**"
+            )
+            self._clear_session(session)
+            return
+
+        # Si solo uno falló → cancelar batalla
+        await session.public_channel.send(
+            f"⚠️ **{player.display_name} did not respond in time.**\n"
+            f"The battle request has been cancelled."
+        )
+
+        self._clear_session(session)
+
+
 
 
 # Setup del cog
