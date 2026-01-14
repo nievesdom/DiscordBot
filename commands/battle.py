@@ -44,6 +44,8 @@ class BattleSession:
         self.guild_id = guild_id
         self.p1 = p1
         self.p2 = p2
+        self.last_round_result: str | None = None
+
 
         # Canal público donde se anuncia la batalla
         self.public_channel: Optional[discord.TextChannel] = None
@@ -678,9 +680,16 @@ class Battle(commands.Cog):
         session.current_stat = random.choice(STATS_COMBAT)
         icono = STAT_ICONS.get(session.current_stat, "")
         nombre = session.current_stat.upper()
+        texto=""
+        
+        # Añadir ganador de la ronda anterior (excepto en la primera)
+        if session.round > 1 and session.last_round_result:
+            texto += f"\nPrevious round: {session.last_round_result}"
+        
+        texto+=(f"Round {session.round}. Stat: {icono} **{nombre}**")
 
-        await channel.send(f"Round {session.round}. Stat: {icono} **{nombre}**")
-
+        await channel.send(texto)
+        
         session.waiting_p1_card = None
         session.waiting_p2_card = None
 
@@ -822,6 +831,7 @@ class Battle(commands.Cog):
 
         await channel.send(embeds=[embed1, embed_vs, embed2])
 
+        session.last_round_result = resultado
         session.round += 1
         if session.has_winner():
             await self._finish_battle(channel, session)
