@@ -200,7 +200,7 @@ class Generales(commands.Cog):
 
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "collection", "discard", "gift", "search", "pack", "show", "status"],
+            "🃏 Cards": ["album", "battle", "collection", "discard", "gift", "search", "pack", "show", "status", "trade"],
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["auto_cards", "pack_limit"]
         }
@@ -221,7 +221,6 @@ class Generales(commands.Cog):
             if texto:
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
 
-        # Este mensaje ya no es ephemeral, será visible para todos en el canal
         await interaction.followup.send(embed=embed)
 
 
@@ -229,9 +228,9 @@ class Generales(commands.Cog):
     async def help_prefix(self, ctx: commands.Context):
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "collection", "discard", "gift", "search", "pack", "show"],
+            "🃏 Cards": ["album", "battle", "collection", "discard", "gift", "search", "pack", "show", "status", "trade"],
             "🌐 Wiki": ["wiki", "character"],
-            "🔨 Moderation": ["auto_cards", "pack_limit", "status"]
+            "🔨 Moderation": ["auto_cards", "pack_limit"]
         }
 
         comandos_dict = {c.name: c for c in self.bot.tree.get_commands()}
