@@ -894,49 +894,51 @@ class Cartas(commands.Cog):
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
         servidor_id = str(interaction.guild.id)
         usuario1_id = str(interaction.user.id)
-
-        # ✅ Cargar inventario del iniciador
+    
+        # Cargar inventario del iniciador
         coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-
-        # ✅ Buscar carta exacta (case-insensitive)
+        coleccion1 = list(map(str, coleccion1))  # Normalización
+    
+        # Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
         carta1_obj = next(
             (c for c in cartas if c.get("nombre", "").lower() == name_lower),
             None
         )
-
+    
         if not carta1_obj:
             await interaction.response.send_message(
-                f"❌ No card found with exact name '{card}'.",
+                f"No card found with exact name '{card}'.",
                 ephemeral=True
             )
             return
-
+    
         carta1_id = str(carta1_obj["id"])
-
-        # ✅ Comprobar posesión
-        if carta1_id not in map(str, coleccion1):
+    
+        # Comprobar posesión
+        if carta1_id not in coleccion1:
             await interaction.response.send_message(
-                f"❌ You don't own a card named {card}.",
+                f"You don't own a card named {card}.",
                 ephemeral=True
             )
             return
-
-        # ✅ Comprobar si está en el mazo
+    
+        # Comprobar si está en el mazo
         if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
             await interaction.response.send_message(
-                f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck.",
+                f"You can't trade {carta1_obj['nombre']} because it is currently in your deck.",
                 ephemeral=True
             )
             return
-
-        # ✅ Enviar solicitud de trade
+    
+        # Enviar solicitud de trade
         await interaction.response.send_message(
-            f"{user.mention}, {interaction.user.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
+            f"{user.mention}, {interaction.user.display_name} wants to trade their card {carta1_obj['nombre']} with you.\n"
             f"Please choose whether to accept or reject.",
             view=TradeView(interaction.user, user, carta1_obj)
         )
+
 
 
     # -----------------------------

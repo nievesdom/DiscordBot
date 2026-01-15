@@ -87,8 +87,8 @@ class TradeView(View):
         usuario2_id = str(self.user2.id)
 
         # Inventarios reales
-        col1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-        col2 = cargar_inventario_usuario(servidor_id, usuario2_id)
+        col1 = list(map(str, cargar_inventario_usuario(servidor_id, usuario1_id)))
+        col2 = list(map(str, cargar_inventario_usuario(servidor_id, usuario2_id)))
 
         id1 = str(self.carta1_obj["id"])
         id2 = str(carta2_obj["id"])
@@ -107,14 +107,14 @@ class TradeView(View):
         # Comprobar mazos
         if carta_en_mazo(servidor_id, usuario1_id, id1):
             await interaction.followup.send(
-                f"🚫 You can't trade **{self.carta1_obj['nombre']}** because it is in your deck."
+                f"You can't trade {self.carta1_obj['nombre']} because it is in your deck."
             )
             self.stop()
             return
 
         if carta_en_mazo(servidor_id, usuario2_id, id2):
             await interaction.followup.send(
-                f"🚫 {self.user2.display_name} can't trade **{carta2_obj['nombre']}** because it is in their deck."
+                f"{self.user2.display_name} can't trade {carta2_obj['nombre']} because it is in their deck."
             )
             self.stop()
             return
@@ -127,8 +127,8 @@ class TradeView(View):
         )
 
         await interaction.followup.send(
-            f"{self.user1.mention}, {self.user2.display_name} offers **{carta2_obj['nombre']}** "
-            f"in exchange for your **{self.carta1_obj['nombre']}**.\nDo you accept?",
+            f"{self.user1.mention}, {self.user2.display_name} offers {carta2_obj['nombre']} "
+            f"in exchange for your {self.carta1_obj['nombre']}.\nDo you accept?",
             view=confirm_view
         )
         self.stop()
@@ -144,6 +144,7 @@ class TradeView(View):
             view=None
         )
         self.stop()
+
 
 
 class ConfirmTradeView(View):
@@ -167,8 +168,8 @@ class ConfirmTradeView(View):
         uid2 = str(self.user2.id)
 
         # Inventarios actuales
-        col1 = cargar_inventario_usuario(servidor_id, uid1)
-        col2 = cargar_inventario_usuario(servidor_id, uid2)
+        col1 = list(map(str, cargar_inventario_usuario(servidor_id, uid1)))
+        col2 = list(map(str, cargar_inventario_usuario(servidor_id, uid2)))
 
         id1 = str(self.carta1_obj["id"])
         id2 = str(self.carta2_obj["id"])
@@ -195,11 +196,11 @@ class ConfirmTradeView(View):
         # Editar mensaje final
         await interaction.message.edit(
             content=(
-                f"✅ **Trade successful!**\n"
-                f"- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "
-                f"and received **{self.carta2_obj['nombre']}**\n"
-                f"- {self.user2.mention} traded **{self.carta2_obj['nombre']}** "
-                f"and received **{self.carta1_obj['nombre']}**"
+                f"Trade successful.\n"
+                f"- {self.user1.mention} traded {self.carta1_obj['nombre']} "
+                f"and received {self.carta2_obj['nombre']}\n"
+                f"- {self.user2.mention} traded {self.carta2_obj['nombre']} "
+                f"and received {self.carta1_obj['nombre']}"
             ),
             view=None
         )
