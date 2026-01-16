@@ -3,7 +3,6 @@ import discord
 import random
 from discord.ext import commands
 from discord import app_commands
-from commands.cartas import carta_en_mazo
 from core.firebase_storage import (
     cargar_inventario_usuario,
     cargar_mazo,
@@ -15,7 +14,6 @@ from views.navegador_mazo import NavegadorMazo
 
 from typing import Dict, Tuple, Optional
 from views.battle_views import AcceptDuelView, ChooseDeckView, ChooseCardView
-from views.navegador_trade import TradeView
 
 DECK_SIZE = 8  # Tamaño máximo del mazo
 STATS_COMBAT = ["health", "attack", "defense", "speed"]
@@ -427,63 +425,82 @@ class Battle(commands.Cog):
         except Exception:
             return 0
 
-    # -----------------------------
-    # /trade (intercambio de cartas entre jugadores)
-    # -----------------------------
+    # ------------------------------
+    # /battle
+    # ------------------------------
     @app_commands.command(
-        name="trade",
-        description="Starts a card trade with another user"
+        name="battle",
+        description="Challenge another user to a card battle.",
     )
-    @app_commands.describe(user="User to trade with", card="Exact name of the card to trade")
-    async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
-    
-        servidor_id = str(interaction.guild.id)
-        usuario1_id = str(interaction.user.id)
-    
-        # Inventario del iniciador
-        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-        coleccion1 = list(map(str, coleccion1))  # Normalización necesaria
-    
-        # Buscar carta exacta
-        cartas = cargar_cartas()
-        name_lower = card.strip().lower()
-        carta1_obj = next(
-            (c for c in cartas if c.get("nombre", "").lower() == name_lower),
-            None
-        )
-    
-        if not carta1_obj:
+    @app_commands.describe(user="User you want to challenge")
+    async def battle_slash(
+        self, interaction: discord.Interaction, user: discord.Member
+    ):
+        # No se permite retar a bots
+        if user.bot:
             await interaction.response.send_message(
-                f"No card found with exact name '{card}'.",
-                ephemeral=True
+                "You cannot challenge a bot.", ephemeral=True
             )
             return
-    
-        carta1_id = str(carta1_obj["id"])
-    
-        # Comprobar posesión
-        if carta1_id not in coleccion1:
+
+        # No se permite retarse a uno mismo
+        if user.id == interaction.user.id:
             await interaction.response.send_message(
-                f"You don't own a card named {carta1_obj['nombre']}.",
-                ephemeral=True
+                "You cannot challenge yourself.", ephemeral=True
             )
             return
-    
-        # Comprobar si está en mazo
-        if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
+
+        # IDs del servidor y la guild
+        guild_id = interaction.guild_id
+        server_id = str(guild_id)
+
+        # Si ya existe una batalla activa entre estos dos usuarios, no se puede iniciar otra
+        if self._get_session(guild_id, interaction.user.id, user.id):
             await interaction.response.send_message(
-                f"You can't trade {carta1_obj['nombre']} because it is currently in your deck.",
-                ephemeral=True
+                "There is already an active battle between you two.",
+                ephemeral=True,
             )
             return
-    
-        # Enviar solicitud de trade
-        await interaction.response.send_message(
-            f"{user.mention}, {interaction.user.display_name} wants to trade their card {carta1_obj['nombre']} with you.\n"
-            f"Please choose whether to accept or reject.",
-            view=TradeView(interaction.user, user, carta1_obj)
+
+        # Comprobar que el retador tiene al menos un mazo lleno
+        if not self.tiene_mazo_lleno(server_id, str(interaction.user.id)):
+            await interaction.response.send_message(
+                "You need at least one full deck to battle.",
+                ephemeral=True,
+            )
+            return
+
+        # Comprobar que el retado también tiene un mazo lleno
+        if not self.tiene_mazo_lleno(server_id, str(user.id)):
+            await interaction.response.send_message(
+                f"{user.display_name} has no full decks.",
+                ephemeral=True,
+            )
+            return
+
+        # Crear sesión de batalla
+        session = BattleSession(guild_id, interaction.user, user)
+
+        # Guardamos la interacción del jugador 1 (necesaria para mensajes efímeros)
+        session.interaction_p1 = interaction
+
+        # Registrar la sesión como activa
+        self._set_session(session)
+
+        # Enviar mensaje al jugador retado con botones Accept/Decline
+        view = AcceptDuelView(
+            on_decision=self._on_duel_decision,
+            on_timeout_callback=lambda: self._prebattle_timeout(session, session.p2)
         )
 
+
+        await interaction.response.send_message(
+            f"{user.mention}, {interaction.user.display_name} challenges you to a battle.",
+            view=view
+        )
+
+        # ESTE es el mensaje real donde vive la vista
+        view.message = await interaction.original_response()
         
         
     async def _on_duel_decision(
