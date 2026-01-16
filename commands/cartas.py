@@ -892,15 +892,13 @@ class Cartas(commands.Cog):
     )
     @app_commands.describe(user="User to trade with", card="Exact name of the card to trade")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
-
         servidor_id = str(interaction.guild.id)
         usuario1_id = str(interaction.user.id)
 
-        # Inventario del iniciador
+        # Cargar inventario del iniciador
         coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-        coleccion1 = list(map(str, coleccion1))  # Normalización necesaria
 
-        # Buscar carta exacta
+        # Buscar carta exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
         carta1_obj = next(
@@ -910,7 +908,7 @@ class Cartas(commands.Cog):
 
         if not carta1_obj:
             await interaction.response.send_message(
-                f"No card found with exact name '{card}'.",
+                f"❌ No card found with exact name '{card}'.",
                 ephemeral=True
             )
             return
@@ -918,24 +916,24 @@ class Cartas(commands.Cog):
         carta1_id = str(carta1_obj["id"])
 
         # Comprobar posesión
-        if carta1_id not in coleccion1:
+        if carta1_id not in map(str, coleccion1):
             await interaction.response.send_message(
-                f"You don't own a card named {carta1_obj['nombre']}.",
+                f"❌ You don't own a card named {card}.",
                 ephemeral=True
             )
             return
 
-        # Comprobar si está en mazo
+        # Comprobar si está en el mazo
         if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
             await interaction.response.send_message(
-                f"You can't trade {carta1_obj['nombre']} because it is currently in your deck.",
+                f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck.",
                 ephemeral=True
             )
             return
 
         # Enviar solicitud de trade
         await interaction.response.send_message(
-            f"{user.mention}, {interaction.user.display_name} wants to trade their card {carta1_obj['nombre']} with you.\n"
+            f"{user.mention}, {interaction.user.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
             f"Please choose whether to accept or reject.",
             view=TradeView(interaction.user, user, carta1_obj)
         )
@@ -951,10 +949,10 @@ class Cartas(commands.Cog):
         servidor_id = str(ctx.guild.id)
         usuario1_id = str(ctx.author.id)
 
-        # ✅ Cargar inventario del iniciador
+        # Cargar inventario del iniciador
         coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
 
-        # ✅ Buscar carta exacta (case-insensitive)
+        # Buscar carta exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
         carta1_obj = next(
