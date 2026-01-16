@@ -1,7 +1,7 @@
 import discord, asyncio
 from discord.ui import View, button
 
-# ✅ Usamos SOLO funciones reales de core.firebase_storage
+# Usamos funciones de core.firebase_storage
 from core.firebase_storage import (
     cargar_inventario_usuario,
     quitar_cartas_inventario,
@@ -86,7 +86,7 @@ class TradeView(View):
         usuario1_id = str(self.user1.id)
         usuario2_id = str(self.user2.id)
 
-        # Inventarios reales
+        # Inventarios reales (normalizados a str)
         col1 = list(map(str, cargar_inventario_usuario(servidor_id, usuario1_id)))
         col2 = list(map(str, cargar_inventario_usuario(servidor_id, usuario2_id)))
 
@@ -147,6 +147,7 @@ class TradeView(View):
 
 
 
+
 class ConfirmTradeView(View):
     """Segunda fase: el iniciador confirma o rechaza el intercambio."""
     def __init__(self, user1, user2, carta1_obj, carta2_obj, servidor_id):
@@ -168,8 +169,8 @@ class ConfirmTradeView(View):
         uid2 = str(self.user2.id)
 
         # Inventarios actuales
-        col1 = list(map(str, cargar_inventario_usuario(servidor_id, uid1)))
-        col2 = list(map(str, cargar_inventario_usuario(servidor_id, uid2)))
+        col1 = cargar_inventario_usuario(servidor_id, uid1)
+        col2 = cargar_inventario_usuario(servidor_id, uid2)
 
         id1 = str(self.carta1_obj["id"])
         id2 = str(self.carta2_obj["id"])
@@ -196,11 +197,11 @@ class ConfirmTradeView(View):
         # Editar mensaje final
         await interaction.message.edit(
             content=(
-                f"Trade successful.\n"
-                f"- {self.user1.mention} traded {self.carta1_obj['nombre']} "
-                f"and received {self.carta2_obj['nombre']}\n"
-                f"- {self.user2.mention} traded {self.carta2_obj['nombre']} "
-                f"and received {self.carta1_obj['nombre']}"
+                f"✅ **Trade successful!**\n"
+                f"- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "
+                f"and received **{self.carta2_obj['nombre']}**\n"
+                f"- {self.user2.mention} traded **{self.carta2_obj['nombre']}** "
+                f"and received **{self.carta1_obj['nombre']}**"
             ),
             view=None
         )
