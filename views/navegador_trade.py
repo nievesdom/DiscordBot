@@ -24,20 +24,34 @@ def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
         or carta_id in map(str, mazo_c)
     )
     
-def puede_trade(sid: str, uid: str, cid: str) -> bool:
-    """Devuelve True si el usuario puede intercambiar esa carta."""
-    cid = str(cid)
+# Comprueba si un usuario puede intercambiar una carta o no
+def puede_trade(sid: str, uid: str, cid: str):
+    """
+    Devuelve (True, None) si puede intercambiar.
+    Devuelve (False, razon) si no puede.
+    """
+    cid = str(cid) # ID de la carta
 
+    # Se cuentan las cartas con ese ID que tiene en el inventario
     inv = [str(c) for c in cargar_inventario_usuario(sid, uid)]
     total_inv = inv.count(cid)
 
+    if total_inv == 0:
+        return False, "You do not own this card."
+
+    # Los mazos del usuario
     ma = [str(c) for c in cargar_mazo(sid, uid, "A")]
     mb = [str(c) for c in cargar_mazo(sid, uid, "B")]
     mc = [str(c) for c in cargar_mazo(sid, uid, "C")]
-
+    
+    # Se cuentan las cartas con ese ID que tiene en sus mazos
     total_mazos = ma.count(cid) + mb.count(cid) + mc.count(cid)
 
-    return total_inv > total_mazos
+    if total_inv <= total_mazos:
+        return False, "All your copies of this card are currently in your decks."
+
+    return True, None
+
 
 
 
@@ -49,7 +63,7 @@ class TradeView(View):
         self.c1 = c1
 
     @button(label="Accept", style=discord.ButtonStyle.green)
-    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.u2.id:
             await interaction.response.send_message("Not for you.", ephemeral=True)
             return
@@ -81,8 +95,9 @@ class TradeView(View):
         sid = str(interaction.guild.id)
         u2 = str(self.u2.id)
 
-        if not puede_trade(sid, u2, c2["id"]):
-            await interaction.followup.send(f"You cannot trade {c2['nombre']}.")
+        ok, reason = puede_trade(sid, u2, c2["id"])
+        if not ok:
+            await interaction.followup.send(reason)
             self.stop()
             return
 
@@ -93,13 +108,14 @@ class TradeView(View):
         self.stop()
 
     @button(label="Reject", style=discord.ButtonStyle.red)
-    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def reject(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.u2.id:
             await interaction.response.send_message("Not for you.", ephemeral=True)
             return
 
         await interaction.message.edit(content=f"{self.u2.display_name} rejected the trade.", view=None)
         self.stop()
+
 
 
 class ConfirmView(View):
@@ -110,7 +126,7 @@ class ConfirmView(View):
         self.c1 = c1
         self.c2 = c2
 
-    @button(label="OK", style=discord.ButtonStyle.green)
+    @button(label="Accept", style=discord.ButtonStyle.green)
     async def ok(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.u1.id:
             await interaction.response.send_message("Not for you.", ephemeral=True)
@@ -123,13 +139,15 @@ class ConfirmView(View):
         id1 = str(self.c1["id"])
         id2 = str(self.c2["id"])
 
-        if not puede_trade(sid, uid1, id1):
-            await interaction.response.send_message("You no longer can trade your card.")
+        ok1, r1 = puede_trade(sid, uid1, id1)
+        if not ok1:
+            await interaction.response.send_message(r1)
             self.stop()
             return
 
-        if not puede_trade(sid, uid2, id2):
-            await interaction.response.send_message("The other user cannot trade their card anymore.")
+        ok2, r2 = puede_trade(sid, uid2, id2)
+        if not ok2:
+            await interaction.response.send_message(r2)
             self.stop()
             return
 
@@ -141,7 +159,7 @@ class ConfirmView(View):
 
         await interaction.message.edit(
             content=(
-                f"Trade done.\n"
+                f"Trade completed.\n"
                 f"- {self.u1.display_name} gave **{self.c1['nombre']}** and got **{self.c2['nombre']}**\n"
                 f"- {self.u2.display_name} gave **{self.c2['nombre']}** and got **{self.c1['nombre']}**"
             ),
@@ -149,7 +167,7 @@ class ConfirmView(View):
         )
         self.stop()
 
-    @button(label="Cancel", style=discord.ButtonStyle.red)
+    @button(label="Reject", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.u1.id:
             await interaction.response.send_message("Not for you.", ephemeral=True)

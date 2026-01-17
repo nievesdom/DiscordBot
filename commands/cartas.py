@@ -909,7 +909,7 @@ class Cartas(commands.Cog):
         sid = str(interaction.guild.id)
         u1 = str(interaction.user.id)
     
-        # Buscar carta
+        # Buscar carta exacta
         cartas = cargar_cartas()
         name = card.strip().lower()
         c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
@@ -921,17 +921,16 @@ class Cartas(commands.Cog):
         cid1 = str(c1["id"])
     
         # Comprobar disponibilidad
-        if not puede_trade(sid, u1, cid1):
-            await interaction.response.send_message(
-                f"You cannot trade {c1['nombre']}.",
-                ephemeral=True
-            )
+        ok, reason = puede_trade(sid, u1, cid1)
+        if not ok:
+            await interaction.response.send_message(reason, ephemeral=True)
             return
     
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to trade **{c1['nombre']}** with you.",
             view=TradeView(interaction.user, user, c1)
         )
+
 
 
 
@@ -1000,7 +999,7 @@ class Cartas(commands.Cog):
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
 
-        # ✅ Buscar coincidencia exacta (case-insensitive)
+        # Buscar coincidencia exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = nombre_carta.strip().lower()
         carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
@@ -1015,10 +1014,10 @@ class Cartas(commands.Cog):
         carta_id = str(carta["id"])
         carta_nombre = carta.get("nombre", "Unknown")
 
-        # ✅ Cargar inventario del usuario
+        # Cargar inventario del usuario
         inventario = cargar_inventario_usuario(servidor_id, usuario_id)
 
-        # ✅ Comprobar si la carta está en el mazo
+        # Comprobar si la carta está en el mazo
         if carta_en_mazo(servidor_id, usuario_id, carta_id):
             await interaction.followup.send(
                 f"🚫 You can't discard **{carta_nombre}** because it is currently in your deck.",
@@ -1026,7 +1025,7 @@ class Cartas(commands.Cog):
             )
             return
 
-        # ✅ Quitar solo una copia
+        # Quitar solo una copia
         ok = quitar_cartas_inventario(servidor_id, usuario_id, [carta_id])
         if not ok:
             await interaction.followup.send(
@@ -1049,7 +1048,7 @@ class Cartas(commands.Cog):
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
 
-        # ✅ Buscar coincidencia exacta (case-insensitive)
+        # Buscar coincidencia exacta (case-insensitive)
         cartas = cargar_cartas()
         name_lower = nombre_carta.strip().lower()
         carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
@@ -1061,17 +1060,17 @@ class Cartas(commands.Cog):
         carta_id = str(carta["id"])
         carta_nombre = carta.get("nombre", "Unknown")
 
-        # ✅ Cargar inventario del usuario
+        # Cargar inventario del usuario
         inventario = cargar_inventario_usuario(servidor_id, usuario_id)
 
-        # ✅ Comprobar si la carta está en el mazo
+        # Comprobar si la carta está en el mazo
         if carta_en_mazo(servidor_id, usuario_id, carta_id):
             await ctx.send(
                 f"🚫 You can't discard **{carta_nombre}** because it is currently in your deck."
             )
             return
 
-        # ✅ Quitar solo una copia
+        # Quitar solo una copia
         ok = quitar_cartas_inventario(servidor_id, usuario_id, [carta_id])
         if not ok:
             await ctx.send(
