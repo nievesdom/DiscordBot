@@ -37,6 +37,22 @@ def backup_settings(settings: dict) -> None:
     timestamp = datetime.datetime.now().isoformat()
     db.collection("settings_backup").document(timestamp).set(settings)
     
+def puede_trade(sid: str, uid: str, cid: str) -> bool:
+    """Devuelve True si el usuario puede intercambiar esa carta."""
+    cid = str(cid)
+
+    inv = [str(c) for c in cargar_inventario_usuario(sid, uid)]
+    total_inv = inv.count(cid)
+
+    ma = [str(c) for c in cargar_mazo(sid, uid, "A")]
+    mb = [str(c) for c in cargar_mazo(sid, uid, "B")]
+    mc = [str(c) for c in cargar_mazo(sid, uid, "C")]
+
+    total_mazos = ma.count(cid) + mb.count(cid) + mc.count(cid)
+
+    return total_inv > total_mazos
+
+    
     
 class Cartas(commands.Cog):
     """Cog principal para gestionar cartas y comandos del sistema RGGO."""
@@ -392,7 +408,7 @@ class Cartas(commands.Cog):
             await ctx.send(f"No cards found containing '{term}'.")
             return
 
-        # ✅ Nueva lógica: cargar inventario del usuario
+        # Cargar inventario del usuario
         servidor_id = str(ctx.guild.id)
         usuario_id = str(ctx.author.id)
         cartas_usuario = cargar_inventario_usuario(servidor_id, usuario_id)
@@ -500,7 +516,7 @@ class Cartas(commands.Cog):
         usuario_packs["packs_opened"] = packs_opened + 1
         guardar_packs(packs)
 
-        # ✅ Guardar cartas en la nueva colección inventario
+        # Guardar cartas en la nueva colección inventario
         ids = [c["id"] for c in nuevas_cartas]
         agregar_cartas_inventario(servidor_id, usuario_id, ids)
 
@@ -582,7 +598,7 @@ class Cartas(commands.Cog):
         usuario_packs["packs_opened"] = packs_opened + 1
         guardar_packs(packs)
 
-        # ✅ Guardar cartas en inventario
+        # Guardar cartas en inventario
         ids = [c["id"] for c in nuevas_cartas]
         agregar_cartas_inventario(servidor_id, usuario_id, ids)
 
@@ -886,57 +902,37 @@ class Cartas(commands.Cog):
     # -----------------------------
     # /trade (intercambio de cartas entre jugadores)
     # -----------------------------
-    @app_commands.command(
-        name="trade",
-        description="Starts a card trade with another user"
-    )
-    @app_commands.describe(user="User to trade with", card="Exact name of the card to trade")
+    @app_commands.command(name="trade", description="Trade a card with another user")
+    @app_commands.describe(user="User to trade with", card="Card you offer")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
-        servidor_id = str(interaction.guild.id)
-        usuario1_id = str(interaction.user.id)
-
-        # Cargar inventario del iniciador
-        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-
-        # Buscar carta exacta (case-insensitive)
+    
+        sid = str(interaction.guild.id)
+        u1 = str(interaction.user.id)
+    
+        # Buscar carta
         cartas = cargar_cartas()
-        name_lower = card.strip().lower()
-        carta1_obj = next(
-            (c for c in cartas if c.get("nombre", "").lower() == name_lower),
-            None
-        )
-
-        if not carta1_obj:
+        name = card.strip().lower()
+        c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
+    
+        if not c1:
+            await interaction.response.send_message(f"No card named '{card}'.", ephemeral=True)
+            return
+    
+        cid1 = str(c1["id"])
+    
+        # Comprobar disponibilidad
+        if not puede_trade(sid, u1, cid1):
             await interaction.response.send_message(
-                f"❌ No card found with exact name '{card}'.",
+                f"You cannot trade {c1['nombre']}.",
                 ephemeral=True
             )
             return
-
-        carta1_id = str(carta1_obj["id"])
-
-        # Comprobar posesión
-        if carta1_id not in map(str, coleccion1):
-            await interaction.response.send_message(
-                f"❌ You don't own a card named {card}.",
-                ephemeral=True
-            )
-            return
-
-        # Comprobar si está en el mazo
-        if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
-            await interaction.response.send_message(
-                f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck.",
-                ephemeral=True
-            )
-            return
-
-        # Enviar solicitud de trade
+    
         await interaction.response.send_message(
-            f"{user.mention}, {interaction.user.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
-            f"Please choose whether to accept or reject.",
-            view=TradeView(interaction.user, user, carta1_obj)
+            f"{user.mention}, {interaction.user.display_name} wants to trade **{c1['nombre']}** with you.",
+            view=TradeView(interaction.user, user, c1)
         )
+
 
 
 
