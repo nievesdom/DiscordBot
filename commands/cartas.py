@@ -32,17 +32,18 @@ def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
     return str(carta_id) in [str(cid) for cid in user_deck]
 
 
-def backup_settings(settings: dict) -> None:
-    """Guarda una copia completa de settings en la colección settings_backup."""
-    timestamp = datetime.datetime.now().isoformat()
-    db.collection("settings_backup").document(timestamp).set(settings)
-    
-def puede_trade(sid: str, uid: str, cid: str) -> bool:
-    """Devuelve True si el usuario puede intercambiar esa carta."""
+def puede_trade(sid: str, uid: str, cid: str):
+    """
+    Devuelve (True, None) si puede intercambiar.
+    Devuelve (False, razon) si no puede.
+    """
     cid = str(cid)
 
     inv = [str(c) for c in cargar_inventario_usuario(sid, uid)]
     total_inv = inv.count(cid)
+
+    if total_inv == 0:
+        return False, "You do not own this card."
 
     ma = [str(c) for c in cargar_mazo(sid, uid, "A")]
     mb = [str(c) for c in cargar_mazo(sid, uid, "B")]
@@ -50,7 +51,11 @@ def puede_trade(sid: str, uid: str, cid: str) -> bool:
 
     total_mazos = ma.count(cid) + mb.count(cid) + mc.count(cid)
 
-    return total_inv > total_mazos
+    if total_inv <= total_mazos:
+        return False, "All your copies of this card are currently in your decks."
+
+    return True, None
+
 
     
     
@@ -905,27 +910,27 @@ class Cartas(commands.Cog):
     @app_commands.command(name="trade", description="Trade a card with another user")
     @app_commands.describe(user="User to trade with", card="Card you offer")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
-    
+
         sid = str(interaction.guild.id)
         u1 = str(interaction.user.id)
-    
+
         # Buscar carta exacta
         cartas = cargar_cartas()
         name = card.strip().lower()
         c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
-    
+
         if not c1:
             await interaction.response.send_message(f"No card named '{card}'.", ephemeral=True)
             return
-    
+
         cid1 = str(c1["id"])
-    
+
         # Comprobar disponibilidad
         ok, reason = puede_trade(sid, u1, cid1)
         if not ok:
             await interaction.response.send_message(reason, ephemeral=True)
             return
-    
+
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to trade **{c1['nombre']}** with you.",
             view=TradeView(interaction.user, user, c1)
