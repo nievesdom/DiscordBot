@@ -886,19 +886,18 @@ class Cartas(commands.Cog):
     # -----------------------------
     # /trade (intercambio de cartas entre jugadores)
     # -----------------------------
-    @app_commands.command(
-        name="trade",
-        description="Starts a card trade with another user"
-    )
+    @app_commands.command(name="trade", description="Starts a card trade with another user")
     @app_commands.describe(user="User to trade with", card="Exact name of the card to trade")
     async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
+    
         servidor_id = str(interaction.guild.id)
         usuario1_id = str(interaction.user.id)
     
-        # Inventario real del iniciador
-        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
+        # Inventario real del iniciador (si no existe, lista vacía)
+        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id) or []
+        coleccion1 = list(map(str, coleccion1))
     
-        # Buscar carta exacta (case-insensitive)
+        # Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
         carta1_obj = next(
@@ -915,15 +914,15 @@ class Cartas(commands.Cog):
     
         carta1_id = str(carta1_obj["id"])
     
-        # Comprobar posesión normalizando IDs
-        if carta1_id not in map(str, coleccion1):
+        # Comprobar posesión
+        if carta1_id not in coleccion1:
             await interaction.response.send_message(
                 f"You don't own a card named {carta1_obj['nombre']}.",
                 ephemeral=True
             )
             return
     
-        # Comprobar si está en el mazo
+        # Comprobar si está en mazo
         if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
             await interaction.response.send_message(
                 f"You can't trade {carta1_obj['nombre']} because it is currently in your deck.",
@@ -936,6 +935,7 @@ class Cartas(commands.Cog):
             f"Please choose whether to accept or reject.",
             view=TradeView(interaction.user, user, carta1_obj)
         )
+
 
 
 
