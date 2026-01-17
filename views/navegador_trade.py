@@ -1,23 +1,28 @@
 import discord, asyncio
 from discord.ui import View, button
 
-# ✅ Usamos SOLO funciones reales de core.firebase_storage
 from core.firebase_storage import (
     cargar_inventario_usuario,
     quitar_cartas_inventario,
     agregar_cartas_inventario,
-    cargar_mazos
+    cargar_mazo
 )
 
 from core.cartas import cargar_cartas
 
 
 def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
-    """Comprueba si una carta está en el mazo del usuario."""
-    mazos = cargar_mazos()
-    servidor = mazos.get(servidor_id, {})
-    mazo_usuario = servidor.get(usuario_id, [])
-    return str(carta_id) in map(str, mazo_usuario)
+    carta_id = str(carta_id)
+
+    mazo_a = cargar_mazo(servidor_id, usuario_id, "A")
+    mazo_b = cargar_mazo(servidor_id, usuario_id, "B")
+    mazo_c = cargar_mazo(servidor_id, usuario_id, "C")
+
+    return (
+        carta_id in map(str, mazo_a)
+        or carta_id in map(str, mazo_b)
+        or carta_id in map(str, mazo_c)
+    )
 
 
 class TradeView(View):
