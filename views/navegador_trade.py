@@ -1,29 +1,23 @@
 import discord, asyncio
 from discord.ui import View, button
 
+# ✅ Usamos SOLO funciones reales de core.firebase_storage
 from core.firebase_storage import (
     cargar_inventario_usuario,
     quitar_cartas_inventario,
     agregar_cartas_inventario,
-    cargar_mazo
+    cargar_mazos
 )
 
 from core.cartas import cargar_cartas
 
 
 def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
-    carta_id = str(carta_id)
-
-    mazo_a = cargar_mazo(servidor_id, usuario_id, "A")
-    mazo_b = cargar_mazo(servidor_id, usuario_id, "B")
-    mazo_c = cargar_mazo(servidor_id, usuario_id, "C")
-
-    return (
-        carta_id in map(str, mazo_a)
-        or carta_id in map(str, mazo_b)
-        or carta_id in map(str, mazo_c)
-    )
-
+    """Comprueba si una carta está en el mazo del usuario."""
+    mazos = cargar_mazos()
+    servidor = mazos.get(servidor_id, {})
+    mazo_usuario = servidor.get(usuario_id, [])
+    return str(carta_id) in map(str, mazo_usuario)
 
 
 class TradeView(View):
@@ -47,7 +41,7 @@ class TradeView(View):
 
         await interaction.response.defer(ephemeral=True)
         await interaction.followup.send(
-            f"{self.user2.mention}, please type the exact name of the card you want to offer in exchange in this channel.",
+            f"{self.user2.mention}, please type the exact name of the card you want to offer in exchange.",
             ephemeral=True
         )
 
@@ -63,18 +57,13 @@ class TradeView(View):
 
         carta2_nombre = respuesta.content.strip()
 
-        # Buscar carta exacta por nombre
+        # Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = carta2_nombre.lower()
-        carta2_obj = next(
-            (c for c in cartas if str(c.get("nombre", "")).lower() == name_lower),
-            None
-        )
+        carta2_obj = next((c for c in cartas if c["nombre"].lower() == name_lower), None)
 
         if not carta2_obj:
-            await interaction.followup.send(
-                f"The card '{carta2_nombre}' hasn't been found with exact name. Trade cancelled."
-            )
+            await interaction.followup.send(f"The card '{carta2_nombre}' was not found. Trade cancelled.")
             self.stop()
             return
 
@@ -83,38 +72,39 @@ class TradeView(View):
         usuario2_id = str(self.user2.id)
 
         # Inventarios reales
-        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-        coleccion2 = cargar_inventario_usuario(servidor_id, usuario2_id)
+        col1 = cargar_inventario_usuario(servidor_id, usuario1_id)
+        col2 = cargar_inventario_usuario(servidor_id, usuario2_id)
 
         id1 = str(self.carta1_obj["id"])
         id2 = str(carta2_obj["id"])
 
-        # Comprobar posesión normalizando IDs
-        if id1 not in map(str, coleccion1):
-            await interaction.followup.send(f"You don't own {self.carta1_obj['nombre']}.")
+        # Comprobar posesión
+        if id1 not in col1:
+            await interaction.followup.send(f"You no longer own {self.carta1_obj['nombre']}.")
             self.stop()
             return
 
-        if id2 not in map(str, coleccion2):
-            await interaction.followup.send(f"{self.user2.display_name} doesn't own {carta2_obj['nombre']}.")
+        if id2 not in col2:
+            await interaction.followup.send(f"{self.user2.display_name} does not own {carta2_obj['nombre']}.")
             self.stop()
             return
 
         # Comprobar mazos
         if carta_en_mazo(servidor_id, usuario1_id, id1):
             await interaction.followup.send(
-                f"You can't trade {self.carta1_obj['nombre']} because it is in your deck."
+                f"🚫 You can't trade **{self.carta1_obj['nombre']}** because it is in your deck."
             )
             self.stop()
             return
 
         if carta_en_mazo(servidor_id, usuario2_id, id2):
             await interaction.followup.send(
-                f"{self.user2.display_name} can't trade {carta2_obj['nombre']} because it is in their deck."
+                f"🚫 {self.user2.display_name} can't trade **{carta2_obj['nombre']}** because it is in their deck."
             )
             self.stop()
             return
 
+        # Pasar a la fase de confirmación
         confirm_view = ConfirmTradeView(
             self.user1, self.user2,
             self.carta1_obj, carta2_obj,
@@ -139,7 +129,6 @@ class TradeView(View):
             view=None
         )
         self.stop()
-
 
 
 class ConfirmTradeView(View):
