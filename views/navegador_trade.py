@@ -24,26 +24,16 @@ def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
         or carta_id in map(str, mazo_c)
     )
     
-async def edit_hybrid(interaction, content=None, view=None):
+async def send_view_msg(interaction, content=None, view=None, ephemeral=False):
     """
-    Edita el mensaje original tanto en slash como en prefijo.
+    Envía un mensaje desde una View tanto si el comando original fue slash como prefijo.
     """
-    try:
-        await interaction.message.edit(content=content, view=view)
-    except:
-        # Slash commands pueden fallar aquí, pero no pasa nada
-        pass
-
-async def send_hybrid(interaction, content=None, view=None, ephemeral=False):
-    """
-    Envía un mensaje tanto si viene de slash command como de comando con prefijo.
-    """
-    # Slash command
+    # Si es un slash command y aún no se ha respondido
     if hasattr(interaction, "response") and not interaction.response.is_done():
         await interaction.response.send_message(content, view=view, ephemeral=ephemeral)
         return
 
-    # Slash followup
+    # Si es un slash command y ya se respondió
     if hasattr(interaction, "followup"):
         try:
             await interaction.followup.send(content, view=view, ephemeral=ephemeral)
@@ -51,8 +41,19 @@ async def send_hybrid(interaction, content=None, view=None, ephemeral=False):
         except:
             pass
 
-    # Prefijo (interaction.message existe)
+    # Si viene de un comando con prefijo (el botón siempre tiene interaction.message)
     await interaction.message.channel.send(content, view=view)
+
+
+async def edit_view_msg(interaction, content=None, view=None):
+    """
+    Edita el mensaje que contiene la View.
+    Funciona tanto para slash como para prefijo.
+    """
+    try:
+        await interaction.message.edit(content=content, view=view)
+    except:
+        pass
 
     
 # Comprueba si un usuario puede intercambiar una carta o no
@@ -96,10 +97,10 @@ class TradeView(View):
     @button(label="Accept", style=discord.ButtonStyle.green)
     async def accept(self, interaction: discord.Interaction, button):
         if interaction.user.id != self.u2.id:
-            await send_hybrid(interaction, "Not for you.", ephemeral=True)
+            await send_view_msg(interaction, "Not for you.", ephemeral=True)
             return
 
-        await send_hybrid(interaction, f"{self.u2.mention}, type the card you offer.")
+        await send_view_msg(interaction, f"{self.u2.mention}, type the card you offer.")
 
         def check(m):
             return m.author.id == self.u2.id and m.channel == interaction.message.channel
@@ -107,7 +108,7 @@ class TradeView(View):
         try:
             msg = await interaction.client.wait_for("message", timeout=120, check=check)
         except asyncio.TimeoutError:
-            await send_hybrid(interaction, "Trade cancelled.")
+            await send_view_msg(interaction, "Trade cancelled.")
             self.stop()
             return
 
@@ -116,7 +117,7 @@ class TradeView(View):
         c2 = next((c for c in cartas if c["nombre"].lower() == name), None)
 
         if not c2:
-            await send_hybrid(interaction, "Card not found. Trade cancelled.")
+            await send_view_msg(interaction, "Card not found. Trade cancelled.")
             self.stop()
             return
 
@@ -125,11 +126,11 @@ class TradeView(View):
 
         ok, reason = puede_trade(sid, u2, c2["id"])
         if not ok:
-            await send_hybrid(interaction, reason)
+            await send_view_msg(interaction, reason)
             self.stop()
             return
 
-        await send_hybrid(
+        await send_view_msg(
             interaction,
             f"{self.u1.mention}, {self.u2.display_name} offers **{c2['nombre']}**.\nDo you accept?",
             view=ConfirmView(self.u1, self.u2, self.c1, c2)
@@ -139,12 +140,11 @@ class TradeView(View):
     @button(label="Reject", style=discord.ButtonStyle.red)
     async def reject(self, interaction: discord.Interaction, button):
         if interaction.user.id != self.u2.id:
-            await send_hybrid(interaction, "Not for you.", ephemeral=True)
+            await send_view_msg(interaction, "Not for you.", ephemeral=True)
             return
 
-        await edit_hybrid(interaction, f"{self.u2.display_name} rejected the trade.", view=None)
+        await edit_view_msg(interaction, f"{self.u2.display_name} rejected the trade.", view=None)
         self.stop()
-
 
 
 
@@ -159,7 +159,7 @@ class ConfirmView(View):
     @button(label="Accept", style=discord.ButtonStyle.green)
     async def ok(self, interaction: discord.Interaction, button):
         if interaction.user.id != self.u1.id:
-            await send_hybrid(interaction, "Not for you.", ephemeral=True)
+            await send_view_msg(interaction, "Not for you.", ephemeral=True)
             return
 
         sid = str(interaction.guild.id)
@@ -171,13 +171,13 @@ class ConfirmView(View):
 
         ok1, r1 = puede_trade(sid, uid1, id1)
         if not ok1:
-            await send_hybrid(interaction, r1)
+            await send_view_msg(interaction, r1)
             self.stop()
             return
 
         ok2, r2 = puede_trade(sid, uid2, id2)
         if not ok2:
-            await send_hybrid(interaction, r2)
+            await send_view_msg(interaction, r2)
             self.stop()
             return
 
@@ -187,7 +187,7 @@ class ConfirmView(View):
         agregar_cartas_inventario(sid, uid1, [id2])
         agregar_cartas_inventario(sid, uid2, [id1])
 
-        await edit_hybrid(
+        await edit_view_msg(
             interaction,
             content=(
                 f"Trade completed.\n"
@@ -201,8 +201,8 @@ class ConfirmView(View):
     @button(label="Reject", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction, button):
         if interaction.user.id != self.u1.id:
-            await send_hybrid(interaction, "Not for you.", ephemeral=True)
+            await send_view_msg(interaction, "Not for you.", ephemeral=True)
             return
 
-        await edit_hybrid(interaction, f"{self.u1.display_name} cancelled the trade.", view=None)
+        await edit_view_msg(interaction, f"{self.u1.display_name} cancelled the trade.", view=None)
         self.stop()

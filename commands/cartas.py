@@ -57,66 +57,6 @@ def puede_trade(sid: str, uid: str, cid: str):
     return True, None
 
 
-async def start_trade(self, origin, u1_member, u2_member, card_name):
-    sid = str(u1_member.guild.id)
-    u1 = str(u1_member.id)
-
-    cartas = cargar_cartas()
-    name = card_name.strip().lower()
-    c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
-
-    if not c1:
-        await send_hybrid(origin, f"No card named '{card_name}'.")
-        return
-
-    cid1 = str(c1["id"])
-
-    ok, reason = puede_trade(sid, u1, cid1)
-    if not ok:
-        await send_hybrid(origin, reason)
-        return
-
-    await send_hybrid(
-        origin,
-        f"{u2_member.mention}, **{u1_member.display_name}** wants to trade **{c1['nombre']}** with you.\nDo you accept?",
-        view=TradeView(u1_member, u2_member, c1)
-    )
-
-
-
-async def send_hybrid(interaction, content=None, view=None, ephemeral=False):
-    """
-    Envía un mensaje tanto si viene de slash command como de comando con prefijo.
-    """
-    # Slash command
-    if hasattr(interaction, "response") and not interaction.response.is_done():
-        await interaction.response.send_message(content, view=view, ephemeral=ephemeral)
-        return
-
-    # Slash followup
-    if hasattr(interaction, "followup"):
-        try:
-            await interaction.followup.send(content, view=view, ephemeral=ephemeral)
-            return
-        except:
-            pass
-
-    # Prefijo (interaction.message existe)
-    await interaction.message.channel.send(content, view=view)
-
-
-async def edit_hybrid(interaction, content=None, view=None):
-    """
-    Edita el mensaje original tanto en slash como en prefijo.
-    """
-    try:
-        await interaction.message.edit(content=content, view=view)
-    except:
-        # Slash commands pueden fallar aquí, pero no pasa nada
-        pass
-
-
-
     
 class Cartas(commands.Cog):
     """Cog principal para gestionar cartas y comandos del sistema RGGO."""
@@ -967,8 +907,32 @@ class Cartas(commands.Cog):
     # /trade (intercambio de cartas entre jugadores)
     # -----------------------------
     @app_commands.command(name="trade", description="Trade a card with another user")
+    @app_commands.describe(user="User to trade with", card="Card you offer")
     async def trade_slash(self, interaction: discord.Interaction, user: discord.Member, card: str):
-        await self.start_trade(interaction, interaction.user, user, card)
+    
+        sid = str(interaction.guild.id)
+        u1 = str(interaction.user.id)
+    
+        cartas = cargar_cartas()
+        name = card.strip().lower()
+        c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
+    
+        if not c1:
+            await interaction.response.send_message(f"No card named '{card}'.", ephemeral=True)
+            return
+    
+        cid1 = str(c1["id"])
+    
+        ok, reason = puede_trade(sid, u1, cid1)
+        if not ok:
+            await interaction.response.send_message(reason, ephemeral=True)
+            return
+    
+        await interaction.response.send_message(
+            f"{user.mention}, **{interaction.user.display_name}** wants to trade **{c1['nombre']}** with you.\nDo you accept?",
+            view=TradeView(interaction.user, user, c1)
+        )
+
 
 
     
@@ -980,7 +944,31 @@ class Cartas(commands.Cog):
     # -----------------------------
     @commands.command(name="trade")
     async def trade_prefix(self, ctx, user: discord.Member, *, card: str):
-        await self.start_trade(ctx, ctx.author, user, card)
+
+        sid = str(ctx.guild.id)
+        u1 = str(ctx.author.id)
+
+        cartas = cargar_cartas()
+        name = card.strip().lower()
+        c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
+
+        if not c1:
+            await ctx.send(f"No card named '{card}'.")
+            return
+
+        cid1 = str(c1["id"])
+
+        ok, reason = puede_trade(sid, u1, cid1)
+        if not ok:
+            await ctx.send(reason)
+            return
+
+        await ctx.send(
+            f"{user.mention}, **{ctx.author.display_name}** wants to trade **{c1['nombre']}** with you.\nDo you accept?",
+            view=TradeView(ctx.author, user, c1)
+        )
+
+
 
 
 
