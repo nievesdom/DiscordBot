@@ -43,7 +43,7 @@ def puede_trade(sid: str, uid: str, cid: str):
     total_inv = inv.count(cid)
 
     if total_inv == 0:
-        return False, "You do not own this card."
+        return False, "You do,'t own that card."
 
     ma = [str(c) for c in cargar_mazo(sid, uid, "A")]
     mb = [str(c) for c in cargar_mazo(sid, uid, "B")]
@@ -52,12 +52,71 @@ def puede_trade(sid: str, uid: str, cid: str):
     total_mazos = ma.count(cid) + mb.count(cid) + mc.count(cid)
 
     if total_inv <= total_mazos:
-        return False, "All your copies of this card are currently in your decks."
+        return False, "All your copies of that card are currently in your decks."
 
     return True, None
 
 
-    
+async def start_trade(self, origin, u1_member, u2_member, card_name):
+    sid = str(u1_member.guild.id)
+    u1 = str(u1_member.id)
+
+    cartas = cargar_cartas()
+    name = card_name.strip().lower()
+    c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
+
+    if not c1:
+        await send_hybrid(origin, f"No card named '{card_name}'.")
+        return
+
+    cid1 = str(c1["id"])
+
+    ok, reason = puede_trade(sid, u1, cid1)
+    if not ok:
+        await send_hybrid(origin, reason)
+        return
+
+    await send_hybrid(
+        origin,
+        f"{u2_member.mention}, **{u1_member.display_name}** wants to trade **{c1['nombre']}** with you.\nDo you accept?",
+        view=TradeView(u1_member, u2_member, c1)
+    )
+
+
+
+async def send_hybrid(interaction, content=None, view=None, ephemeral=False):
+    """
+    Envía un mensaje tanto si viene de slash command como de comando con prefijo.
+    """
+    # Slash command
+    if hasattr(interaction, "response") and not interaction.response.is_done():
+        await interaction.response.send_message(content, view=view, ephemeral=ephemeral)
+        return
+
+    # Slash followup
+    if hasattr(interaction, "followup"):
+        try:
+            await interaction.followup.send(content, view=view, ephemeral=ephemeral)
+            return
+        except:
+            pass
+
+    # Prefijo (interaction.message existe)
+    await interaction.message.channel.send(content, view=view)
+
+
+async def edit_hybrid(interaction, content=None, view=None):
+    """
+    Edita el mensaje original tanto en slash como en prefijo.
+    """
+    try:
+        await interaction.message.edit(content=content, view=view)
+    except:
+        # Slash commands pueden fallar aquí, pero no pasa nada
+        pass
+
+
+
     
 class Cartas(commands.Cog):
     """Cog principal para gestionar cartas y comandos del sistema RGGO."""
@@ -85,7 +144,7 @@ class Cartas(commands.Cog):
         objetivo = user or interaction.user
         servidor_id, usuario_id = str(interaction.guild.id), str(objetivo.id)
 
-        # ✅ Nueva lógica: cargar inventario del usuario
+        # Cargar inventario del usuario
         cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
 
         if not cartas_ids:
@@ -103,7 +162,7 @@ class Cartas(commands.Cog):
         objetivo = user or ctx.author
         servidor_id, usuario_id = str(ctx.guild.id), str(objetivo.id)
 
-        # ✅ Nueva lógica: cargar inventario del usuario
+        # Cargar inventario del usuario
         cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
 
         if not cartas_ids:
@@ -127,7 +186,7 @@ class Cartas(commands.Cog):
         objetivo = user or interaction.user
         servidor_id, usuario_id = str(interaction.guild.id), str(objetivo.id)
 
-        # ✅ Nueva lógica: cargar inventario del usuario
+        # Cargar inventario del usuario
         cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
         if not cartas_ids:
             await interaction.followup.send(f"{objetivo.display_name} has no cards yet.")
@@ -178,7 +237,7 @@ class Cartas(commands.Cog):
         objetivo = user or ctx.author
         servidor_id, usuario_id = str(ctx.guild.id), str(objetivo.id)
 
-        # ✅ Nueva lógica: cargar inventario del usuario
+        # Cargar inventario del usuario
         cartas_ids = cargar_inventario_usuario(servidor_id, usuario_id)
         if not cartas_ids:
             await ctx.send(f"{objetivo.display_name} has no cards yet.")
@@ -368,7 +427,7 @@ class Cartas(commands.Cog):
             await interaction.followup.send(f"No cards found containing '{term}'.")
             return
 
-        # ✅ Nueva lógica: cargar inventario del usuario
+        # Cargar inventario del usuario
         servidor_id = str(interaction.guild.id)
         usuario_id = str(interaction.user.id)
         cartas_usuario = cargar_inventario_usuario(servidor_id, usuario_id)
@@ -850,7 +909,7 @@ class Cartas(commands.Cog):
         if ruta_img and ruta_img.startswith("http"):
             embed.set_image(url=ruta_img)
         else:
-            embed.description += "\n⚠️ Image not found. Please, contact my creator."
+            embed.description += "\n⚠️ Image not found."
 
         await interaction.followup.send(embed=embed)
 
@@ -865,7 +924,7 @@ class Cartas(commands.Cog):
         cartas = cargar_cartas()
         name_lower = name.strip().lower()
 
-        # ✅ Buscar coincidencia exacta (case-insensitive)
+        # Buscar coincidencia exacta (case-insensitive)
         carta = next((c for c in cartas if c.get("nombre", "").lower() == name_lower), None)
 
         if not carta:
@@ -899,7 +958,7 @@ class Cartas(commands.Cog):
         if ruta_img and ruta_img.startswith("http"):
             embed.set_image(url=ruta_img)
         else:
-            embed.description += "\n⚠️ Image not found. Please, contact my creator."
+            embed.description += "\n⚠️ Image not found."
 
         await ctx.send(embed=embed)
 
@@ -908,38 +967,11 @@ class Cartas(commands.Cog):
     # /trade (intercambio de cartas entre jugadores)
     # -----------------------------
     @app_commands.command(name="trade", description="Trade a card with another user")
-    @app_commands.describe(user="User to trade with", card="Card you offer")
-    async def trade(self, interaction: discord.Interaction, user: discord.Member, card: str):
-
-        sid = str(interaction.guild.id)
-        u1 = str(interaction.user.id)
-
-        # Buscar carta exacta
-        cartas = cargar_cartas()
-        name = card.strip().lower()
-        c1 = next((c for c in cartas if c["nombre"].lower() == name), None)
-
-        if not c1:
-            await interaction.response.send_message(f"No card named '{card}'.", ephemeral=True)
-            return
-
-        cid1 = str(c1["id"])
-
-        # Comprobar disponibilidad
-        ok, reason = puede_trade(sid, u1, cid1)
-        if not ok:
-            await interaction.response.send_message(reason, ephemeral=True)
-            return
-
-        await interaction.response.send_message(
-            f"{user.mention}, {interaction.user.display_name} wants to trade **{c1['nombre']}** with you.",
-            view=TradeView(interaction.user, user, c1)
-        )
+    async def trade_slash(self, interaction: discord.Interaction, user: discord.Member, card: str):
+        await self.start_trade(interaction, interaction.user, user, card)
 
 
-
-
-
+    
 
 
 
@@ -947,45 +979,9 @@ class Cartas(commands.Cog):
     # Prefijo: y!trade
     # -----------------------------
     @commands.command(name="trade")
-    async def trade_prefix(self, ctx: commands.Context, user: discord.Member, *, card: str):
-        servidor_id = str(ctx.guild.id)
-        usuario1_id = str(ctx.author.id)
+    async def trade_prefix(self, ctx, user: discord.Member, *, card: str):
+        await self.start_trade(ctx, ctx.author, user, card)
 
-        # Cargar inventario del iniciador
-        coleccion1 = cargar_inventario_usuario(servidor_id, usuario1_id)
-
-        # Buscar carta exacta (case-insensitive)
-        cartas = cargar_cartas()
-        name_lower = card.strip().lower()
-        carta1_obj = next(
-            (c for c in cartas if c.get("nombre", "").lower() == name_lower),
-            None
-        )
-
-        if not carta1_obj:
-            await ctx.send(f"❌ No card found with exact name '{card}'.")
-            return
-
-        carta1_id = str(carta1_obj["id"])
-
-        # ✅ Comprobar posesión
-        if carta1_id not in map(str, coleccion1):
-            await ctx.send(f"❌ You don't own a card named {card}.")
-            return
-
-        # ✅ Comprobar si está en el mazo
-        if carta_en_mazo(servidor_id, usuario1_id, carta1_id):
-            await ctx.send(
-                f"🚫 You can't trade **{carta1_obj['nombre']}** because it is currently in your deck."
-            )
-            return
-
-        # ✅ Enviar solicitud de trade
-        await ctx.send(
-            f"{user.mention}, {ctx.author.display_name} wants to trade their card **{carta1_obj['nombre']}** with you.\n"
-            f"Please choose whether to accept or reject.",
-            view=TradeView(ctx.author, user, carta1_obj)
-        )
 
 
         
