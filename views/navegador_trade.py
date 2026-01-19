@@ -2,82 +2,34 @@ import discord, asyncio
 from discord.ui import View, button
 
 from core.firebase_storage import (
+    cargar_propiedades,
+    guardar_propiedades,
     cargar_inventario_usuario,
     quitar_cartas_inventario,
-    agregar_cartas_inventario,
-    cargar_mazo
+    agregar_cartas_inventario
 )
 
 from core.cartas import cargar_cartas
+from core.firebase_storage import cargar_mazo
 
 
-def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
-    carta_id = str(carta_id)
-
-    mazo_a = cargar_mazo(servidor_id, usuario_id, "A")
-    mazo_b = cargar_mazo(servidor_id, usuario_id, "B")
-    mazo_c = cargar_mazo(servidor_id, usuario_id, "C")
-
-    return (
-        carta_id in map(str, mazo_a)
-        or carta_id in map(str, mazo_b)
-        or carta_id in map(str, mazo_c)
-    )
-    
-async def send_view_msg(interaction, content=None, view=None, ephemeral=False):
-    """
-    Envía un mensaje desde una View tanto si el comando original fue slash como prefijo.
-    """
-    # Slash command (si aún no respondió)
-    if hasattr(interaction, "response") and not interaction.response.is_done():
-        await interaction.response.send_message(content, view=view, ephemeral=ephemeral)
-        return
-
-    # Slash followup
-    if hasattr(interaction, "followup"):
-        try:
-            await interaction.followup.send(content, view=view, ephemeral=ephemeral)
-            return
-        except:
-            pass
-
-    # Prefijo (botón → interaction.message existe)
-    await interaction.message.channel.send(content, view=view)
-
-
-async def edit_view_msg(interaction, content=None, view=None):
-    """
-    Edita el mensaje que contiene la View.
-    Funciona tanto para slash como para prefijo.
-    """
-    try:
-        await interaction.message.edit(content=content, view=view)
-    except:
-        pass
-
-
-    
-# Comprueba si un usuario puede intercambiar una carta o no
 def puede_trade(sid: str, uid: str, cid: str):
     """
     Devuelve (True, None) si puede intercambiar.
     Devuelve (False, razon) si no puede.
     """
-    cid = str(cid) # ID de la carta
+    cid = str(cid)
 
-    # Se cuentan las cartas con ese ID que tiene en el inventario
     inv = [str(c) for c in cargar_inventario_usuario(sid, uid)]
     total_inv = inv.count(cid)
 
     if total_inv == 0:
         return False, "You don't own that card."
 
-    # Los mazos del usuario
     ma = [str(c) for c in cargar_mazo(sid, uid, "A")]
     mb = [str(c) for c in cargar_mazo(sid, uid, "B")]
     mc = [str(c) for c in cargar_mazo(sid, uid, "C")]
-    
-    # Se cuentan las cartas con ese ID que tiene en sus mazos
+
     total_mazos = ma.count(cid) + mb.count(cid) + mc.count(cid)
 
     if total_inv <= total_mazos:
@@ -87,127 +39,163 @@ def puede_trade(sid: str, uid: str, cid: str):
 
 
 
-
 class TradeView(View):
-    def __init__(self, u1: discord.Member, u2: discord.Member, c1: dict):
+    """
+    Primera fase del intercambio.
+    user1 ofrece una carta y user2 decide si acepta.
+    Si acepta, escribe el nombre exacto de la carta que ofrece a cambio.
+    """
+    def __init__(self, user1: discord.Member, user2: discord.Member, carta1_obj: dict):
         super().__init__(timeout=120)
-        self.u1 = u1
-        self.u2 = u2
-        self.c1 = c1
+        self.user1 = user1
+        self.user2 = user2
+        self.carta1_obj = carta1_obj
 
     @button(label="Accept", style=discord.ButtonStyle.green)
     async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user.id != self.u2.id:
-            await send_view_msg(interaction, "Not for you.", ephemeral=True)
+        if interaction.user.id != self.user2.id:
+            await interaction.response.send_message("This button is not for you.", ephemeral=True)
             return
 
-        await send_view_msg(interaction, f"{self.u2.mention}, type the card you offer.")
+        # Se difiere la interacción para permitir mensajes posteriores
+        await interaction.response.defer(ephemeral=True)
 
-        # Se comprueba que el mensaje sea del mismo autor, mismo canal.
+        # Se solicita a user2 que escriba el nombre de la carta que ofrece
+        await interaction.followup.send(
+            f"{self.user2.mention}, type the exact name of the card you want to offer.",
+            ephemeral=False
+        )
+
         canal_id = interaction.channel.id
 
+        # Se espera un mensaje del usuario 2 en el mismo canal
         def check(m: discord.Message):
-            return m.author.id == self.u2.id and m.channel.id == canal_id
+            return m.author.id == self.user2.id and m.channel.id == canal_id
 
         try:
-            msg = await interaction.client.wait_for("message", timeout=120, check=check)
+            respuesta = await interaction.client.wait_for("message", timeout=120, check=check)
         except asyncio.TimeoutError:
-            await send_view_msg(interaction, "Trade cancelled.")
+            await interaction.followup.send("Trade cancelled.")
             self.stop()
             return
 
-        name = msg.content.strip().lower()
-        cartas = cargar_cartas()
-        c2 = next((c for c in cartas if c["nombre"].lower() == name), None)
+        carta2_nombre = respuesta.content.strip().lower()
 
-        if not c2:
-            await send_view_msg(interaction, "Card not found. Trade cancelled.")
+        # Búsqueda exacta de la carta ofrecida
+        cartas = cargar_cartas()
+        carta2_obj = next(
+            (c for c in cartas if c["nombre"].lower() == carta2_nombre),
+            None
+        )
+
+        if not carta2_obj:
+            await interaction.followup.send(f"The card '{carta2_nombre}' was not found. Trade cancelled.")
             self.stop()
             return
 
         sid = str(interaction.guild.id)
-        u2 = str(self.u2.id)
+        uid2 = str(self.user2.id)
 
-        ok, reason = puede_trade(sid, u2, c2["id"])
+        # Validación completa usando puede_trade
+        ok, reason = puede_trade(sid, uid2, carta2_obj["id"])
         if not ok:
-            await send_view_msg(interaction, reason)
+            await interaction.followup.send(reason)
             self.stop()
             return
 
-        await send_view_msg(
-            interaction,
-            f"{self.u1.mention}, {self.u2.display_name} offers **{c2['nombre']}**.\nDo you accept?",
-            view=ConfirmView(self.u1, self.u2, self.c1, c2)
+        # Se pasa a la fase de confirmación
+        confirm_view = ConfirmTradeView(
+            self.user1, self.user2, self.carta1_obj, carta2_obj
         )
+
+        await interaction.followup.send(
+            f"{self.user1.mention}, {self.user2.display_name} offers **{carta2_obj['nombre']}** "
+            f"in exchange for your **{self.carta1_obj['nombre']}**.\nDo you accept?",
+            view=confirm_view
+        )
+
         self.stop()
 
     @button(label="Reject", style=discord.ButtonStyle.red)
     async def reject(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user.id != self.u2.id:
-            await send_view_msg(interaction, "Not for you.", ephemeral=True)
+        if interaction.user.id != self.user2.id:
+            await interaction.response.send_message("This button is not for you.", ephemeral=True)
             return
 
-        await edit_view_msg(interaction, f"{self.u2.display_name} rejected the trade.", view=None)
+        await interaction.message.edit(
+            content=f"{self.user2.display_name} has rejected the trade.",
+            view=None
+        )
         self.stop()
 
 
 
-
-class ConfirmView(View):
-    def __init__(self, u1, u2, c1, c2):
+class ConfirmTradeView(View):
+    """
+    Segunda fase del intercambio.
+    user1 confirma o rechaza el intercambio final.
+    """
+    def __init__(self, user1, user2, carta1_obj, carta2_obj):
         super().__init__(timeout=120)
-        self.u1 = u1
-        self.u2 = u2
-        self.c1 = c1
-        self.c2 = c2
+        self.user1 = user1
+        self.user2 = user2
+        self.carta1_obj = carta1_obj
+        self.carta2_obj = carta2_obj
 
-    @button(label="Accept", style=discord.ButtonStyle.green)
-    async def ok(self, interaction: discord.Interaction, button):
-        if interaction.user.id != self.u1.id:
-            await send_view_msg(interaction, "Not for you.", ephemeral=True)
+    @button(label="Accept Trade", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user1.id:
+            await interaction.response.send_message("Only the initiator can confirm.", ephemeral=True)
             return
 
         sid = str(interaction.guild.id)
-        uid1 = str(self.u1.id)
-        uid2 = str(self.u2.id)
+        uid1 = str(self.user1.id)
+        uid2 = str(self.user2.id)
 
-        id1 = str(self.c1["id"])
-        id2 = str(self.c2["id"])
+        id1 = str(self.carta1_obj["id"])
+        id2 = str(self.carta2_obj["id"])
 
+        # Validación final usando puede_trade
         ok1, r1 = puede_trade(sid, uid1, id1)
         if not ok1:
-            await send_view_msg(interaction, r1)
+            await interaction.response.send_message(r1, ephemeral=True)
             self.stop()
             return
 
         ok2, r2 = puede_trade(sid, uid2, id2)
         if not ok2:
-            await send_view_msg(interaction, r2)
+            await interaction.response.send_message(r2, ephemeral=True)
             self.stop()
             return
 
+        # Intercambio real
         quitar_cartas_inventario(sid, uid1, [id1])
         quitar_cartas_inventario(sid, uid2, [id2])
 
         agregar_cartas_inventario(sid, uid1, [id2])
         agregar_cartas_inventario(sid, uid2, [id1])
 
-        await edit_view_msg(
-            interaction,
+        await interaction.message.edit(
             content=(
-                f"Trade completed.\n"
-                f"- {self.u1.display_name} gave **{self.c1['nombre']}** and got **{self.c2['nombre']}**\n"
-                f"- {self.u2.display_name} gave **{self.c2['nombre']}** and got **{self.c1['nombre']}**"
+                f"Trade completed:\n"
+                f"- {self.user1.mention} traded **{self.carta1_obj['nombre']}** "
+                f"and received **{self.carta2_obj['nombre']}**\n"
+                f"- {self.user2.mention} traded **{self.carta2_obj['nombre']}** "
+                f"and received **{self.carta1_obj['nombre']}**"
             ),
             view=None
         )
+
         self.stop()
 
-    @button(label="Reject", style=discord.ButtonStyle.red)
-    async def cancel(self, interaction: discord.Interaction, button):
-        if interaction.user.id != self.u1.id:
-            await send_view_msg(interaction, "Not for you.", ephemeral=True)
+    @button(label="Reject Trade", style=discord.ButtonStyle.red)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user1.id:
+            await interaction.response.send_message("Only the initiator can reject.", ephemeral=True)
             return
 
-        await edit_view_msg(interaction, f"{self.u1.display_name} cancelled the trade.", view=None)
+        await interaction.message.edit(
+            content=f"{self.user1.display_name} has rejected the trade.",
+            view=None
+        )
         self.stop()
