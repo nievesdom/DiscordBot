@@ -28,12 +28,12 @@ async def send_view_msg(interaction, content=None, view=None, ephemeral=False):
     """
     Envía un mensaje desde una View tanto si el comando original fue slash como prefijo.
     """
-    # Si es un slash command y aún no se ha respondido
+    # Slash command (si aún no respondió)
     if hasattr(interaction, "response") and not interaction.response.is_done():
         await interaction.response.send_message(content, view=view, ephemeral=ephemeral)
         return
 
-    # Si es un slash command y ya se respondió
+    # Slash followup
     if hasattr(interaction, "followup"):
         try:
             await interaction.followup.send(content, view=view, ephemeral=ephemeral)
@@ -41,7 +41,7 @@ async def send_view_msg(interaction, content=None, view=None, ephemeral=False):
         except:
             pass
 
-    # Si viene de un comando con prefijo (el botón siempre tiene interaction.message)
+    # Prefijo (botón → interaction.message existe)
     await interaction.message.channel.send(content, view=view)
 
 
@@ -54,6 +54,7 @@ async def edit_view_msg(interaction, content=None, view=None):
         await interaction.message.edit(content=content, view=view)
     except:
         pass
+
 
     
 # Comprueba si un usuario puede intercambiar una carta o no
