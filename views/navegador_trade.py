@@ -96,15 +96,18 @@ class TradeView(View):
         self.c1 = c1
 
     @button(label="Accept", style=discord.ButtonStyle.green)
-    async def accept(self, interaction: discord.Interaction, button):
+    async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.u2.id:
             await send_view_msg(interaction, "Not for you.", ephemeral=True)
             return
 
         await send_view_msg(interaction, f"{self.u2.mention}, type the card you offer.")
 
-        def check(m):
-            return m.author.id == self.u2.id and m.channel == interaction.message.channel
+        # Se comprueba que el mensaje sea del mismo autor, mismo canal.
+        canal_id = interaction.channel.id
+
+        def check(m: discord.Message):
+            return m.author.id == self.u2.id and m.channel.id == canal_id
 
         try:
             msg = await interaction.client.wait_for("message", timeout=120, check=check)
@@ -139,13 +142,14 @@ class TradeView(View):
         self.stop()
 
     @button(label="Reject", style=discord.ButtonStyle.red)
-    async def reject(self, interaction: discord.Interaction, button):
+    async def reject(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.u2.id:
             await send_view_msg(interaction, "Not for you.", ephemeral=True)
             return
 
         await edit_view_msg(interaction, f"{self.u2.display_name} rejected the trade.", view=None)
         self.stop()
+
 
 
 
