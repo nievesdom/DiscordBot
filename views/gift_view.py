@@ -4,30 +4,32 @@ from discord.ui import View, button
 from core.firebase_storage import (
     cargar_inventario_usuario,
     quitar_cartas_inventario,
-    agregar_cartas_inventario,
-    cargar_mazo
+    agregar_cartas_inventario
 )
 
+from core.cartas import cargar_cartas
+from core.firebase_storage import cargar_mazo
 
-def carta_en_mazo(servidor_id: str, usuario_id: str, carta_id: str) -> bool:
-    carta_id = str(carta_id)
 
-    # Comprobar mazo A
-    mazo_a = cargar_mazo(servidor_id, usuario_id, "A")
-    if carta_id in map(str, mazo_a):
-        return True
+def puede_trade(sid: str, uid: str, cid: str):
+    cid = str(cid)
 
-    # Comprobar mazo B
-    mazo_b = cargar_mazo(servidor_id, usuario_id, "B")
-    if carta_id in map(str, mazo_b):
-        return True
+    inv = [str(c) for c in cargar_inventario_usuario(sid, uid)]
+    total_inv = inv.count(cid)
 
-    # Comprobar mazo C
-    mazo_c = cargar_mazo(servidor_id, usuario_id, "C")
-    if carta_id in map(str, mazo_c):
-        return True
+    if total_inv == 0:
+        return False, "You don't own that card."
 
-    return False
+    ma = [str(c) for c in cargar_mazo(sid, uid, "A")]
+    mb = [str(c) for c in cargar_mazo(sid, uid, "B")]
+    mc = [str(c) for c in cargar_mazo(sid, uid, "C")]
+
+    total_mazos = ma.count(cid) + mb.count(cid) + mc.count(cid)
+
+    if total_inv <= total_mazos:
+        return False, "All your copies of that card are currently in your decks."
+
+    return True, None
 
 
 
@@ -52,25 +54,14 @@ class GiftView(View):
         recipient_id = str(self.recipient.id)
         carta_id = str(self.carta_obj["id"])
 
-        sender_cards = cargar_inventario_usuario(servidor_id, sender_id)
-        recipient_cards = cargar_inventario_usuario(servidor_id, recipient_id)
-
-        if carta_id not in map(str, sender_cards):
-            await interaction.response.send_message(
-                "The sender no longer owns this card.",
-                ephemeral=True
-            )
+        # Validación completa usando puede_trade
+        ok, reason = puede_trade(servidor_id, sender_id, carta_id)
+        if not ok:
+            await interaction.response.send_message(reason, ephemeral=True)
             self.stop()
             return
 
-        if carta_en_mazo(servidor_id, sender_id, carta_id):
-            await interaction.response.send_message(
-                f"The sender cannot gift {self.carta_obj['nombre']} because it is currently in their deck.",
-                ephemeral=True
-            )
-            self.stop()
-            return
-
+        # Transferencia de la carta
         ok1 = quitar_cartas_inventario(servidor_id, sender_id, [carta_id])
         if not ok1:
             await interaction.response.send_message(
@@ -82,6 +73,7 @@ class GiftView(View):
 
         agregar_cartas_inventario(servidor_id, recipient_id, [carta_id])
 
+        # Log opcional
         try:
             log_guild_id = 286617766516228096
             log_channel_id = 1441990735883800607
@@ -90,16 +82,14 @@ class GiftView(View):
                 log_channel = log_guild.get_channel(log_channel_id)
                 if log_channel:
                     await log_channel.send(
-                        f"[GIFT] {self.sender.display_name} regaló '{self.carta_obj['nombre']}' "
-                        f"a {self.recipient.display_name} en {interaction.guild.name}"
+                        f"[GIFT] {self.sender.display_name} gifted '{self.carta_obj['nombre']}' "
+                        f"to {self.recipient.display_name} in {interaction.guild.name}"
                     )
         except Exception as e:
             print(f"[ERROR] Could not send log: {e}")
 
         await interaction.response.edit_message(
-            content=(
-                f"{self.recipient.mention} accepted the gift and received {self.carta_obj['nombre']}"
-            ),
+            content=f"{self.recipient.mention} accepted the gift and received {self.carta_obj['nombre']}",
             view=None
         )
         self.stop()
