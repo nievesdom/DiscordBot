@@ -719,10 +719,8 @@ class Cartas(commands.Cog):
         servidor_id = str(interaction.guild.id)
         sender_id = str(interaction.user.id)
 
-        # Inventario del que regala
         sender_cards = cargar_inventario_usuario(servidor_id, sender_id)
 
-        # Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
         carta_obj = next((c for c in cartas if c["nombre"].lower() == name_lower), None)
@@ -736,27 +734,17 @@ class Cartas(commands.Cog):
 
         carta_id = str(carta_obj["id"])
 
-        # Comprobar posesión
-        if carta_id not in map(str, sender_cards):
-            await interaction.response.send_message(
-                f"❌ You don't own a card named {card}.",
-                ephemeral=True
-            )
+        # Validación completa usando puede_trade
+        ok, reason = puede_trade(servidor_id, sender_id, carta_id)
+        if not ok:
+            await interaction.response.send_message(reason, ephemeral=True)
             return
 
-        # Comprobar si está en el mazo
-        if carta_en_mazo(servidor_id, sender_id, carta_id):
-            await interaction.response.send_message(
-                f"🚫 You can't gift **{carta_obj['nombre']}** because it is currently in your deck.",
-                ephemeral=True
-            )
-            return
-
-        # Enviar solicitud al receptor
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} wants to gift you the card **{carta_obj['nombre']}**.\nDo you accept?",
             view=GiftView(interaction.user, user, carta_obj, servidor_id, interaction.client)
         )
+        
 
         
     # -----------------------------
@@ -767,10 +755,8 @@ class Cartas(commands.Cog):
         servidor_id = str(ctx.guild.id)
         sender_id = str(ctx.author.id)
 
-        # Inventario del que regala
         sender_cards = cargar_inventario_usuario(servidor_id, sender_id)
 
-        # Buscar carta exacta
         cartas = cargar_cartas()
         name_lower = card.strip().lower()
         carta_obj = next((c for c in cartas if c["nombre"].lower() == name_lower), None)
@@ -781,23 +767,17 @@ class Cartas(commands.Cog):
 
         carta_id = str(carta_obj["id"])
 
-        # Comprobar posesión
-        if carta_id not in map(str, sender_cards):
-            await ctx.send(f"❌ You don't own a card named {card}.")
+        # Validación completa usando puede_trade
+        ok, reason = puede_trade(servidor_id, sender_id, carta_id)
+        if not ok:
+            await ctx.send(reason)
             return
 
-        # Comprobar si está en el mazo
-        if carta_en_mazo(servidor_id, sender_id, carta_id):
-            await ctx.send(
-                f"🚫 You can't gift **{carta_obj['nombre']}** because it is currently in your deck."
-            )
-            return
-
-        # Enviar solicitud al receptor
         await ctx.send(
             f"{user.mention}, {ctx.author.display_name} wants to gift you the card **{carta_obj['nombre']}**.\nDo you accept?",
             view=GiftView(ctx.author, user, carta_obj, servidor_id, ctx.bot)
         )
+
 
 
 

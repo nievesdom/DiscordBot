@@ -142,10 +142,10 @@ class ConfirmTradeView(View):
         self.carta1_obj = carta1_obj
         self.carta2_obj = carta2_obj
 
-    @button(label="Accept Trade", style=discord.ButtonStyle.green)
+    @button(label="Accept", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user1.id:
-            await interaction.response.send_message("Only the initiator can confirm.", ephemeral=True)
+            await interaction.response.send_message("Only the trade initiator can accept.", ephemeral=True)
             return
 
         sid = str(interaction.guild.id)
@@ -188,10 +188,10 @@ class ConfirmTradeView(View):
 
         self.stop()
 
-    @button(label="Reject Trade", style=discord.ButtonStyle.red)
+    @button(label="Reject", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user1.id:
-            await interaction.response.send_message("Only the initiator can reject.", ephemeral=True)
+            await interaction.response.send_message("Only the trade initiator can reject.", ephemeral=True)
             return
 
         await interaction.message.edit(
