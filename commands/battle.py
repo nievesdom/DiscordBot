@@ -425,6 +425,7 @@ class Battle(commands.Cog):
         except Exception:
             return 0
 
+
     # ------------------------------
     # /battle
     # ------------------------------
@@ -493,13 +494,12 @@ class Battle(commands.Cog):
             on_timeout_callback=lambda: self._prebattle_timeout(session, session.p2)
         )
 
-
         await interaction.response.send_message(
             f"{user.mention}, {interaction.user.display_name} challenges you to a battle.",
             view=view
         )
 
-        # ESTE es el mensaje real donde vive la vista
+        # Mensaje donde vive la vista
         view.message = await interaction.original_response()
         
         
@@ -629,7 +629,6 @@ class Battle(commands.Cog):
 
 
     async def _on_deck_chosen(self, interaction, session, player, letra):
-
         # Editar el mensaje donde estaban los botones
         try:
             await interaction.response.edit_message(
@@ -680,16 +679,25 @@ class Battle(commands.Cog):
             await self._finish_battle(channel, session)
             return
 
-        # 40% de probabilidad de multi-stat
-        if random.random() < 0.40:
-            # Elegir entre 2 y 4 stats distintos
-            n = random.randint(2, 4)
-            session.current_stats = random.sample(STATS_COMBAT, n)
-        else:
-            # Solo 1 stat
-            session.current_stats = [random.choice(STATS_COMBAT)]
+        # Probabilidad de número de stats:
+        # 60% → 1 stat
+        # 25% → 2 stats
+        # 10% → 3 stats
+        # 5%  → 4 stats
+        r = random.random()
 
-        # Construir texto de stats
+        if r < 0.60:
+            n = 1
+        elif r < 0.60 + 0.25:
+            n = 2
+        elif r < 0.60 + 0.25 + 0.10:
+            n = 3
+        else:
+            n = 4
+
+        session.current_stats = random.sample(STATS_COMBAT, n)
+
+        # Construcción del texto de stats
         partes = []
         for st in session.current_stats:
             icono = STAT_ICONS.get(st, "")
@@ -700,14 +708,12 @@ class Battle(commands.Cog):
         # Mensaje de inicio de ronda
         texto = ""
 
-        # Ganador de la ronda anterior
         if session.round > 1 and session.last_round_result:
             texto += f"{session.last_round_result}\n"
             texto += (
                 f"Score: {session.p1.display_name} {session.score_p1} - "
                 f"{session.score_p2} {session.p2.display_name}\n"
             )
-
 
         texto += f"Round {session.round}. Stats: {texto_stats}"
 
@@ -720,7 +726,6 @@ class Battle(commands.Cog):
         # Pedir cartas
         await self._ask_card_choice(session, session.p1, True)
         await self._ask_card_choice(session, session.p2, False)
-
 
 
     async def _ask_card_choice(self, session, player, is_p1):

@@ -682,6 +682,7 @@ class Cartas(commands.Cog):
             )
             
             
+            
     # -----------------------------
     # Prefijo: y!pack_limit
     # -----------------------------
@@ -777,8 +778,6 @@ class Cartas(commands.Cog):
             f"{user.mention}, {ctx.author.display_name} wants to gift you the card **{carta_obj['nombre']}**.\nDo you accept?",
             view=GiftView(ctx.author, user, carta_obj, servidor_id, ctx.bot)
         )
-
-
 
 
 
@@ -912,10 +911,6 @@ class Cartas(commands.Cog):
             f"{user.mention}, **{interaction.user.display_name}** wants to trade **{c1['nombre']}** with you.\nDo you accept?",
             view=TradeView(interaction.user, user, c1)
         )
-
-
-
-    
 
 
 
