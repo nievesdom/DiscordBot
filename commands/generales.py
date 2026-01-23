@@ -200,7 +200,7 @@ class Generales(commands.Cog):
 
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "battle", "collection", "discard", "gift", "search", "pack", "show", "status", "trade"],
+            "🃏 Cards": ["album", "battle", "collection","deck","deck_add","deck_remove", "discard", "gift", "search", "pack", "show", "status", "trade"],
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["auto_cards", "pack_limit"]
         }
@@ -228,7 +228,7 @@ class Generales(commands.Cog):
     async def help_prefix(self, ctx: commands.Context):
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "battle", "collection", "discard", "gift", "search", "pack", "show", "status", "trade"],
+            "🃏 Cards": ["album", "battle", "collection","deck","deck_add","deck_remove", "discard", "gift", "search", "pack", "show", "status", "trade"],
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["auto_cards", "pack_limit"]
         }
