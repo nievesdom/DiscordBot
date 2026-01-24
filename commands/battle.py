@@ -880,18 +880,22 @@ class Battle(commands.Cog):
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
         log_guild = self.bot.get_guild(log_guild_id)
-
+        
         if log_guild:
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
                 try:
                     await log_channel.send(
                         f"[BATTLE ROUND] {session.p1.display_name} vs {session.p2.display_name} | "
-                        f"Round {session.round} | Stats: {', '.join(session.current_stats)} | "
-                        f"Result: {resultado} ({total1} vs {total2})"
+                        f"Round {session.round}\n"
+                        f"• {session.p1.display_name} played **{nombre1}** → {total1}\n"
+                        f"• {session.p2.display_name} played **{nombre2}** → {total2}\n"
+                        f"Stats used: {', '.join(session.current_stats)}\n"
+                        f"Result: {resultado}"
                     )
                 except Exception as e:
                     print(f"[ERROR] Could not send battle round log: {e}")
+
 
 
         session.last_round_result = resultado
@@ -944,7 +948,7 @@ class Battle(commands.Cog):
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
         log_guild = self.bot.get_guild(log_guild_id)
-        
+
         if log_guild:
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
