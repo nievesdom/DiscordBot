@@ -784,6 +784,25 @@ class Battle(commands.Cog):
 
 
     async def _resolve_round(self, channel, session):
+        if hasattr(session, "abandonos") and session.abandonos:
+            abandoner = session.p1 if session.p1.id in session.abandonos else session.p2
+            winner = session.p2 if abandoner == session.p1 else session.p1
+        
+            await channel.send(
+                f"⚠️ **{abandoner.display_name} did not play a card in time.**\n"
+                f"🏳️ **{abandoner.display_name} loses by abandonment.**\n"
+                f"🏆 Winner: {winner.display_name}"
+            )
+        
+            await self._battle_log(
+                session.guild_id,
+                f"[BATTLE TIMEOUT] {abandoner.display_name} failed to respond. Winner: {winner.display_name}"
+            )
+        
+            self._clear_session(session)
+            return
+
+        
         idx1, cid1 = session.waiting_p1_card
         idx2, cid2 = session.waiting_p2_card
 
@@ -1003,29 +1022,17 @@ class Battle(commands.Cog):
             # LOG
             await self._battle_log(
                 session.guild_id,
-                f"[BATTLE TIMEOUT] Both players failed to respond. Draw by abandonment."
+                "[BATTLE TIMEOUT] Both players failed to respond. Draw by abandonment."
             )
 
             self._clear_session(session)
             return
 
-        # Si solo uno falló → derrota por abandono
-        other = session.p1 if player.id == session.p2.id else session.p2
+        # Si solo uno ha fallado, NO anunciar nada todavía.
+        # Esperamos a ver si el otro también falla.
+        # No resolvemos ronda, no enviamos mensajes, no hacemos nada.
+        return
 
-        await session.public_channel.send(
-            f"⚠️ **{player.display_name} did not play a card in time.**\n"
-            f"🏳️ **{player.display_name} loses by abandonment.**\n"
-            f"🏆 Winner: {other.display_name}"
-        )
-
-        # LOG
-        await self._battle_log(
-            session.guild_id,
-            f"[BATTLE TIMEOUT] {player.display_name} failed to respond. "
-            f"Winner: {other.display_name}"
-        )
-
-        self._clear_session(session)
 
         
         
