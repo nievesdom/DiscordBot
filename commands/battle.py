@@ -1022,8 +1022,10 @@ class Battle(commands.Cog):
             # LOG
             await self._battle_log(
                 session.guild_id,
-                "[BATTLE TIMEOUT] Both players failed to respond. Draw by abandonment."
+                f"[BATTLE TIMEOUT] Both players failed to respond. Draw by abandonment. "
+                f"Players: {session.p1.display_name} vs {session.p2.display_name}"
             )
+
 
             self._clear_session(session)
             return
