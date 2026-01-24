@@ -24,8 +24,6 @@ STAT_ICONS = {
     "speed": "💨",
 }
 
-
-
 def normalizar_mazo(nombre: str) -> str:
     nombre = nombre.strip().lower()
 
@@ -46,8 +44,6 @@ class BattleSession:
         self.p2 = p2
         self.last_round_result: str | None = None
         self.current_stats: list[str] = []
-
-
 
         # Canal público donde se anuncia la batalla
         self.public_channel: Optional[discord.TextChannel] = None
@@ -83,6 +79,7 @@ class BattleSession:
     def best_of_limit(self) -> int:
         return 5
 
+    # Comprueba si ya hay un ganador
     def has_winner(self) -> bool:
         if self.score_p1 >= 3 or self.score_p2 >= 3:
             return True
@@ -90,6 +87,7 @@ class BattleSession:
             return True
         return False
 
+    # Devuelve el ganador
     def winner(self) -> Optional[discord.Member]:
         if self.score_p1 > self.score_p2:
             return self.p1
@@ -877,6 +875,24 @@ class Battle(commands.Cog):
 
 
         await channel.send(embeds=[embed1, embed_vs, embed2])
+        
+        # LOG DE RONDA
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+        log_guild = self.bot.get_guild(log_guild_id)
+
+        if log_guild:
+            log_channel = log_guild.get_channel(log_channel_id)
+            if log_channel:
+                try:
+                    await log_channel.send(
+                        f"[BATTLE ROUND] {session.p1.display_name} vs {session.p2.display_name} | "
+                        f"Round {session.round} | Stats: {', '.join(session.current_stats)} | "
+                        f"Result: {resultado} ({total1} vs {total2})"
+                    )
+                except Exception as e:
+                    print(f"[ERROR] Could not send battle round log: {e}")
+
 
         session.last_round_result = resultado
         session.round += 1
@@ -923,6 +939,24 @@ class Battle(commands.Cog):
             )
 
             await channel.send(embed=embed)
+
+        # LOG FINAL DE BATALLA
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+        log_guild = self.bot.get_guild(log_guild_id)
+        
+        if log_guild:
+            log_channel = log_guild.get_channel(log_channel_id)
+            if log_channel:
+                try:
+                    await log_channel.send(
+                        f"[BATTLE END] Winner: {winner.display_name if winner else 'Tie'} | "
+                        f"Final Score: {session.p1.display_name} {session.score_p1} - "
+                        f"{session.score_p2} {session.p2.display_name}"
+                    )
+                except Exception as e:
+                    print(f"[ERROR] Could not send battle end log: {e}")
+
 
         # Limpiar sesión
         self._clear_session(session)

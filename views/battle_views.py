@@ -55,12 +55,12 @@ class ChooseDeckView(discord.ui.View):
         player: discord.Member,
         available_decks: List[str],
         on_choose: Callable[[discord.Interaction, str], None],
-        on_timeout_callback=None  # ← añadido
+        on_timeout_callback=None
     ):
         super().__init__(timeout=180)
         self.player = player
         self.on_choose = on_choose
-        self.on_timeout_callback = on_timeout_callback  # ← añadido
+        self.on_timeout_callback = on_timeout_callback
 
         for letra in available_decks:
             self.add_item(DeckButton(letra))
@@ -68,7 +68,7 @@ class ChooseDeckView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.player.id
 
-    async def on_timeout(self):  # ← añadido
+    async def on_timeout(self):
         if self.on_timeout_callback:
             await self.on_timeout_callback(self.player)
 
@@ -80,7 +80,7 @@ class DeckButton(discord.ui.Button):
         self.letra = letra
 
     async def callback(self, interaction: discord.Interaction):
-        view: ChooseDeckView = self.view  # type: ignore
+        view: ChooseDeckView = self.view
         await view.on_choose(interaction, self.letra)
         view.stop()
 
@@ -93,7 +93,7 @@ class ChooseCardView(discord.ui.View):
         cartas_info: Dict[str, Dict],
         used_indices: set[int],
         on_choose: Callable[[discord.Interaction, int, str], None],
-        on_timeout_callback: Callable[[discord.Member], None]   # ← NUEVO
+        on_timeout_callback: Callable[[discord.Member], None]
     ):
         super().__init__(timeout=180)
         self.player = player
@@ -101,7 +101,7 @@ class ChooseCardView(discord.ui.View):
         self.cartas_info = cartas_info
         self.used_indices = used_indices
         self.on_choose = on_choose
-        self.on_timeout_callback = on_timeout_callback   # ← NUEVO
+        self.on_timeout_callback = on_timeout_callback
 
         self.indices = [i for i in range(len(deck_cards)) if i not in used_indices]
         self.i = 0

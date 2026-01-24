@@ -107,65 +107,83 @@ class Generales(commands.Cog):
     @app_commands.command(name="updates", description="Shows the latest updates and what's coming up.")
     async def updates_slash(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "**Version 1.2.2 Patch notes**\n"
-            "Version 1.2.2 is mostly an urgent bug fixing update, but it also adds some new cards, a feature and some QoL changes. Also, sorry for the downtime of the bot, I wasn't home to fix the issue quickly.\n\n" 
+            "**Version 1.3 Patch notes**\n"
+            "Version 1.3 adds decks, the first version of card battles and documentation for the bot.\n\n" 
             
-            "**Bug fixes:**\n"
-            "- Fixed an error that made adding cards to someone's inventory not work because the database where they were stored got too big. This involved changing many things in both the code and how cards are stored.\n"
-            "- Removed a duplicate card.\n\n"
-            
-            "**New features:**\n"
-            "- Added a rarity order mode to the ''/album'' command. Now the alphabetical order ignores card rarity and therefore all of the cards of the same character will be together.\n\n"
-
-            "**Quality of life changes:**\n"
-            "- Due to the changes in how cards are saved and stored, the bot might be a bit quicker when using commands such as ''/pack''."
-            "- Added the number of copies of one card that are owned (if it's more than one) next to the card's name in the ''/search'' command, just like in the ''/collection'' command.\n\n"
-            
-            "**New cards:**\n"
-            "- UR Masumi Arakawa (YLAD Summon)\n"
-            "- UR Taiga Saejima (Christmas Eve)\n"
-            "- UR Lily (Christmas Eve)\n"
-            "- UR Noah Rich (PY)\n"
-            "- UR Goro Majima (PY Mad Dog)\n\n"
+            "New features:\n"
+            "- Added decks. You can now add your cards to decks to either battle or for showcasing reasons. Each person has 3 decks (A, B and C) that consist of 8 cards each. The deck-related commands are `/deck_add`, `/deck_remove` and `/deck`.\n"
+            "- Added the first version of card combat: stat battles. This is a simplified version of battles while a more complex battle system is developed. To try it, challenge someone with `/battle` (note that you two must have a full deck). For more info about it, check the documentation.\n"
+            "- The documentation for the bot is finally ready. It has more detailed explanations about every command, card structure and more.\n\n"
+            "Other changes:\n"
+            "- Having added decks, if you want to gift, trade or discard a card it can’t be in any of your decks (unless you have more copies of it). This is to prevent losing valuable cards.\n\n"
+            "Bug fixes:\n"
+            "- Fixed a bug that made the “/trade” command not work due to the changes in inventory management and early deck work.\n\n"
+            "New cards:\n"
+            "- UR Jason Rich (PY)\n"
+            "- UR Goro Majima (PY)\n"
+            "- UR Taiga Saejima (PY)\n"
+            "- UR Mortimer (PY)\n"
+            "- UR .Notes (Christmas Eve)\n"
+            "- UR Kamulop (Christmas Eve)\n"
+            "- UR Asuka (New Year's II)\n"
+            "- UR Yui (New Year's II)\n"
+            "- UR Hikaru (New Year's II)\n"
+            "- UR Maya (New Year's II)\n"
+            "- UR Sofia (New Year's II)\n"
+            "- UR Futoshi Shimano ('05 Fighting Spirit)\n"
+            "- UR Masaru Sera ('05 Fighting Spirit)\n"
+            "- UR Keiji Shibusawa (Black)\n"
+            "- UR Ryo Takashima (Summon)\n"
+            "- UR Seonhee (True)\n"
+            "- UR Koichi Takasugi ('12 Assist)\n"
+            "- UR Tatsuo Shinada (Assist)\n"
+            "- UR Jun Oda (Palace)\n\n"
 
             "**Coming up:**\n"
             "- The choice to show wiki search results in the server's chat rather than in DMs.\n"
-            "- Documentation for the bot (already started).\n"
-            "- Deck creation (almost done!)."
             "- Community-made cards (just maybe).\n"
-            "- Card combat (eventually)."
+            "- Complex card combat."
         )
 
     @commands.command(name="updates")
     async def updates_prefix(self, ctx: commands.Context):
         await ctx.send(
-            "**Version 1.2.2 Patch notes**\n"
-            "Version 1.2.2 is mostly an urgent bug fixing update, but it also adds some new cards, a feature and some QoL changes. Also, sorry for the downtime of the bot, I wasn't home to fix the issue quickly.\n\n" 
+            "**Version 1.3 Patch notes**\n"
+            "Version 1.3 adds decks, the first version of card battles and documentation for the bot.\n\n" 
             
-            "**Bug fixes:**\n"
-            "- Fixed an error that made adding cards to someone's inventory not work because the database where they were stored got too big. This involved changing many things in both the code and how cards are stored.\n"
-            "- Removed a duplicate card.\n\n"
-            
-            "**New features:**\n"
-            "- Added a rarity order mode to the ''/album'' command. Now the alphabetical order ignores card rarity and therefore all of the cards of the same character will be together.\n\n"
-
-            "**Quality of life changes:**\n"
-            "- Due to the changes in how cards are saved and stored, the bot might be a bit quicker when using commands such as ''/pack''."
-            "- Added the number of copies of one card that are owned (if it's more than one) next to the card's name in the ''/search'' command, just like in the ''/collection'' command.\n\n"
-            
-            "**New cards:**\n"
-            "- UR Masumi Arakawa (YLAD Summon)\n"
-            "- UR Taiga Saejima (Christmas Eve)\n"
-            "- UR Lily (Christmas Eve)\n"
-            "- UR Noah Rich (PY)\n"
-            "- UR Goro Majima (PY Mad Dog)\n\n"
+            "New features:\n"
+            "- Added decks. You can now add your cards to decks to either battle or for showcasing reasons. Each person has 3 decks (A, B and C) that consist of 8 cards each. The deck-related commands are `/deck_add`, `/deck_remove` and `/deck`.\n"
+            "- Added the first version of card combat: stat battles. This is a simplified version of battles while a more complex battle system is developed. To try it, challenge someone with `/battle` (note that you two must have a full deck). For more info about it, check the documentation.\n"
+            "- The documentation for the bot is finally ready. It has more detailed explanations about every command, card structure and more.\n\n"
+            "Other changes:\n"
+            "- Having added decks, if you want to gift, trade or discard a card it can’t be in any of your decks (unless you have more copies of it). This is to prevent losing valuable cards.\n\n"
+            "Bug fixes:\n"
+            "- Fixed a bug that made the “/trade” command not work due to the changes in inventory management and early deck work.\n\n"
+            "New cards:\n"
+            "- UR Jason Rich (PY)\n"
+            "- UR Goro Majima (PY)\n"
+            "- UR Taiga Saejima (PY)\n"
+            "- UR Mortimer (PY)\n"
+            "- UR .Notes (Christmas Eve)\n"
+            "- UR Kamulop (Christmas Eve)\n"
+            "- UR Asuka (New Year's II)\n"
+            "- UR Yui (New Year's II)\n"
+            "- UR Hikaru (New Year's II)\n"
+            "- UR Maya (New Year's II)\n"
+            "- UR Sofia (New Year's II)\n"
+            "- UR Futoshi Shimano ('05 Fighting Spirit)\n"
+            "- UR Masaru Sera ('05 Fighting Spirit)\n"
+            "- UR Keiji Shibusawa (Black)\n"
+            "- UR Ryo Takashima (Summon)\n"
+            "- UR Seonhee (True)\n"
+            "- UR Koichi Takasugi ('12 Assist)\n"
+            "- UR Tatsuo Shinada (Assist)\n"
+            "- UR Jun Oda (Palace)\n\n"
 
             "**Coming up:**\n"
             "- The choice to show wiki search results in the server's chat rather than in DMs.\n"
-            "- Documentation for the bot (already started).\n"
-            "- Deck creation (almost done!)."
             "- Community-made cards (just maybe).\n"
-            "- Card combat (eventually)."
+            "- Complex card combat."
         )
 
     # ---------------------------
@@ -195,7 +213,6 @@ class Generales(commands.Cog):
     # ---------------------------
     @app_commands.command(name="help", description="Shows all available commands.")
     async def help_slash(self, interaction: discord.Interaction):
-        # Ya no usamos ephemeral=True
         await interaction.response.defer(ephemeral=False)
 
         categorias = {
@@ -221,14 +238,22 @@ class Generales(commands.Cog):
             if texto:
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
 
+        # Añadir link a la documentación
+        embed.add_field(
+            name="📘 Documentation",
+            value="[Click here to open the full documentation](https://docs.google.com/document/d/1rTfRPUR-YUN_pYVgCU8PLx1q9XYR64WqukWsmL6Oi3Y/edit?usp=sharing)",
+            inline=False
+        )
+
         await interaction.followup.send(embed=embed)
+
 
 
     @commands.command(name="help")
     async def help_prefix(self, ctx: commands.Context):
         categorias = {
             "👤 General": ["count", "feedback", "help", "hola", "ping", "say", "updates"],
-            "🃏 Cards": ["album", "battle", "collection","deck","deck_add","deck_remove", "discard", "gift", "search", "pack", "show", "status", "trade"],
+            "🃏 Cards": ["album", "collection","deck","deck_add","deck_remove", "discard", "gift", "search", "pack", "show", "status", "trade"],
             "🌐 Wiki": ["wiki", "character"],
             "🔨 Moderation": ["auto_cards", "pack_limit"]
         }
@@ -249,6 +274,13 @@ class Generales(commands.Cog):
                     texto += f"**y!{comando.name}** → {comando.description or 'Sin descripción'}\n"
             if texto:
                 embed.add_field(name=nombre_cat, value=texto, inline=False)
+                
+        # Añadir link a la documentación
+        embed.add_field(
+            name="📘 Documentation",
+            value="[Click here to open the full documentation](https://docs.google.com/document/d/1rTfRPUR-YUN_pYVgCU8PLx1q9XYR64WqukWsmL6Oi3Y/edit?usp=sharing)",
+            inline=False
+        )
 
         await ctx.send(embed=embed)
 
