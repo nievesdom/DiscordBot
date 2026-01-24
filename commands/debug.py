@@ -468,8 +468,7 @@ class Debug(commands.Cog):
         message = (
             "🚀 **The bot has been updated to version 1.3**\n"
             "A new big update has dropped, with the addition of decks to organize your cards and also get them ready for the new `/battle` command, a simple battle that focuses on stats (this is not what I have in mind when I talk about battle, but that will take longer). The documentation is finally ready. Trades have also been fixed.\n"
-            "Use `/help` to see the full list of available commands or `/updates` in order to see a more detailed description of all the changes. You can also check the new documentation for the bot.\n"
-            "Updates may slow down in the near future, as this time of the year is busier for me, but the bot will continue to be worked on."
+            "Use `/help` to see the full list of available commands or `/updates` in order to see a more detailed description of all the changes. You can also check the new [documentation](https://docs.google.com/document/d/1rTfRPUR-YUN_pYVgCU8PLx1q9XYR64WqukWsmL6Oi3Y/edit?usp=sharing) for the bot."
         )
         sent, failed = 0, 0
         cartas_cog = self.bot.get_cog("CartasAuto")
