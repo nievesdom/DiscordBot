@@ -880,7 +880,7 @@ class Battle(commands.Cog):
         log_guild_id = 286617766516228096
         log_channel_id = 1441990735883800607
         log_guild = self.bot.get_guild(log_guild_id)
-        
+
         if log_guild:
             log_channel = log_guild.get_channel(log_channel_id)
             if log_channel:
@@ -966,24 +966,50 @@ class Battle(commands.Cog):
         self._clear_session(session)
         
         
+    async def _battle_log(self, guild_id: int, message: str):
+        log_guild_id = 286617766516228096
+        log_channel_id = 1441990735883800607
+    
+        log_guild = self.bot.get_guild(log_guild_id)
+        if not log_guild:
+            return
+    
+        log_channel = log_guild.get_channel(log_channel_id)
+        if not log_channel:
+            return
+    
+        try:
+            await log_channel.send(message)
+        except Exception as e:
+            print(f"[ERROR] Could not send battle log: {e}")
+
+        
+        
     async def _player_timeout(self, session, player):
 
-        # Marcar abandono
+        # Crear set si no existe
         if not hasattr(session, "abandonos"):
             session.abandonos = set()
 
         session.abandonos.add(player.id)
 
-        # Si ambos abandonaron → empate
+        # Si ambos fallaron → empate por abandono
         if len(session.abandonos) == 2:
             await session.public_channel.send(
                 "⚠️ **Both players failed to play a card in time.**\n"
                 "**The battle ends in a draw by abandonment.**"
             )
+
+            # LOG
+            await self._battle_log(
+                session.guild_id,
+                f"[BATTLE TIMEOUT] Both players failed to respond. Draw by abandonment."
+            )
+
             self._clear_session(session)
             return
 
-        # Si solo uno abandonó → derrota por abandono
+        # Si solo uno falló → derrota por abandono
         other = session.p1 if player.id == session.p2.id else session.p2
 
         await session.public_channel.send(
@@ -992,7 +1018,15 @@ class Battle(commands.Cog):
             f"🏆 Winner: {other.display_name}"
         )
 
+        # LOG
+        await self._battle_log(
+            session.guild_id,
+            f"[BATTLE TIMEOUT] {player.display_name} failed to respond. "
+            f"Winner: {other.display_name}"
+        )
+
         self._clear_session(session)
+
         
         
     async def _prebattle_timeout(self, session, player):
