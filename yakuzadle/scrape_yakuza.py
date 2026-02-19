@@ -153,6 +153,54 @@ def extract_fighting_style(soup):
     return styles or None
 
 # -----------------------------
+# Occupation (puede estar en occupations, occupation o associations)
+# -----------------------------
+
+def extract_occupation(soup):
+    # 1. Caso más común: occupations
+    section = get_section(soup, "occupations")
+    if section:
+        lis = section.find_all("li")
+        occs = []
+        for li in lis:
+            text = clean_list_item(li.get_text())
+            if text and text not in occs:
+                occs.append(text)
+        if occs:
+            return occs
+
+    # 2. Segundo caso: occupation (singular)
+    section = get_section(soup, "occupation")
+    if section:
+        lis = section.find_all("li")
+        occs = []
+        for li in lis:
+            text = clean_list_item(li.get_text())
+            if text and text not in occs:
+                occs.append(text)
+        if occs:
+            return occs
+
+    # 3. Tercer caso: dentro de associations
+    section = get_section(soup, "associations")
+    if section:
+        lis = section.find_all("li")
+        occs = []
+        for li in lis:
+            text = li.get_text(" ", strip=True)
+            text = remove_refs(text)
+            if text.lower().startswith("occupation"):
+                parts = re.split(r"[:\-–]", text, maxsplit=1)
+                if len(parts) == 2:
+                    occ = clean_text(parts[1])
+                    if occ and occ not in occs:
+                        occs.append(occ)
+        if occs:
+            return occs
+
+    return None
+
+# -----------------------------
 # Normalización de appears_in (separar juegos)
 # -----------------------------
 
@@ -166,13 +214,11 @@ def normalize_appears_in(items):
         if not item:
             continue
 
-        # 1. Separar por "/"
         parts = item.split("/")
 
         for p in parts:
             p = p.replace("_", " ")
 
-            # 2. Separar por " and "
             if " and " in p:
                 sub = p.split(" and ")
                 for s in sub:
@@ -320,6 +366,7 @@ def scrape_personaje(nombre):
         "affiliation": extract_affiliations(get_section(soup, "affiliation")),
         "appears_in": appears_clean,
         "fighting_style": extract_fighting_style(soup),
+        "occupation": extract_occupation(soup),
     }
 
     db.collection("personajes").document(nombre).set(data, merge=True)
