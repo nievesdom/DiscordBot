@@ -5,6 +5,7 @@ import "./styles/main.css";
 
 function App() {
   const [guesses, setGuesses] = useState([]);
+  const [targetCharacter, setTargetCharacter] = useState(null); // NUEVO
 
   const handleGuess = async (name) => {
     const res = await fetch(
@@ -15,6 +16,11 @@ function App() {
     if (data.error) {
       alert("Character not found");
       return;
+    }
+
+    // Guardar el target la primera vez que se recibe
+    if (!targetCharacter) {
+      setTargetCharacter(data.target);
     }
 
     setGuesses((prev) => [
@@ -29,8 +35,6 @@ function App() {
 
   return (
     <div className="page">
-
-      {/* BLOQUE SUPERIOR CENTRADO */}
       <div className="top-container">
         <header className="hero">
           <h1 className="title">Yakuzadle</h1>
@@ -38,15 +42,14 @@ function App() {
         </header>
       </div>
 
-      {/* TABLA INDEPENDIENTE DEL CENTRADO */}
       <div className="bottom-container">
         {guesses.length > 0 && (
           <main className="results">
-            <ResultTable guesses={guesses} />
+            {/* Pasamos targetCharacter a ResultTable */}
+            <ResultTable guesses={guesses} target={targetCharacter} />
           </main>
         )}
       </div>
-
     </div>
   );
 }

@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 
 function GuessInput({ onGuess }) {
   const [value, setValue] = useState("");
-  const [allNames, setAllNames] = useState([]);
+  const [allItems, setAllItems] = useState([]);      // array de { name, image }
   const [filtered, setFiltered] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:3001/list")
       .then(res => res.json())
-      .then(data => setAllNames(data));
+      .then(data => setAllItems(data));
   }, []);
 
   const handleChange = (e) => {
@@ -20,17 +20,17 @@ function GuessInput({ onGuess }) {
       return;
     }
 
-    const f = allNames.filter(n =>
-      n.toLowerCase().includes(v.toLowerCase())
+    const f = allItems.filter(item =>
+      item.name.toLowerCase().includes(v.toLowerCase())
     );
 
     setFiltered(f.slice(0, 8));
   };
 
-  const selectName = (name) => {
-    setValue(name);
+  const selectItem = (item) => {
+    setValue(item.name);
     setFiltered([]);
-    onGuess(name);
+    onGuess(item.name);
   };
 
   const submit = (e) => {
@@ -56,13 +56,18 @@ function GuessInput({ onGuess }) {
 
       {filtered.length > 0 && (
         <div className="autocomplete-box">
-          {filtered.map((name, i) => (
+          {filtered.map((item, i) => (
             <div
               key={i}
               className="autocomplete-item"
-              onClick={() => selectName(name)}
+              onClick={() => selectItem(item)}
             >
-              {name}
+              {item.image ? (
+                <img src={item.image} alt={item.name} className="suggestion-img" />
+              ) : (
+                <div className="suggestion-img-placeholder"></div>
+              )}
+              <span>{item.name}</span>
             </div>
           ))}
         </div>
