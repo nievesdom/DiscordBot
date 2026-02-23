@@ -41,9 +41,17 @@ def clean_text(text):
 def remove_refs(text):
     return re.sub(r"\[[^\]]*\]", "", text)
 
+def remove_wp(text):
+    if not text:
+        return text
+    # Elimina " WP", "WP", "(WP)", "WP)"...
+    text = re.sub(r"\s*WP\b", "", text)
+    text = re.sub(r"\(\s*WP\s*\)", "", text)
+    return clean_text(text)
+
 def clean_parentheses(text, field=None):
     def repl(m):
-        content = m.group(1)
+        content = m.group(1).strip()
         if "formerly" in content.lower():
             return f"({content})"
         if field == "height":
@@ -66,6 +74,7 @@ def clean_scalar(section, field=None):
 
     text = local.get_text(" ", strip=True)
     text = remove_refs(text)
+    text = remove_wp(text)
     text = clean_parentheses(text, field)
     text = clean_text(text)
 
@@ -73,15 +82,25 @@ def clean_scalar(section, field=None):
         return "Unknown"
     return text
 
-def clean_list_item(text):
+def strip_field_name(text, field_name):
+    if not text:
+        return text
+    pattern = rf"^{field_name}\s*[:\-–]?\s*"
+    text = re.sub(pattern, "", text, flags=re.IGNORECASE).strip()
+    return text
+
+def clean_list_item(text, field_name=None):
     text = remove_refs(text)
+    text = remove_wp(text)
+    if field_name:
+        text = strip_field_name(text, field_name)
     text = clean_parentheses(text)
     text = clean_text(text)
     if not text or text in ("-", "—"):
         return None
     return text
 
-def extract_list(section):
+def extract_list(section, field_name=None):
     if section is None:
         return None
 
@@ -89,50 +108,59 @@ def extract_list(section):
     if lis:
         items = []
         for li in lis:
-            val = clean_list_item(li.get_text())
+            val = clean_list_item(li.get_text(), field_name)
             if val:
                 items.append(val)
         return items or None
 
-    val = clean_list_item(section.get_text())
+    val = clean_list_item(section.get_text(), field_name)
     return [val] if val else None
+
+# -----------------------------
+# Affiliations
+# -----------------------------
 
 def extract_affiliations(section):
     if section is None:
         return None
 
-    lis = section.find_all("li")
-    if not lis:
-        val = clean_list_item(section.get_text())
-        return [val] if val else None
-
     afiliaciones = []
 
+    # Buscar todos los <li> en todos los niveles
+    lis = section.find_all("li")
+
     for li in lis:
-        raw = li.get_text(" ", strip=True)
-        raw = remove_refs(raw)
+        # 1. Si hay <a>, usar su texto (es la afiliación real)
+        a = li.find("a", recursive=False)
+        if a:
+            text = a.get_text(strip=True)
+        else:
+            # 2. Si no hay <a>, usar solo el texto directo del <li>
+            direct = li.find(text=True, recursive=False)
+            text = direct.strip() if direct else ""
 
-        parts = re.split(r"\)\s+", raw)
+        # 3. Limpiar
+        text = remove_refs(text)
+        text = remove_wp(text)
+        text = strip_field_name(text, "Affiliation")
+        text = clean_text(text)
 
-        for p in parts:
-            p = p.strip()
-            if not p:
-                continue
+        # 4. Ignorar "(formerly)" y vacíos
+        if not text or text.lower() == "(formerly)":
+            continue
 
-            if "(formerly" in p and not p.endswith(")"):
-                p = p + ")"
-
-            val = clean_list_item(p)
-            if val and val not in afiliaciones:
-                afiliaciones.append(val)
+        # 5. Añadir si no está ya
+        if text not in afiliaciones:
+            afiliaciones.append(text)
 
     return afiliaciones or None
+
 
 def get_section(soup, key):
     return soup.find("div", {"data-source": key})
 
 # -----------------------------
-# Fighting Style (data-source="fighting_styles")
+# Fighting Style (hereda paréntesis del SIGUIENTE)
 # -----------------------------
 
 def extract_fighting_style(soup):
@@ -144,44 +172,51 @@ def extract_fighting_style(soup):
     styles = []
 
     for li in lis:
-        text = li.get_text(" ", strip=True)
-        text = remove_refs(text)
-        text = clean_text(text)
-        if text and text not in styles:
-            styles.append(text)
+        raw = li.get_text(" ", strip=True)
+        raw = remove_refs(raw)
+        raw = remove_wp(raw)
+        raw = strip_field_name(raw, "Fighting Style")
+
+        parts = [clean_text(p) for p in raw.split("+")]
+
+        parentheses = []
+        for p in parts:
+            m = re.search(r"\((.*?)\)", p)
+            parentheses.append(m.group(1).strip() if m else None)
+
+        # Heredar paréntesis del siguiente
+        for i in range(len(parts) - 2, -1, -1):
+            if parentheses[i] is None and parentheses[i + 1] is not None:
+                parentheses[i] = parentheses[i + 1]
+
+        for p, par in zip(parts, parentheses):
+            p = re.sub(r"\(.*?\)", "", p).strip()
+            if par:
+                p = f"{p} ({par})"
+            if p:
+                p = p[0].upper() + p[1:]
+            if p and p not in styles:
+                styles.append(p)
 
     return styles or None
 
 # -----------------------------
-# Occupation (puede estar en occupations, occupation o associations)
+# Occupation
 # -----------------------------
 
 def extract_occupation(soup):
-    # 1. Caso más común: occupations
-    section = get_section(soup, "occupations")
-    if section:
-        lis = section.find_all("li")
-        occs = []
-        for li in lis:
-            text = clean_list_item(li.get_text())
-            if text and text not in occs:
-                occs.append(text)
-        if occs:
-            return occs
+    for key in ["occupations", "occupation"]:
+        section = get_section(soup, key)
+        if section:
+            lis = section.find_all("li")
+            occs = []
+            for li in lis:
+                text = clean_list_item(li.get_text(), "Occupation")
+                if text and text not in occs:
+                    occs.append(text)
+            if occs:
+                return occs
 
-    # 2. Segundo caso: occupation (singular)
-    section = get_section(soup, "occupation")
-    if section:
-        lis = section.find_all("li")
-        occs = []
-        for li in lis:
-            text = clean_list_item(li.get_text())
-            if text and text not in occs:
-                occs.append(text)
-        if occs:
-            return occs
-
-    # 3. Tercer caso: dentro de associations
     section = get_section(soup, "associations")
     if section:
         lis = section.find_all("li")
@@ -189,6 +224,7 @@ def extract_occupation(soup):
         for li in lis:
             text = li.get_text(" ", strip=True)
             text = remove_refs(text)
+            text = remove_wp(text)
             if text.lower().startswith("occupation"):
                 parts = re.split(r"[:\-–]", text, maxsplit=1)
                 if len(parts) == 2:
@@ -201,7 +237,22 @@ def extract_occupation(soup):
     return None
 
 # -----------------------------
-# Normalización de appears_in (separar juegos)
+# Nationality
+# -----------------------------
+
+def normalize_nationality(value):
+    if not value or value == "Unknown":
+        return value
+
+    if "/" not in value:
+        return value
+
+    parts = value.split("/")
+    cleaned = [clean_text(p) for p in parts if clean_text(p)]
+    return cleaned if cleaned else value
+
+# -----------------------------
+# Appears In
 # -----------------------------
 
 def normalize_appears_in(items):
@@ -233,7 +284,49 @@ def normalize_appears_in(items):
     return final or None
 
 # -----------------------------
-# Nombre japonés
+# Actors (voiced_by, eng_voiced_by, zh_voiced_by…)
+# -----------------------------
+
+def extract_actors(soup):
+    actors = {}
+
+    for div in soup.find_all("div", {"data-source": True}):
+        key = div["data-source"]
+        if not key.endswith("voiced_by"):
+            continue
+
+        lang = div.find("h3")
+        if not lang:
+            continue
+
+        lang_name = clean_text(lang.get_text())
+        actors[lang_name] = []
+
+        value = div.find("div", class_="pi-data-value")
+        if not value:
+            continue
+
+        lis = value.find_all("li")
+        if lis:
+            for li in lis:
+                text = li.get_text()
+                text = remove_refs(text)
+                text = remove_wp(text)
+                text = clean_text(text)
+                if text:
+                    actors[lang_name].append(text)
+        else:
+            text = value.get_text()
+            text = remove_refs(text)
+            text = remove_wp(text)
+            text = clean_text(text)
+            if text:
+                actors[lang_name].append(text)
+
+    return actors or None
+
+# -----------------------------
+# Japanese Name
 # -----------------------------
 
 def get_japanese_name(soup):
@@ -255,7 +348,7 @@ def get_japanese_name(soup):
     return "Unknown"
 
 # -----------------------------
-# 1. Buscar título real
+# Buscar título real
 # -----------------------------
 
 def buscar_titulo(nombre):
@@ -275,7 +368,7 @@ def buscar_titulo(nombre):
     return data["query"]["search"][0]["title"]
 
 # -----------------------------
-# 2. Obtener HTML real con action=parse
+# Obtener HTML
 # -----------------------------
 
 def obtener_html(titulo):
@@ -293,7 +386,7 @@ def obtener_html(titulo):
     return data["parse"]["text"]["*"]
 
 # -----------------------------
-# 3. Descargar imágenes
+# Descargar imágenes
 # -----------------------------
 
 def download_images(soup, personaje):
@@ -303,9 +396,10 @@ def download_images(soup, personaje):
     infobox = soup.find("aside", {"class": "portable-infobox"})
     if not infobox:
         print("⚠ No se encontró infobox para imágenes")
-        return
+        return []
 
     images = infobox.find_all("img")
+    saved = []
 
     for img in images:
         url = img.get("src")
@@ -318,19 +412,21 @@ def download_images(soup, personaje):
         filename = f"{personaje}_{game}.png"
         filepath = os.path.join(img_folder, filename)
 
-        if os.path.exists(filepath):
-            continue
+        if not os.path.exists(filepath):
+            try:
+                img_data = requests.get(url, headers=HEADERS).content
+                with open(filepath, "wb") as f:
+                    f.write(img_data)
+                print(f"📥 Imagen descargada: {filename}")
+            except Exception as e:
+                print(f"❌ Error descargando {url}: {e}")
 
-        try:
-            img_data = requests.get(url, headers=HEADERS).content
-            with open(filepath, "wb") as f:
-                f.write(img_data)
-            print(f"📥 Imagen descargada: {filename}")
-        except Exception as e:
-            print(f"❌ Error descargando {url}: {e}")
+        saved.append(filename)
+
+    return saved
 
 # -----------------------------
-# 4. Scraping principal
+# Scraping principal
 # -----------------------------
 
 def scrape_personaje(nombre):
@@ -349,30 +445,35 @@ def scrape_personaje(nombre):
 
     soup = BeautifulSoup(html, "html.parser")
 
-    appears_raw = extract_list(get_section(soup, "appears_in"))
+    appears_raw = extract_list(get_section(soup, "appears_in"), "Appears In")
     appears_clean = normalize_appears_in(appears_raw)
+
+    nationality_raw = clean_scalar(get_section(soup, "nationality"))
+    nationality_clean = normalize_nationality(nationality_raw)
+
+    images = download_images(soup, nombre.replace(" ", ""))
 
     data = {
         "name": nombre,
         "japanese_name": get_japanese_name(soup),
-        "aliases": extract_list(get_section(soup, "aliases")),
-        "nicknames": extract_list(get_section(soup, "nicknames")),
-        "arena_names": extract_list(get_section(soup, "arena_names")),
+        "aliases": extract_list(get_section(soup, "aliases"), "Aliases"),
+        "nicknames": extract_list(get_section(soup, "nicknames"), "Nicknames"),
+        "arena_names": extract_list(get_section(soup, "arena_names"), "Arena Names"),
         "date_of_birth": clean_scalar(get_section(soup, "date_of_birth")),
         "place_of_birth": clean_scalar(get_section(soup, "place_of_birth")),
-        "nationality": clean_scalar(get_section(soup, "nationality")),
+        "nationality": nationality_clean,
         "height": clean_scalar(get_section(soup, "height"), field="height"),
         "blood_type": clean_scalar(get_section(soup, "blood_type")),
         "affiliation": extract_affiliations(get_section(soup, "affiliation")),
         "appears_in": appears_clean,
         "fighting_style": extract_fighting_style(soup),
         "occupation": extract_occupation(soup),
+        "actors": extract_actors(soup),
+        "images": images,
     }
 
     db.collection("personajes").document(nombre).set(data, merge=True)
     print(f"✔ Guardado/actualizado en Firestore: {nombre}")
-
-    download_images(soup, nombre.replace(" ", ""))
 
 # -----------------------------
 # Main

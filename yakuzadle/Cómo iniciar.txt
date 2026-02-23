@@ -1,0 +1,8 @@
+1.- Arrancar backend
+cd E:\DAM\Digitalizacion\Bot\yakuzadle\yakuzadle-backend
+node server.js
+
+2.- Arrancar frontend
+cd E:\DAM\Digitalizacion\Bot\yakuzadle\yakuzadle
+npm run dev
+Abrir http://localhost:5173

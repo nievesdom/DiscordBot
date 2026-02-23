@@ -42,3 +42,9 @@ coverage.xml
 build/
 dist/
 *.egg-info/
+
+# Claves
+yakuzadle/yakuzadle-backend/serviceAccountKey.json
+serviceAccountKey.json
+yakuzadle/credentials.json
+credentials.json
