@@ -22,7 +22,7 @@ async function loadCharacterNames() {
   console.log(`Loaded ${characterNames.length} character names`);
 }
 
-// Obtener el personaje objetivo para una fecha dada (por defecto hoy)
+// Función para obtener el personaje objetivo de una fecha dada (por defecto hoy)
 async function getDailyTarget(date = new Date()) {
   const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
   const dateStr = utcDate.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -55,7 +55,7 @@ async function getDailyTarget(date = new Date()) {
   return targetChar;
 }
 
-// Endpoint para adivinar
+// Endpoint para adivinar un personaje
 app.get("/guess", async (req, res) => {
   const name = req.query.name;
   if (!name) return res.status(400).json({ error: "Missing name" });
@@ -73,7 +73,7 @@ app.get("/guess", async (req, res) => {
         games: userChar.appears_in
       },
       result,
-      target: targetChar
+      target: targetChar  // Incluimos el objetivo para que el frontend pueda usarlo
     });
   } catch (error) {
     console.error("Error getting daily target:", error);
@@ -81,7 +81,7 @@ app.get("/guess", async (req, res) => {
   }
 });
 
-// Endpoint para listar todos los personajes (con imagen)
+// Endpoint para listar todos los personajes (con imagen para autocompletado)
 app.get("/list", async (req, res) => {
   const snapshot = await db.collection("personajes").get();
   const items = snapshot.docs.map(doc => {
@@ -95,17 +95,19 @@ app.get("/list", async (req, res) => {
   res.json(items);
 });
 
-// Endpoint opcional para obtener el objetivo del día (sin adivinar)
+// NUEVO ENDPOINT: Devuelve el personaje objetivo del día (solo el nombre, o datos completos si se necesita)
 app.get("/daily-target", async (req, res) => {
   try {
     const target = await getDailyTarget();
+    // Por ahora solo devolvemos el nombre, pero podríamos devolver más datos si el frontend los necesita
     res.json({ name: target.name });
   } catch (error) {
+    console.error("Error fetching daily target:", error);
     res.status(500).json({ error: "Could not fetch daily target" });
   }
 });
 
-// Función auxiliar para obtener un personaje por nombre
+// Función auxiliar para obtener un personaje por nombre desde Firestore
 async function getCharacter(name) {
   const doc = await db.collection("personajes").doc(name).get();
   return doc.exists ? doc.data() : null;

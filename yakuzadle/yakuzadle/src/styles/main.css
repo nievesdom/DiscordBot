@@ -137,7 +137,7 @@
 
 .table {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1600px; /* ÚNICO CAMBIO: más ancha */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -171,7 +171,7 @@
   justify-content: center;
 }
 
-/* Celdas de datos normales */
+/* Celdas de datos (con animación flip) */
 .cell {
   padding: 12px;
   border-radius: 6px;
@@ -181,40 +181,48 @@
   min-height: 48px;
   text-align: center;
   line-height: 1.3;
-  animation: flipReveal 0.6s ease-out forwards;
+  background-color: #333;
+  color: white;
+  opacity: 0;
+  animation: flipReveal 1s linear forwards;
+  backface-visibility: hidden;
 }
 
 .cell-text {
   font-size: 0.9rem;
 }
 
-/* Colores de comparación - TODOS con texto blanco */
-.color-cell {
-  color: white;
-}
-
-.color-cell.green { background: #2e7d32; }
-.color-cell.yellow { background: #d4a017; } /* Amarillo más oscuro para mejor contraste */
-.color-cell.red { background: #c62828; }
+/* Variables de color final para cada tipo */
+.color-cell.green { --final-bg: #2e7d32; }
+.color-cell.yellow { --final-bg: #d4a017; }
+.color-cell.red { --final-bg: #c62828; }
 .color-cell.higher,
 .color-cell.lower,
 .color-cell.older,
 .color-cell.younger {
-  background: #c62828;
+  --final-bg: #c62828;
 }
 
-/* Celda de personaje (imagen arriba + nombre) */
-.character-cell {
+/* Celda de personaje: estática */
+.character-cell-static {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  background: #333;
-  color: white;
   border-radius: 6px;
   min-height: 100px;
+  background-color: #333;
+  color: white;
+  opacity: 1;
+  animation: revealCharacter 0.2s ease-out forwards;
+  backface-visibility: hidden;
+}
+
+.character-cell-static .character-image,
+.character-cell-static .character-name {
+  opacity: 1;
 }
 
 .character-image {
@@ -255,15 +263,88 @@
    =========================== */
 @keyframes flipReveal {
   0% {
-    transform: perspective(400px) rotateY(90deg);
-    opacity: 0;
+    transform: perspective(800px) rotateY(180deg);
     background-color: #333;
-    color: transparent;
+    opacity: 0;
+  }
+  80% {
+    transform: perspective(800px) rotateY(36deg);
+    background-color: #333;
+    opacity: 0;
+  }
+  85% {
+    transform: perspective(800px) rotateY(27deg);
+    background-color: var(--final-bg, #333);
+    opacity: 1;
   }
   100% {
-    transform: perspective(400px) rotateY(0deg);
-    opacity: 1;
+    transform: perspective(800px) rotateY(0deg);
     background-color: var(--final-bg, #333);
-    color: white;
+    opacity: 1;
   }
+}
+
+@keyframes revealCharacter {
+  0% {
+    background-color: #333;
+  }
+  100% {
+    background-color: var(--character-final-bg, #333);
+  }
+}
+
+/* ===========================
+   CELEBRACIÓN
+   =========================== */
+.celebration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.celebration h2 {
+  font-size: 2.5rem;
+  color: #f9a825;
+  text-shadow: 0 0 10px rgba(249, 168, 37, 0.5);
+  animation: pulse 1.5s infinite;
+}
+
+.celebration p {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ===========================
+   ALINEACIÓN IZQUIERDA PARA CELDAS DE LISTAS
+   =========================== */
+.cell.left-align {
+  justify-content: flex-start !important;
+  padding-left: 16px;
+}
+
+.list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+  width: 100%;
+}
+
+.bullet {
+  color: white;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+/* Ajuste para que el texto no se desborde */
+.list-item strong {
+  font-weight: bold;
 }

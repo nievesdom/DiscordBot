@@ -1,7 +1,7 @@
 function ResultRow({ guess, target }) {
   const fields = [
     ["affiliation", "Affiliation"],
-    ["nationality", "Nationality"],
+    ["nationality", "Nationality/Heritage"],
     ["games", "Games"],
     ["blood_type", "Blood Type"],
     ["fighting_style", "Fighting Style"],
@@ -42,47 +42,93 @@ function ResultRow({ guess, target }) {
   const userGames = guess.character?.games || [];
   const targetGames = target?.appears_in || [];
 
+  const groupGames = (games) => {
+    const grouped = [];
+    const used = new Set();
+
+    for (let i = 0; i < games.length; i++) {
+      if (used.has(i)) continue;
+      const game = games[i];
+      let paired = false;
+
+      const match = game.match(/^Yakuza(?:\s+(\d+))?$/);
+      if (match) {
+        const num = match[1] || '';
+        const kiwamiName = num ? `Yakuza Kiwami ${num}` : "Yakuza Kiwami";
+        for (let j = i + 1; j < games.length; j++) {
+          if (used.has(j)) continue;
+          if (games[j] === kiwamiName) {
+            grouped.push(`${game} / ${kiwamiName}`);
+            used.add(i);
+            used.add(j);
+            paired = true;
+            break;
+          }
+        }
+      }
+      if (!paired) {
+        grouped.push(game);
+        used.add(i);
+      }
+    }
+    return grouped;
+  };
+
+  const groupedGames = groupGames(userGames);
+
   const renderGames = () => {
-    if (!userGames.length) return "-";
-    return userGames.map((game, idx) => {
-      const isExcluded = game === EXCLUDED_GAME;
+    if (!groupedGames.length) return null;
+    return groupedGames.map((game, idx) => {
+      const isExcluded = game.includes(EXCLUDED_GAME);
       const isBold = isExcluded && targetGames.includes(EXCLUDED_GAME);
       return (
-        <span key={idx}>
-          {idx > 0 && ", "}
+        <div key={idx} className="list-item">
+          <span className="bullet">•</span>
           {isBold ? <strong>{game}</strong> : game}
-        </span>
+        </div>
       );
     });
   };
 
-  const totalCells = 8; // 1 (character) + 7 fields
-
-  // Mapa de colores a códigos hexadecimales
-  const colorMap = {
-    green: '#2e7d32',
-    yellow: '#d4a017',
-    red: '#c62828',
-    higher: '#c62828',
-    lower: '#c62828',
-    older: '#c62828',
-    younger: '#c62828'
+  const renderAffiliation = () => {
+    const affiliations = guess.character?.affiliation || [];
+    if (!affiliations.length) return null;
+    return affiliations.map((aff, idx) => (
+      <div key={idx} className="list-item">
+        <span className="bullet">•</span>
+        {aff}
+      </div>
+    ));
   };
 
-  // Función para obtener el color final de una celda
-  const getFinalColor = (key, comparisonColor) => {
-    if (key === 'character') return '#333';
-    return colorMap[comparisonColor] || '#333';
+  const renderFightingStyles = () => {
+    const styles = guess.character?.fighting_style || [];
+    if (!styles.length) return null;
+    return styles.map((style, idx) => {
+      const normalized = normalizeFightingStyle(style);
+      return (
+        <div key={idx} className="list-item">
+          <span className="bullet">•</span>
+          {normalized}
+        </div>
+      );
+    });
   };
+
+  const totalDataCells = fields.length;
+  const delayStep = 0.3;
+  const characterDelay = (totalDataCells - 1) * delayStep + 1.0;
+
+  const isCorrect = target && guess.name === target.name;
+  const characterFinalBg = isCorrect ? '#2e7d32' : '#c62828';
 
   return (
     <div className="row">
-      {/* Celda del personaje */}
       <div
-        className="cell character-cell"
+        className="character-cell-static"
         style={{
-          animationDelay: `${(totalCells - 1 - 0) * 0.15}s`,
-          '--final-bg': '#333'
+          animationDelay: `${characterDelay}s`,
+          '--character-final-bg': characterFinalBg
         }}
       >
         {imageUrl ? (
@@ -94,58 +140,52 @@ function ResultRow({ guess, target }) {
       </div>
 
       {fields.map(([key], i) => {
-        const cellIndex = i + 1;
-        const delay = (totalCells - 1 - cellIndex) * 0.15;
-
-        // Determinar el color de comparación
-        let comparisonColor = guess.comparison?.[key] || "red";
+        const delay = i * delayStep;
+        const rawColor = guess.comparison?.[key] || "red";
+        let bgColor = rawColor;
         if (key === "date_of_birth") {
-          comparisonColor = colorForBirth(comparisonColor);
+          bgColor = colorForBirth(rawColor);
         }
 
-        const finalBg = getFinalColor(key, comparisonColor);
+        if (key === "affiliation") {
+          const content = renderAffiliation();
+          return (
+            <div
+              key={i}
+              className={`cell color-cell ${bgColor} ${content ? 'left-align' : ''}`}
+              style={{ animationDelay: `${delay}s` }}
+            >
+              <div className="cell-text">{content || '-'}</div>
+            </div>
+          );
+        }
 
-        // Games
         if (key === "games") {
+          const content = renderGames();
           return (
             <div
               key={i}
-              className={`cell color-cell ${comparisonColor}`}
-              style={{
-                animationDelay: `${delay}s`,
-                '--final-bg': finalBg
-              }}
+              className={`cell color-cell ${bgColor} ${content ? 'left-align' : ''}`}
+              style={{ animationDelay: `${delay}s` }}
             >
-              <span className="cell-text">{renderGames()}</span>
+              <div className="cell-text">{content || '-'}</div>
             </div>
           );
         }
 
-        // Fighting style
         if (key === "fighting_style") {
-          const value = guess.character?.[key];
-          let text = "-";
-          if (Array.isArray(value)) {
-            const normalized = value.map(v => normalizeFightingStyle(v)).filter(v => v);
-            text = normalized.length ? normalized.join(", ") : "-";
-          } else if (typeof value === "string") {
-            text = normalizeFightingStyle(value) || "-";
-          }
+          const content = renderFightingStyles();
           return (
             <div
               key={i}
-              className={`cell color-cell ${comparisonColor}`}
-              style={{
-                animationDelay: `${delay}s`,
-                '--final-bg': finalBg
-              }}
+              className={`cell color-cell ${bgColor} ${content ? 'left-align' : ''}`}
+              style={{ animationDelay: `${delay}s` }}
             >
-              <span className="cell-text">{text}</span>
+              <div className="cell-text">{content || '-'}</div>
             </div>
           );
         }
 
-        // Resto de campos
         const value = guess.character?.[key];
         let text = "-";
         if (Array.isArray(value)) {
@@ -157,14 +197,11 @@ function ResultRow({ guess, target }) {
         return (
           <div
             key={i}
-            className={`cell color-cell ${comparisonColor}`}
-            style={{
-              animationDelay: `${delay}s`,
-              '--final-bg': finalBg
-            }}
+            className={`cell color-cell ${bgColor}`}
+            style={{ animationDelay: `${delay}s` }}
           >
             <span className="cell-text">
-              {text} {arrowFor(key, guess.comparison?.[key])}
+              {text} {arrowFor(key, rawColor)}
             </span>
           </div>
         );

@@ -15,7 +15,7 @@ function ResultTable({ guesses, target }) {
       <div className="header-row">
         <div className="header-cell">Character</div>
         <div className="header-cell">Affiliation</div>
-        <div className="header-cell">Nationality</div>
+        <div className="header-cell">Nationality/Heritage</div>
         <div className="header-cell">Games*</div>
         <div className="header-cell">Blood Type</div>
         <div className="header-cell">Fighting Style</div>

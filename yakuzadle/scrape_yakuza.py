@@ -44,7 +44,6 @@ def remove_refs(text):
 def remove_wp(text):
     if not text:
         return text
-    # Elimina " WP", "WP", "(WP)", "WP)"...
     text = re.sub(r"\s*WP\b", "", text)
     text = re.sub(r"\(\s*WP\s*\)", "", text)
     return clean_text(text)
@@ -100,20 +99,47 @@ def clean_list_item(text, field_name=None):
         return None
     return text
 
+# -----------------------------
+# APPEARS IN — FILTRO ANTES DE LIMPIAR
+# -----------------------------
+
+APPEARS_EXCLUDE = [
+    "mentioned only",
+    "mentioned",
+    "flashback",
+    "dlc"
+]
+
 def extract_list(section, field_name=None):
     if section is None:
         return None
 
     lis = section.find_all("li")
-    if lis:
-        items = []
-        for li in lis:
-            val = clean_list_item(li.get_text(), field_name)
-            if val:
-                items.append(val)
-        return items or None
+    items = []
 
-    val = clean_list_item(section.get_text(), field_name)
+    for li in lis:
+        raw = li.get_text(" ", strip=True)
+        raw_low = raw.lower()
+
+        # FILTRO ANTES DE LIMPIAR PARÉNTESIS
+        if any(tag in raw_low for tag in APPEARS_EXCLUDE):
+            continue
+
+        val = clean_list_item(raw, field_name)
+        if val:
+            items.append(val)
+
+    if items:
+        return items
+
+    # Caso sin <li>
+    raw = section.get_text(" ", strip=True)
+    raw_low = raw.lower()
+
+    if any(tag in raw_low for tag in APPEARS_EXCLUDE):
+        return None
+
+    val = clean_list_item(raw, field_name)
     return [val] if val else None
 
 # -----------------------------
@@ -125,42 +151,34 @@ def extract_affiliations(section):
         return None
 
     afiliaciones = []
-
-    # Buscar todos los <li> en todos los niveles
     lis = section.find_all("li")
 
     for li in lis:
-        # 1. Si hay <a>, usar su texto (es la afiliación real)
         a = li.find("a", recursive=False)
         if a:
             text = a.get_text(strip=True)
         else:
-            # 2. Si no hay <a>, usar solo el texto directo del <li>
             direct = li.find(text=True, recursive=False)
             text = direct.strip() if direct else ""
 
-        # 3. Limpiar
         text = remove_refs(text)
         text = remove_wp(text)
         text = strip_field_name(text, "Affiliation")
         text = clean_text(text)
 
-        # 4. Ignorar "(formerly)" y vacíos
         if not text or text.lower() == "(formerly)":
             continue
 
-        # 5. Añadir si no está ya
         if text not in afiliaciones:
             afiliaciones.append(text)
 
     return afiliaciones or None
 
-
 def get_section(soup, key):
     return soup.find("div", {"data-source": key})
 
 # -----------------------------
-# Fighting Style (hereda paréntesis del SIGUIENTE)
+# Fighting Style
 # -----------------------------
 
 def extract_fighting_style(soup):
@@ -184,7 +202,6 @@ def extract_fighting_style(soup):
             m = re.search(r"\((.*?)\)", p)
             parentheses.append(m.group(1).strip() if m else None)
 
-        # Heredar paréntesis del siguiente
         for i in range(len(parts) - 2, -1, -1):
             if parentheses[i] is None and parentheses[i + 1] is not None:
                 parentheses[i] = parentheses[i + 1]
@@ -237,22 +254,40 @@ def extract_occupation(soup):
     return None
 
 # -----------------------------
-# Nationality
+# Nationality + Heritage
 # -----------------------------
 
-def normalize_nationality(value):
+def normalize_ethnic_field(value):
     if not value or value == "Unknown":
-        return value
+        return None
+    parts = [clean_text(p) for p in value.split("/") if clean_text(p)]
+    return parts if parts else None
 
-    if "/" not in value:
-        return value
+def extract_nationality_and_heritage(soup):
+    nat_raw = clean_scalar(get_section(soup, "nationality"))
+    her_raw = clean_scalar(get_section(soup, "heritage"))
 
-    parts = value.split("/")
-    cleaned = [clean_text(p) for p in parts if clean_text(p)]
-    return cleaned if cleaned else value
+    nat_list = normalize_ethnic_field(nat_raw)
+    her_list = normalize_ethnic_field(her_raw)
+
+    if not nat_list and not her_list:
+        return None
+
+    combined = []
+    if nat_list:
+        combined.extend(nat_list)
+    if her_list:
+        combined.extend(her_list)
+
+    final = []
+    for x in combined:
+        if x not in final:
+            final.append(x)
+
+    return final or None
 
 # -----------------------------
-# Appears In
+# Appears In — normalización final
 # -----------------------------
 
 def normalize_appears_in(items):
@@ -262,29 +297,16 @@ def normalize_appears_in(items):
     final = []
 
     for item in items:
-        if not item:
-            continue
-
         parts = item.split("/")
-
         for p in parts:
-            p = p.replace("_", " ")
-
-            if " and " in p:
-                sub = p.split(" and ")
-                for s in sub:
-                    s = clean_text(s)
-                    if s and s not in final:
-                        final.append(s)
-            else:
-                p = clean_text(p)
-                if p and p not in final:
-                    final.append(p)
+            p = clean_text(p.replace("_", " "))
+            if p and p not in final:
+                final.append(p)
 
     return final or None
 
 # -----------------------------
-# Actors (voiced_by, eng_voiced_by, zh_voiced_by…)
+# Actors
 # -----------------------------
 
 def extract_actors(soup):
@@ -426,6 +448,32 @@ def download_images(soup, personaje):
     return saved
 
 # -----------------------------
+# EXTRAER YEAR OF BIRTH
+# -----------------------------
+
+def extract_year_of_birth(soup):
+    section = get_section(soup, "year_of_birth")
+    if section is None:
+        return None
+
+    raw = clean_scalar(section)
+    if not raw or raw == "Unknown":
+        return None
+
+    raw = remove_refs(raw)
+
+    raw = re.sub(r"^\s*c\.\s*", "", raw, flags=re.IGNORECASE)
+    raw = re.sub(r"^\s*ca\.\s*", "", raw, flags=re.IGNORECASE)
+
+    m = re.match(r"(\d{4})(?:\s*/\s*(\d{4}))?", raw)
+    if m:
+        if m.group(2):
+            return f"{m.group(1)}/{m.group(2)}"
+        return m.group(1)
+
+    return None
+
+# -----------------------------
 # Scraping principal
 # -----------------------------
 
@@ -448,10 +496,16 @@ def scrape_personaje(nombre):
     appears_raw = extract_list(get_section(soup, "appears_in"), "Appears In")
     appears_clean = normalize_appears_in(appears_raw)
 
-    nationality_raw = clean_scalar(get_section(soup, "nationality"))
-    nationality_clean = normalize_nationality(nationality_raw)
+    nationality_final = extract_nationality_and_heritage(soup)
 
     images = download_images(soup, nombre.replace(" ", ""))
+
+    dob = clean_scalar(get_section(soup, "date_of_birth"))
+
+    if not dob or dob == "Unknown":
+        yob = extract_year_of_birth(soup)
+        if yob:
+            dob = yob
 
     data = {
         "name": nombre,
@@ -459,9 +513,9 @@ def scrape_personaje(nombre):
         "aliases": extract_list(get_section(soup, "aliases"), "Aliases"),
         "nicknames": extract_list(get_section(soup, "nicknames"), "Nicknames"),
         "arena_names": extract_list(get_section(soup, "arena_names"), "Arena Names"),
-        "date_of_birth": clean_scalar(get_section(soup, "date_of_birth")),
+        "date_of_birth": dob,
         "place_of_birth": clean_scalar(get_section(soup, "place_of_birth")),
-        "nationality": nationality_clean,
+        "nationality": nationality_final,
         "height": clean_scalar(get_section(soup, "height"), field="height"),
         "blood_type": clean_scalar(get_section(soup, "blood_type")),
         "affiliation": extract_affiliations(get_section(soup, "affiliation")),
