@@ -151,28 +151,45 @@ def extract_affiliations(section):
         return None
 
     afiliaciones = []
+
+    # 1) Si hay <li>, procesarlos
     lis = section.find_all("li")
+    if lis:
+        for li in lis:
+            raw = li.get_text(" ", strip=True)
+            raw = remove_refs(raw)
+            raw = remove_wp(raw)
+            raw = strip_field_name(raw, "Affiliation")
 
-    for li in lis:
-        a = li.find("a", recursive=False)
-        if a:
-            text = a.get_text(strip=True)
-        else:
-            direct = li.find(text=True, recursive=False)
-            text = direct.strip() if direct else ""
+            # eliminar "(formerly)" pero NO borrar todo
+            raw = re.sub(r"\(.*?formerly.*?\)", "", raw, flags=re.IGNORECASE)
 
-        text = remove_refs(text)
-        text = remove_wp(text)
-        text = strip_field_name(text, "Affiliation")
-        text = clean_text(text)
+            raw = clean_text(raw)
+            if raw and raw.lower() != "formerly":
+                afiliaciones.append(raw)
 
-        if not text or text.lower() == "(formerly)":
-            continue
+    # 2) Si NO hay <li>, procesar texto plano
+    else:
+        raw = section.get_text(" ", strip=True)
+        raw = remove_refs(raw)
+        raw = remove_wp(raw)
+        raw = strip_field_name(raw, "Affiliation")
 
-        if text not in afiliaciones:
-            afiliaciones.append(text)
+        # eliminar "(formerly)"
+        raw = re.sub(r"\(.*?formerly.*?\)", "", raw, flags=re.IGNORECASE)
 
-    return afiliaciones or None
+        # dividir por comas si hay varias
+        parts = [clean_text(p) for p in raw.split(",") if clean_text(p)]
+        afiliaciones.extend(parts)
+
+    # 3) Eliminar duplicados manteniendo orden
+    final = []
+    for a in afiliaciones:
+        if a and a not in final:
+            final.append(a)
+
+    return final or None
+
 
 def get_section(soup, key):
     return soup.find("div", {"data-source": key})

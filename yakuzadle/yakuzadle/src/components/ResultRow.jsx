@@ -6,17 +6,31 @@ function ResultRow({ guess, target }) {
     ["blood_type", "Blood Type"],
     ["fighting_style", "Fighting Style"],
     ["height", "Height"],
-    ["date_of_birth", "Birthdate"]
+    ["date_of_birth", "Birthdate"],
   ];
 
+  // Flechas hacia el personaje objetivo
   const arrowFor = (key, color) => {
     if (key === "height") {
-      if (color.includes("higher")) return "↑";
-      if (color.includes("lower")) return "↓";
+      if (color.includes("higher")) return "↓"; // adivinado más alto → objetivo más bajo
+      if (color.includes("lower")) return "↑";   // adivinado más bajo → objetivo más alto
     }
     if (key === "date_of_birth") {
-      if (color.includes("older")) return "↑";
-      if (color.includes("younger")) return "↓";
+      if (color.includes("older")) return "↓";   // adivinado mayor → él es mayor (flecha abajo)
+      if (color.includes("younger")) return "↑"; // adivinado más joven → flecha arriba
+    }
+    return "";
+  };
+
+  // Tooltip para altura y fecha
+  const tooltipFor = (key, color) => {
+    if (key === "height") {
+      if (color.includes("higher")) return "Target is lower";
+      if (color.includes("lower")) return "Target is higher";
+    }
+    if (key === "date_of_birth") {
+      if (color.includes("older")) return "You are older";
+      if (color.includes("younger")) return "You are younger";
     }
     return "";
   };
@@ -53,7 +67,7 @@ function ResultRow({ guess, target }) {
 
       const match = game.match(/^Yakuza(?:\s+(\d+))?$/);
       if (match) {
-        const num = match[1] || '';
+        const num = match[1] || "";
         const kiwamiName = num ? `Yakuza Kiwami ${num}` : "Yakuza Kiwami";
         for (let j = i + 1; j < games.length; j++) {
           if (used.has(j)) continue;
@@ -120,7 +134,7 @@ function ResultRow({ guess, target }) {
   const characterDelay = (totalDataCells - 1) * delayStep + 1.0;
 
   const isCorrect = target && guess.name === target.name;
-  const characterFinalBg = isCorrect ? '#2e7d32' : '#c62828';
+  const characterFinalBg = isCorrect ? "#2e7d32" : "#c62828";
 
   return (
     <div className="row">
@@ -128,7 +142,7 @@ function ResultRow({ guess, target }) {
         className="character-cell-static"
         style={{
           animationDelay: `${characterDelay}s`,
-          '--character-final-bg': characterFinalBg
+          "--character-final-bg": characterFinalBg,
         }}
       >
         {imageUrl ? (
@@ -147,15 +161,18 @@ function ResultRow({ guess, target }) {
           bgColor = colorForBirth(rawColor);
         }
 
+        const arrow = arrowFor(key, rawColor);
+        const tooltip = tooltipFor(key, rawColor);
+
         if (key === "affiliation") {
           const content = renderAffiliation();
           return (
             <div
               key={i}
-              className={`cell color-cell ${bgColor} ${content ? 'left-align' : ''}`}
+              className={`cell color-cell ${bgColor} ${content ? "left-align" : ""}`}
               style={{ animationDelay: `${delay}s` }}
             >
-              <div className="cell-text">{content || '-'}</div>
+              <div className="cell-text">{content || "-"}</div>
             </div>
           );
         }
@@ -165,10 +182,10 @@ function ResultRow({ guess, target }) {
           return (
             <div
               key={i}
-              className={`cell color-cell ${bgColor} ${content ? 'left-align' : ''}`}
+              className={`cell color-cell ${bgColor} ${content ? "left-align" : ""}`}
               style={{ animationDelay: `${delay}s` }}
             >
-              <div className="cell-text">{content || '-'}</div>
+              <div className="cell-text">{content || "-"}</div>
             </div>
           );
         }
@@ -178,10 +195,10 @@ function ResultRow({ guess, target }) {
           return (
             <div
               key={i}
-              className={`cell color-cell ${bgColor} ${content ? 'left-align' : ''}`}
+              className={`cell color-cell ${bgColor} ${content ? "left-align" : ""}`}
               style={{ animationDelay: `${delay}s` }}
             >
-              <div className="cell-text">{content || '-'}</div>
+              <div className="cell-text">{content || "-"}</div>
             </div>
           );
         }
@@ -199,9 +216,10 @@ function ResultRow({ guess, target }) {
             key={i}
             className={`cell color-cell ${bgColor}`}
             style={{ animationDelay: `${delay}s` }}
+            title={tooltip || undefined}
           >
             <span className="cell-text">
-              {text} {arrowFor(key, rawColor)}
+              {text} {arrow}
             </span>
           </div>
         );

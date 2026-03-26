@@ -1,16 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 
-function GuessInput({ onGuess }) {
+function GuessInput({ onGuess, onError }) {
   const [value, setValue] = useState("");
   const [allItems, setAllItems] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    fetch("http://localhost:3001/list")
-      .then(res => res.json())
-      .then(data => setAllItems(data));
-  }, []);
+    const cached = localStorage.getItem("characterList");
+    if (cached) {
+      setAllItems(JSON.parse(cached));
+    } else {
+      fetch("http://localhost:3001/list")
+        .then((res) => res.json())
+        .then((data) => {
+          setAllItems(data);
+          localStorage.setItem("characterList", JSON.stringify(data));
+        })
+        .catch(() => onError("Failed to load character list"));
+    }
+  }, [onError]);
 
   const handleChange = (e) => {
     const v = e.target.value;
@@ -19,7 +28,7 @@ function GuessInput({ onGuess }) {
       setFiltered([]);
       return;
     }
-    const f = allItems.filter(item =>
+    const f = allItems.filter((item) =>
       item.name.toLowerCase().includes(v.toLowerCase())
     );
     setFiltered(f.slice(0, 8));

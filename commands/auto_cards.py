@@ -37,6 +37,8 @@ class CartasAuto(commands.Cog):
         asyncio.create_task(self._autosave_loop())
 
         print("[INFO] CartasAuto inicializado.")
+        
+        self.send_semaphore = asyncio.Semaphore(5)   # máximo 5 envíos concurrentes
 
         # Recreamos tareas activas desde settings (por si el bot se reinicia)
         for gid, config in self.settings["guilds"].items():
@@ -300,7 +302,7 @@ class CartasAuto(commands.Cog):
                 continue
 
             # Programar próxima aparición con espera aleatoria dentro del intervalo
-            wait = random.randint(0, config["interval"][1] * 3600)
+            wait = random.randint(300, config["interval"][1] * 3600)
             next_spawn = (datetime.datetime.now() + datetime.timedelta(seconds=wait)).isoformat()
             config["next_spawn"] = next_spawn
             self.marcar_cambios()
@@ -401,7 +403,8 @@ class CartasAuto(commands.Cog):
             # Enviar al canal; si falla, registrar el error y continuar
             try:
                 if archivo:
-                    await channel.send(file=archivo, embed=embed, view=vista)
+                    async with self.send_semaphore:
+                        await channel.send(file=archivo, embed=embed, view=vista)
                 else:
                     await channel.send(embed=embed, view=vista)
             except Exception as e:
