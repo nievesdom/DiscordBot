@@ -543,7 +543,7 @@ class Debug(commands.Cog):
     async def resetpacks(self, interaction: discord.Interaction):
         # Verificar que el usuario es el owner del bot
         app_owner = (await self.bot.application_info()).owner
-        if interaction.user.id != app_owner.id:
+        if interaction.user.id != OWNER_ID:
             await interaction.response.send_message("🚫 Only the bot owner can use this command.", ephemeral=True)
             return
 

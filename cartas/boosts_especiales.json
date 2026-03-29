@@ -1,17 +1,32 @@
 [
   {
-    "id": 1108,
-    "nombre": "UR Goro Majima (PY)",
+    "id": 1137,
+    "nombre": "UR Mortimer (PY II)",
     "stats_antes": {
-      "health": 982,
-      "attack": 335,
-      "defense": 234,
-      "speed": 166
+      "health": 1103,
+      "attack": 376,
+      "defense": 238,
+      "speed": 199
     },
     "boost": {
       "type": "single",
       "stat": "defense",
-      "factor": 1.134
+      "factor": 1.137
+    }
+  },
+  {
+    "id": 1144,
+    "nombre": "UR Shun Akiyama (3-14)",
+    "stats_antes": {
+      "health": 1143,
+      "attack": 345,
+      "defense": 235,
+      "speed": 196
+    },
+    "boost": {
+      "type": "single",
+      "stat": "health",
+      "factor": 1.149
     }
   }
 ]
