@@ -17,7 +17,7 @@ JSON_PATH = os.path.join(CARPETA_CARTAS, "cartas.json")
 BOOSTS_PATH = os.path.join(CARPETA_CARTAS, "boosts_especiales.json")
 
 # URL base para Render (para exponer imágenes por HTTP)
-BASE_URL = "https://discordbot-n4ts.onrender.com/cartas/"
+BASE_URL = "https://yamai-bot.onrender.com/cartas/"
 
 # Colores → atributo
 COLOR_TO_TIPO = {
