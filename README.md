@@ -283,7 +283,7 @@ PORT=8080
 ```
 
 ### Instalación
-```env  
+```bash 
 git clone https://github.com/nievesdom/DiscordBot.git  
 cd DiscordBot  
 python -m venv venv  
@@ -293,7 +293,7 @@ pip install -r requirements.txt
 ```
 
 ### Ejecución
-```env
+```bash
 python main.py
 ```
 
