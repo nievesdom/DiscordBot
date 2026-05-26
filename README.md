@@ -1,10 +1,6 @@
 # Yamai Bot  
   
-Bot modular para Discord desarrollado en Python que implementa un sistema de cartas coleccionables con mecánicas de gacha, sistema de batallas competitivas, integración con APIs externas y una mini-aplicación web. Diseñado con arquitectura escalable basada en Cogs, persistencia en la nube con Firebase Firestore y interfaces interactivas utilizando Discord UI Components.  
-  
-## Visión General del Proyecto  
-  
-Yamai Bot es un proyecto de ingeniería de software que combina múltiples sistemas complejos en una aplicación unificada. El bot opera en múltiples servidores de Discord simultáneamente, gestionando estado persistente, sistemas de economía virtual, y proporcionando experiencias interactivas en tiempo real.  
+Bot modular para Discord desarrollado en Python que implementa un sistema de cartas coleccionables con mecánicas de gacha, sistema de batallas competitivas, integración con APIs externas y una mini-aplicación web. Diseñado con arquitectura escalable basada en Cogs, persistencia en la nube con Firebase Firestore y interfaces interactivas utilizando Discord UI Components. El bot opera en múltiples servidores de Discord simultáneamente, gestionando estado persistente, sistemas de economía virtual, y proporcionando experiencias interactivas en tiempo real.
   
 ## Arquitectura Técnica  
   
