@@ -458,7 +458,7 @@ class Debug(commands.Cog):
             ephemeral=True
         )'''
 
-
+    '''
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
     @app_commands.command(name="avisar_update", description="**[Bot owner only]** Send update notice to all servers with auto_cards enabled.")
@@ -491,7 +491,7 @@ class Debug(commands.Cog):
                     failed += 1
         await interaction.followup.send(f"✅ Aviso enviado a {sent} servidores. ❌ Fallos: {failed}.", ephemeral=True)
 
-
+        '''
     @app_commands.default_permissions()
     @app_commands.check(lambda i: i.user.id == OWNER_ID)
     @app_commands.command(name="carta", description="Draws a random RGGO card")
